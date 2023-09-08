@@ -1,6 +1,6 @@
 # Project_4
 
-
+Engin de recherche et Plateforme de maillage dans le domaine IA en santé.
 
 ## Getting started
 
