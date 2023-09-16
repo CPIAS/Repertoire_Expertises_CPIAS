@@ -10,4 +10,4 @@ Launch the app with `npm start`. This opens [http://localhost:3000](http://local
 
 ## Run the linter
 
-Run `npm run lint` to see the errors/warning related to lint
+Run `npm run lint` to see the errors/warning related to lint.
