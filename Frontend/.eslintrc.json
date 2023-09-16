@@ -1,0 +1,45 @@
+// {
+//     "env": {
+//         "browser": true,
+//         "es2021": true
+//     },
+//     "extends": "plugin:react/recommended",
+//     "parser": "@typescript-eslint/parser",
+//     "parserOptions": {
+//         "ecmaVersion": "latest",
+//         "sourceType": "module"
+//     },
+//     "plugins": [
+//         "@typescript-eslint",
+//         "react"
+//     ],
+//     "rules": {
+//     }
+// }
+
+{
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint", "react"],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:react/recommended"
+    ],
+    "settings": {
+        "react": {
+          "version": "detect"
+        }
+    },
+    "rules": {
+        "indent": ["error", 4],
+        "semi": ["error", "always"],
+        "quotes": ["error", "single"],
+        "keyword-spacing": ["error", { "before": true, "after": true }],
+        "prefer-const": "error",
+        "eqeqeq": "error"
+
+    }
+  }
+  
+
+

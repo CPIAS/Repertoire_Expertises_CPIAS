@@ -1,17 +1,12 @@
-import * as React from "react"
-import {
-  ChakraProvider,
-  Box,
-  Text,
-  theme,
-} from "@chakra-ui/react"
+import { ChakraProvider, theme } from '@chakra-ui/react';
+import React from 'react';
+import Router from './Routes';
 
-export const App = () => (
-  <ChakraProvider theme={theme}>
-    <Box textAlign="center" fontSize="6xl">
-      <Text>
-        {'LOG8970'}
-      </Text>
-    </Box>
-  </ChakraProvider>
-)
+export const App: React.FC = () => {
+    return (
+        <ChakraProvider theme={theme}>
+            <Router />    
+        </ChakraProvider>
+    );
+};
+
