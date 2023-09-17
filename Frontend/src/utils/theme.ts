@@ -11,6 +11,8 @@ const theme = extendTheme({
             body: {
                 bg: colors.grey.main,
             },
+            width: '100%',
+            maxHeight: '100vh',
         },
     }
 });

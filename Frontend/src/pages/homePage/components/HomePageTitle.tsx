@@ -12,17 +12,19 @@ const HomePageTitle: React.FC = () => {
             <Flex 
                 width={'100%'}
                 justifyContent={'center'}
+                alignItems={'center'}
             >
                 <Text 
                     fontSize='5xl'
                     textAlign={'center'}
                 >
-                    {'Bienvenue sur le répertoire des expertises de la Communauté de pratique IA en santé'}
+                    {'Répertoire des expertises de la CPIAS'}
                 </Text>
             </Flex>
             <Flex
                 width={'100%'}  
                 justifyContent={'center'}
+                alignItems={'center'}
             >
                 <Text
                     fontSize='2xl'
