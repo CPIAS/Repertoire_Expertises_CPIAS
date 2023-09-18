@@ -5,7 +5,7 @@ const colors = {
         dark: '#8D8E8D',
     },
     blue: {
-        main: '#203864',
+        main: '#142C49',
     },
 };
 

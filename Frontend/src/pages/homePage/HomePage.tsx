@@ -2,6 +2,8 @@ import { Flex, Text } from '@chakra-ui/react';
 import React from 'react';
 import SearchBar from '../../components/searchBar/SearchBar';
 import HomePageTitle from './components/HomePageTitle';
+import HomePageFooter from './components/HomePageFooter';
+import Header from '../../components/header/Header';
 
 const HomePage: React.FC = () => {
     return (
@@ -13,19 +15,17 @@ const HomePage: React.FC = () => {
             flexWrap={'wrap'}
         >
             <Flex 
-                height={'5.5vh'} 
                 width={'100%'}
+                height={'10vh'} 
                 alignItems={'center'}
                 boxSizing={'border-box'}
                 borderBottom={'1px solid black'}
             >
-                <Text>
-                    {'[Header]'}
-                </Text>
+                <Header />
             </Flex>
             <Flex 
                 width={'100%'}
-                height={'30vh'}
+                height={'40vh'}
                 justifyContent={'center'}
             >
                 <HomePageTitle />
@@ -34,17 +34,17 @@ const HomePage: React.FC = () => {
 
             <Flex
                 width={'100%'}
-                height={'27.5vh'}
+                height={'25vh'}
                 justifyContent={'center'}
-                alignItems={'center'}
+                alignItems={'flex-start'}
             >
                 <SearchBar />
             </Flex>
             <Flex 
                 width={'100%'}
-                height={'5vh'}
+                height={'25vh'}
                 justifyContent={'center'}
-                alignItems={'center'}
+                alignItems={'flex-start'}
             >
                 <Text>
                     {'[Guide d\'utilisation]'}
@@ -52,13 +52,12 @@ const HomePage: React.FC = () => {
             </Flex>
             <Flex 
                 width={'100%'}
-                height={'26.5vh'}
+                height={'35vh'}
                 justifyContent={'center'}
                 alignItems={'center'}
+                backgroundColor={'white'}
             >
-                <Text>
-                    {'[Partenaires]'}
-                </Text>
+                <HomePageFooter />
 
             </Flex>
         </Flex>

@@ -7,7 +7,6 @@ const HomePageTitle: React.FC = () => {
             width={'60%'}
             justifyContent={'center'}
             flexWrap={'wrap'}
-            gap={'2rem'}
         >
             <Flex 
                 width={'100%'}
@@ -24,7 +23,7 @@ const HomePageTitle: React.FC = () => {
             <Flex
                 width={'100%'}  
                 justifyContent={'center'}
-                alignItems={'center'}
+                alignItems={'flex-start'}
             >
                 <Text
                     fontSize='2xl'
