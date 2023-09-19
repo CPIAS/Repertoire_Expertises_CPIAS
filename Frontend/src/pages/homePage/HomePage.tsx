@@ -12,11 +12,13 @@ const HomePage: React.FC = () => {
             height={'100vh'}
             minHeight={'100vh'}
             maxHeight={'100vh'}
+            justifyContent={'center'}
             flexWrap={'wrap'}
         >
             <Flex 
                 width={'100%'}
                 height={'10vh'} 
+                justifyContent={'center'}
                 alignItems={'center'}
                 boxSizing={'border-box'}
                 borderBottom={'1px solid black'}
@@ -24,7 +26,7 @@ const HomePage: React.FC = () => {
                 <Header />
             </Flex>
             <Flex 
-                width={'100%'}
+                width={'85%'}
                 height={'40vh'}
                 justifyContent={'center'}
             >
@@ -33,7 +35,7 @@ const HomePage: React.FC = () => {
             </Flex>
 
             <Flex
-                width={'100%'}
+                width={'85%'}
                 height={'25vh'}
                 justifyContent={'center'}
                 alignItems={'flex-start'}
@@ -41,7 +43,7 @@ const HomePage: React.FC = () => {
                 <SearchBar />
             </Flex>
             <Flex 
-                width={'100%'}
+                width={'85%'}
                 height={'25vh'}
                 justifyContent={'center'}
                 alignItems={'flex-start'}

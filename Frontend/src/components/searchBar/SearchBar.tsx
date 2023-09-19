@@ -25,7 +25,7 @@ const SearchBar: React.FC = () => {
             justifyContent={'center'}    
         >
             <InputGroup 
-                width={'50%'}
+                width={'65%'}
                 height={'4rem'}
                 size={'lg'}
             >

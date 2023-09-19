@@ -4,7 +4,7 @@ import React from 'react';
 const HomePageTitle: React.FC = () => {
     return (
         <Flex 
-            width={'60%'}
+            width={'100%'}
             justifyContent={'center'}
             flexWrap={'wrap'}
         >
