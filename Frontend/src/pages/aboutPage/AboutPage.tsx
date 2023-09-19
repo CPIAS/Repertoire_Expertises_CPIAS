@@ -2,7 +2,7 @@ import { Flex, Text } from '@chakra-ui/react';
 import React from 'react';
 import Header from '../../components/header/Header';
 
-const MembersPage: React.FC = () => {
+const AboutPage: React.FC = () => {
     return (
         <Flex 
             width={'100%'}
@@ -21,10 +21,10 @@ const MembersPage: React.FC = () => {
                 <Header />
             </Flex>
             <Text>
-                {'Page des membres'}
+                {'About'}
             </Text>
         </Flex>
     );
 };
 
-export default MembersPage;
+export default AboutPage;

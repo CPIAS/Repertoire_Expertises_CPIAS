@@ -2,7 +2,7 @@ import { Flex, Text } from '@chakra-ui/react';
 import React from 'react';
 import Header from '../../components/header/Header';
 
-const MembersPage: React.FC = () => {
+const SignUpPage: React.FC = () => {
     return (
         <Flex 
             width={'100%'}
@@ -21,10 +21,10 @@ const MembersPage: React.FC = () => {
                 <Header />
             </Flex>
             <Text>
-                {'Page des membres'}
+                {'L\'inscription se fait ici : https://docs.google.com/forms/d/e/1FAIpQLSe2SqXkvCzOzsXgFq7vw06ScGqprwYiqkzrJjdFwnYc73fc9g/viewform'}
             </Text>
         </Flex>
     );
 };
 
-export default MembersPage;
+export default SignUpPage;
