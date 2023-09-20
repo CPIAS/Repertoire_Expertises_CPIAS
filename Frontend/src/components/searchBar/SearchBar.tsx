@@ -33,7 +33,7 @@ const SearchBar: React.FC = () => {
                     placeholder={'Rechercher un mot-clé, un nom, une phrase...'} 
                     fontSize={'xl'}
                     height={'inherit'}
-                    backgroundColor={'white'}
+                    backgroundColor={colors.darkAndLight.white}
                     paddingRight={'4.5rem'}
                     borderRadius={'1rem'}
                     border={'1px solid darkgrey'}
@@ -52,7 +52,7 @@ const SearchBar: React.FC = () => {
                     onClick={submitSearch}
                 >
                     <SearchIcon 
-                        color={'white'}
+                        color={colors.darkAndLight.white}
                         boxSize={'8'}
                     />
 

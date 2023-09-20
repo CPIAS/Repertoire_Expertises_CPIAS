@@ -1,18 +1,20 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import AboutPage from './pages/aboutPage/AboutPage';
 import HomePage from './pages/homePage/HomePage';
 import MembersPage from './pages/membersPage/MembersPage';
-import SignUpPage from './pages/signUpPage/signUpPage';
-import AboutPage from './pages/aboutPage/AboutPage';
+import SignUpPage from './pages/signUpPage/SignUpPage';
 
 const Router: React.FC = () => {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<HomePage/>} />
+                <Route path="/" element={<Navigate to="/accueil" replace />} />              
+                <Route path="/accueil" element={<HomePage/>} />
                 <Route path="/membres" element={<MembersPage/>} />
                 <Route path="/inscription" element={<SignUpPage/>} />
-                <Route path="/a-propos" element={<AboutPage/>} />
+                <Route path="/apropos" element={<AboutPage/>} />
+                {/* TODO: Create error 404 page */}
             </Routes>
         </BrowserRouter>
     );

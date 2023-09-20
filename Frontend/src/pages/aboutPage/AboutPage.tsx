@@ -10,11 +10,13 @@ const AboutPage: React.FC = () => {
             minHeight={'100vh'}
             maxHeight={'100vh'}
             justifyContent={'center'}
+            alignItems={'flex-start'}
             flexWrap={'wrap'}
+            overflowY={'hidden'}
         >
             <Flex 
                 width={'100%'}
-                height={'10vh'} 
+                height={'8.5vh'}
                 justifyContent={'center'}
                 alignItems={'center'}
             >

@@ -2,6 +2,7 @@ import { Flex, Text } from '@chakra-ui/react';
 import React from 'react';
 import Header from '../../components/header/Header';
 import SearchBar from '../../components/searchBar/SearchBar';
+import colors from '../../utils/colors';
 import HomePageFooter from './components/HomePageFooter';
 import HomePageTitle from './components/HomePageTitle';
 
@@ -13,24 +14,25 @@ const HomePage: React.FC = () => {
             minHeight={'100vh'}
             maxHeight={'100vh'}
             justifyContent={'center'}
+            alignItems={'flex-start'}
             flexWrap={'wrap'}
-        >
+            overflowY={'hidden'}
+            
+        >            
             <Flex 
                 width={'100%'}
-                height={'10vh'} 
+                height={'8.5vh'}
                 justifyContent={'center'}
                 alignItems={'center'}
-                position={'fixed'}
             >
                 <Header />
             </Flex>
             <Flex
                 width={'100%'}
-                height={'90vh'} 
+                height={'91.5vh'}
                 justifyContent={'center'}
                 flexWrap={'wrap'}
-                marginTop={'10vh'}
-                overflowY={'scroll'}
+                overflowY={'auto'}
             >
             
                 <Flex 
@@ -44,7 +46,7 @@ const HomePage: React.FC = () => {
 
                 <Flex
                     width={'85%'}
-                    height={'25vh'}
+                    height={'20vh'}
                     justifyContent={'center'}
                     alignItems={'flex-start'}
                 >
@@ -65,7 +67,7 @@ const HomePage: React.FC = () => {
                     height={'35vh'}
                     justifyContent={'center'}
                     alignItems={'center'}
-                    backgroundColor={'white'}
+                    backgroundColor={colors.darkAndLight.white}
                 >
                     <HomePageFooter />
 

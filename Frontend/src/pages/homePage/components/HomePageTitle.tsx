@@ -3,13 +3,15 @@ import React from 'react';
 
 const HomePageTitle: React.FC = () => {
     return (
-        <Flex 
+        <Flex
             width={'100%'}
+            height={'100%'}
             justifyContent={'center'}
             flexWrap={'wrap'}
         >
             <Flex 
                 width={'100%'}
+                height={'60%'}
                 justifyContent={'center'}
                 alignItems={'center'}
             >
@@ -17,11 +19,12 @@ const HomePageTitle: React.FC = () => {
                     fontSize='5xl'
                     textAlign={'center'}
                 >
-                    {'Répertoire des expertises de la CPIAS'}
+                    {'Répertoire des expertises'}
                 </Text>
             </Flex>
             <Flex
-                width={'100%'}  
+                width={'100%'} 
+                height={'40%'} 
                 justifyContent={'center'}
                 alignItems={'flex-start'}
             >
