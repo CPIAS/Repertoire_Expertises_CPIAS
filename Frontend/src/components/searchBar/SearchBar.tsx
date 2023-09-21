@@ -2,7 +2,7 @@
 import { SearchIcon } from '@chakra-ui/icons';
 import { Flex, Input, InputGroup, InputRightElement } from '@chakra-ui/react';
 import React, { useState } from 'react';
-import colors from '../../utils/colors';
+import colors from '../../utils/theme/colors';
 
 const ENTER_KEY = 'Enter';
 
@@ -16,18 +16,28 @@ const SearchBar: React.FC = () => {
     };
 
     const submitSearch = () => {
-        console.log(searchBarContent);
+        // TODO: Change endpoint
+        // axiosInstance.post('/endpoint/', { data: searchBarContent })
+        //     .then((response) => {
+        //         // TODO: handle response
+        //     })
+        //     .catch((error) => {
+        //         console.error('Error POST request:', error);
+        //     });
+
     };
 
     return (
         <Flex 
             width={'100%'}
-            justifyContent={'center'}    
+            justifyContent={'center'}   
+            flexWrap={'wrap'} 
         >
             <InputGroup 
                 width={'65%'}
                 height={'4rem'}
                 size={'lg'}
+                
             >
                 <Input 
                     placeholder={'Rechercher un mot-clé, un nom, une phrase...'} 
@@ -40,6 +50,7 @@ const SearchBar: React.FC = () => {
                     onChange={(event) => setSearchBarContent(event.target.value.trim())}
                     onKeyDown={handleEnterKeyPress}
                     defaultValue={searchBarContent}
+                    boxShadow={`0px 0px 7.5px 0px ${colors.grey.dark}`}
                 />
                 <InputRightElement 
                     width={'4rem'} 
@@ -50,6 +61,7 @@ const SearchBar: React.FC = () => {
                     borderLeft={'none'}
                     cursor={'pointer'}
                     onClick={submitSearch}
+                    _hover={{ backgroundColor: colors.orange.main }}
                 >
                     <SearchIcon 
                         color={colors.darkAndLight.white}

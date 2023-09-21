@@ -23,7 +23,7 @@ const AboutPage: React.FC = () => {
                 <Header />
             </Flex>
             <Text>
-                {'About'}
+                {'About (TODO)'}
             </Text>
         </Flex>
     );

@@ -17,6 +17,7 @@
     "axios": "^1.5.0",
     "eslint": "^8.49.0",
     "framer-motion": "^6.5.1",
+    "humps": "^2.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^3.11.0",
@@ -30,7 +31,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "start:proxy": "node setupProxy.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -49,6 +51,8 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@types/humps": "^2.0.4",
     "eslint-plugin-react": "^7.33.2"
-  }
+  },
+  "proxy": "http://localhost:8000"
 }

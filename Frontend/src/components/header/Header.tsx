@@ -1,12 +1,12 @@
 import { Flex, Image, Link, Text } from '@chakra-ui/react';
 import React from 'react';
 import { Link as ReactRouterLink, useLocation } from 'react-router-dom';
-import colors from '../../utils/colors';
+import colors from '../../utils/theme/colors';
 
 interface NavProps {
     path: string;
     label: string;
-  }
+}
 
 const NavItem: React.FC<NavProps> = ({ path, label }) => {
     const location = useLocation();
@@ -52,7 +52,7 @@ const Header: React.FC = () => {
             justifyContent={'flex-start'}
             backgroundColor={colors.blue.main}
             flexWrap={'wrap'}
-            boxShadow={'0px 0px 10px 2px grey;'}
+            boxShadow={`0px 0px 10px 2px ${colors.grey.dark}`}
             gap={'2.5rem'}
         >
             <Flex
@@ -70,7 +70,6 @@ const Header: React.FC = () => {
             >
                 <NavItem path="/accueil" label="Accueil" />
                 <NavItem path="/membres" label="Membres" />
-                <NavItem path="/inscription" label="Inscription" />
                 <NavItem path="/apropos" label="À propos" />
             </Flex>
         </Flex>
@@ -78,30 +77,3 @@ const Header: React.FC = () => {
 };
 
 export default Header;
-
-// const Header: React.FC = () => {
-//     return (
-//         <Flex 
-//             width={'100%'}
-//             height={'100%'}
-//             alignItems={'center'}
-//             justifyContent={'center'}
-//             backgroundColor={colors.blue.main}
-//             flexWrap={'wrap'}
-//             boxShadow={'0px 0px 10px 2px grey;'}
-//         >
-//             <Flex
-//                 width={'100%'}
-//                 height={'100%'}
-//                 alignItems={'center'}
-//             >
-//                 <NavItem path="/accueil" label="Accueil" />
-//                 <NavItem path="/membres" label="Membres" />
-//                 <NavItem path="/inscription" label="Inscription" />
-//                 <NavItem path="/apropos" label="À propos" />
-//             </Flex>
-//         </Flex>
-//     );
-// };
-
-// export default Header;

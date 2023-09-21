@@ -1,8 +1,25 @@
-import { Flex, Text } from '@chakra-ui/react';
-import React from 'react';
+import { Flex } from '@chakra-ui/react';
+import * as humps from 'humps';
+import React, { useState } from 'react';
 import Header from '../../components/header/Header';
+import Loader from '../../components/loader/Loader';
+import MemberCard from '../../components/memberCard/MemberCard';
+import { MemberModel } from '../../models/MemberModel';
+import axiosInstance from '../../utils/http-requests';
 
 const MembersPage: React.FC = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(true); //TODO: REMOVE
+    const [members, setMembers] = useState<MemberModel[]>([]);
+    
+    axiosInstance.get<unknown, MemberModel[]>('/users')
+        .then((response) => {
+            setMembers(humps.camelizeKeys(response) as MemberModel[]);
+            setIsLoading(false);
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+
     return (
         <Flex 
             width={'100%'}
@@ -17,14 +34,36 @@ const MembersPage: React.FC = () => {
             <Flex 
                 width={'100%'}
                 height={'8.5vh'}
+                
                 justifyContent={'center'}
                 alignItems={'center'}
             >
                 <Header />
             </Flex>
-            <Text>
-                {'Page des membres'}
-            </Text>
+            <Flex
+                overflowY={'scroll'}
+                height={'91.5vh'}
+                justifyContent={'center'}
+                alignItems={'center'}
+            >
+                {isLoading ? 
+                    <Loader /> 
+                    :
+                    <>
+                        <Flex 
+                            width={'100%'} 
+                            flexWrap={'wrap'}
+                        >
+                            {members.map((member) => (
+                                <MemberCard key={member.userId} {...member} />
+                            
+                            ))}
+                        </Flex>
+                   
+                    </>
+                }
+            </Flex>
+            
         </Flex>
     );
 };

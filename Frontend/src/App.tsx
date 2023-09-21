@@ -1,7 +1,7 @@
 import { ChakraProvider } from '@chakra-ui/react';
 import React from 'react';
 import Router from './Routes';
-import theme from './utils/theme';
+import theme from './utils/theme/theme';
 
 const App: React.FC = () => {
     return (

@@ -2,7 +2,7 @@ import { Flex, Text } from '@chakra-ui/react';
 import React from 'react';
 import Header from '../../components/header/Header';
 import SearchBar from '../../components/searchBar/SearchBar';
-import colors from '../../utils/colors';
+import colors from '../../utils/theme/colors';
 import HomePageFooter from './components/HomePageFooter';
 import HomePageTitle from './components/HomePageTitle';
 
@@ -30,6 +30,7 @@ const HomePage: React.FC = () => {
             <Flex
                 width={'100%'}
                 height={'91.5vh'}
+                paddingTop={'8.5vh'}
                 justifyContent={'center'}
                 flexWrap={'wrap'}
                 overflowY={'auto'}
