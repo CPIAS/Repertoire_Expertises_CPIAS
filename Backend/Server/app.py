@@ -1,7 +1,8 @@
 import csv
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 from flask import Flask, jsonify, request
+
 from models import db, User
 
 app = Flask(__name__)
@@ -9,6 +10,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db.init_app(app)
 with app.app_context():
     db.create_all()
+
+
+@app.route('/', methods=['GET'])
+def welcome():
+    formatted_datetime = datetime.now(timezone(-timedelta(hours=4), 'EDT')).strftime("%Y-%m-%d %H:%M:%S")
+    response = (f"Welcome to the server of the search engine and networking platform in the healthcare AI field.<br>"
+                f"Current Datetime: {formatted_datetime}")
+    return response, 200, {'Content-Type': 'text/html; charset=utf-8'}
 
 
 @app.route('/upload', methods=['POST'])
