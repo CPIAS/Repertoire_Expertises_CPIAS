@@ -10,4 +10,4 @@
 
 <p>The server should be run on Ubuntu (22.04 AMD64).</p>
 
-    usage: gunicorn -c gunicorn_config.py app:app
+    usage: gunicorn -c gunicorn_config.py wsgi:app
