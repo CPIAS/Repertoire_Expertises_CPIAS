@@ -14,7 +14,7 @@ const theme = extendTheme({
             width: '100%',
             maxHeight: '100vh',
         },
-    }
+    },
 });
 
 export default theme;

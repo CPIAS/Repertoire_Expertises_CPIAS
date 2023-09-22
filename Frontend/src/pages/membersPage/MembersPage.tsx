@@ -1,24 +1,32 @@
-import { Flex } from '@chakra-ui/react';
-import * as humps from 'humps';
-import React, { useState } from 'react';
+import { Flex, Text } from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
 import Header from '../../components/header/Header';
 import Loader from '../../components/loader/Loader';
 import MemberCard from '../../components/memberCard/MemberCard';
-import { MemberModel } from '../../models/MemberModel';
-import axiosInstance from '../../utils/http-requests';
+import { Member } from '../../models/member';
+import mockMembers from './mockMembers.json';
+import axios, { AxiosResponse } from 'axios';
+import humps from 'humps';
+const API_HOST = process.env.REACT_APP_SERVER_URL;
 
 const MembersPage: React.FC = () => {
-    const [isLoading, setIsLoading] = useState<boolean>(true); //TODO: REMOVE
-    const [members, setMembers] = useState<MemberModel[]>([]);
-    
-    axiosInstance.get<unknown, MemberModel[]>('/users')
-        .then((response) => {
-            setMembers(humps.camelizeKeys(response) as MemberModel[]);
-            setIsLoading(false);
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [members, setMembers] = useState<Member[]>(mockMembers); //TODO: Empty array by default
+
+    useEffect(() => {
+        const fetchMembers = async () => {
+            try {
+                const response: AxiosResponse<Member[]> = await axios.get(`${API_HOST}/users`);
+                setMembers(humps.camelizeKeys(response.data) as Member[]);
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Error while fetching members: ', error);
+                setIsLoading(false);
+            }
+        };
+
+        fetchMembers();
+    }, []);
 
     return (
         <Flex 
@@ -33,7 +41,7 @@ const MembersPage: React.FC = () => {
         >
             <Flex 
                 width={'100%'}
-                height={'8.5vh'}
+                height={'10vh'}
                 
                 justifyContent={'center'}
                 alignItems={'center'}
@@ -41,26 +49,46 @@ const MembersPage: React.FC = () => {
                 <Header />
             </Flex>
             <Flex
+                width={'100%'}
                 overflowY={'scroll'}
-                height={'91.5vh'}
+                height={'90vh'}
                 justifyContent={'center'}
                 alignItems={'center'}
             >
                 {isLoading ? 
                     <Loader /> 
                     :
-                    <>
+                    <Flex
+                        width={'80%'}
+                        paddingTop={'5vh'}
+                        height={'100%'}
+                        justifyContent={'center'}
+                        alignItems={'center'}
+                        flexWrap={'wrap'}
+                    >
+                        <Flex 
+                            width={'100%'}
+                            alignItems={'center'}
+                            justifyContent={'flex-start'}
+                        >
+                            <Text fontSize={'3xl'} fontWeight={'bold'}>
+                                {'Membres de la CPIAS'}
+                            </Text>
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            alignItems={'center'}
+                            justifyContent={'space-between'}
+                            paddingBottom={'1.5rem'}
+                        >
+                        </Flex>
                         <Flex 
                             width={'100%'} 
-                            flexWrap={'wrap'}
                         >
-                            {members.map((member) => (
-                                <MemberCard key={member.userId} {...member} />
-                            
-                            ))}
+                            <MemberCard members={members} />
                         </Flex>
                    
-                    </>
+                    </Flex>
                 }
             </Flex>
             

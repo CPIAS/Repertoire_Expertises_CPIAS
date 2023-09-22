@@ -6,20 +6,20 @@ const Loader: React.FC = () => {
     return (
         <Flex 
             width={'100%'}
+            height={'100%'}
             justifyContent={'center'}
             alignItems={'center'}
+            alignContent={'center'}
             flexWrap={'wrap'}
-            gap={'3rem'}
+            gap={'2rem'}
         >
             <Flex 
                 width={'100%'}
                 justifyContent={'center'}
-                alignItems={'center'}
             >
                 <Spinner
                     thickness='0.5rem'
                     speed='0.75s'
-                    emptyColor={colors.grey.main}
                     color={colors.blue.main}
                     boxSize={24}
                 />
@@ -27,9 +27,8 @@ const Loader: React.FC = () => {
             <Flex
                 width={'100%'}
                 justifyContent={'center'}
-                alignItems={'center'}
             >
-                <Text fontSize='2xl'>
+                <Text fontSize='2xl' fontWeight={'bold'}>
                     {'Chargement...'}
                 </Text>
             </Flex>

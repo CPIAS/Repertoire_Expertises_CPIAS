@@ -17,6 +17,7 @@ const HomePageTitle: React.FC = () => {
             >
                 <Text 
                     fontSize='5xl'
+                    fontWeight={'bold'}
                     textAlign={'center'}
                 >
                     {'Répertoire des expertises'}

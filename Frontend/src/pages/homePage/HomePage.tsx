@@ -21,7 +21,7 @@ const HomePage: React.FC = () => {
         >            
             <Flex 
                 width={'100%'}
-                height={'8.5vh'}
+                height={'10vh'}
                 justifyContent={'center'}
                 alignItems={'center'}
             >
@@ -29,7 +29,7 @@ const HomePage: React.FC = () => {
             </Flex>
             <Flex
                 width={'100%'}
-                height={'91.5vh'}
+                height={'90vh'}
                 paddingTop={'8.5vh'}
                 justifyContent={'center'}
                 flexWrap={'wrap'}
@@ -46,7 +46,7 @@ const HomePage: React.FC = () => {
                 </Flex>
 
                 <Flex
-                    width={'85%'}
+                    width={'60%'}
                     height={'20vh'}
                     justifyContent={'center'}
                     alignItems={'flex-start'}

@@ -27,7 +27,6 @@ const NavItem: React.FC<NavProps> = ({ path, label }) => {
                 as={ReactRouterLink}
                 to={path}
                 textDecoration="none"
-                _hover={{ color: isActive ? '' : 'lightgrey' }}
             >
                 <Text
                     color={colors.darkAndLight.white}
@@ -35,6 +34,7 @@ const NavItem: React.FC<NavProps> = ({ path, label }) => {
                     paddingX={'2rem'}
                     height={'100%'}
                     textAlign={'center'}
+                    _hover={{color: isActive ? colors.darkAndLight.white : colors.orange.light }}
                 >
                     {label}
                 </Text>
@@ -60,7 +60,7 @@ const Header: React.FC = () => {
                 alignItems={'center'}
                 backgroundColor={colors.blue.main}
             >
-                <Image src='/images/cpias-logo.png' alt='cpias' alignSelf="center" height={'7.5vh'}/>
+                <Image src='/images/cpias-logo.png' alt='cpias' alignSelf="center" height={'10vh'}/>
             </Flex>
             <Flex
                 width={'80%'}

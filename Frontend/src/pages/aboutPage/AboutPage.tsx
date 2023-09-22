@@ -16,7 +16,7 @@ const AboutPage: React.FC = () => {
         >
             <Flex 
                 width={'100%'}
-                height={'8.5vh'}
+                height={'10vh'}
                 justifyContent={'center'}
                 alignItems={'center'}
             >

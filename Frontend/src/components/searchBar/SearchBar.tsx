@@ -2,29 +2,30 @@
 import { SearchIcon } from '@chakra-ui/icons';
 import { Flex, Input, InputGroup, InputRightElement } from '@chakra-ui/react';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import colors from '../../utils/theme/colors';
 
 const ENTER_KEY = 'Enter';
 
-const SearchBar: React.FC = () => {
-    const [searchBarContent, setSearchBarContent] = useState<string>('');
+interface SearchBarProps {
+    defaultValue?: string;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({
+    defaultValue
+}) => {
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const navigate = useNavigate ();
 
     const handleEnterKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === ENTER_KEY && searchBarContent.trim().length !== 0) {
+        if (event.key === ENTER_KEY && searchQuery.trim().length !== 0) {
             submitSearch();
         }
     };
 
     const submitSearch = () => {
-        // TODO: Change endpoint
-        // axiosInstance.post('/endpoint/', { data: searchBarContent })
-        //     .then((response) => {
-        //         // TODO: handle response
-        //     })
-        //     .catch((error) => {
-        //         console.error('Error POST request:', error);
-        //     });
-
+        if (searchQuery.trim().length !== 0)
+            navigate(`/recherche?q=${searchQuery}`);
     };
 
     return (
@@ -34,22 +35,22 @@ const SearchBar: React.FC = () => {
             flexWrap={'wrap'} 
         >
             <InputGroup 
-                width={'65%'}
+                width={'100%'}
                 height={'4rem'}
                 size={'lg'}
                 
             >
                 <Input 
-                    placeholder={'Rechercher un mot-clé, un nom, une phrase...'} 
+                    placeholder={'Rechercher un nom, un mot-clé, une phrase...'} 
                     fontSize={'xl'}
                     height={'inherit'}
                     backgroundColor={colors.darkAndLight.white}
                     paddingRight={'4.5rem'}
                     borderRadius={'1rem'}
                     border={'1px solid darkgrey'}
-                    onChange={(event) => setSearchBarContent(event.target.value.trim())}
+                    onChange={(event) => setSearchQuery(event.target.value.trim())}
                     onKeyDown={handleEnterKeyPress}
-                    defaultValue={searchBarContent}
+                    defaultValue={defaultValue ?? searchQuery}
                     boxShadow={`0px 0px 7.5px 0px ${colors.grey.dark}`}
                 />
                 <InputRightElement 
