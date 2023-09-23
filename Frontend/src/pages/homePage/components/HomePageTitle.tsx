@@ -5,18 +5,18 @@ const HomePageTitle: React.FC = () => {
     return (
         <Flex
             width={'100%'}
-            height={'100%'}
+            height={'90%'}
             justifyContent={'center'}
             flexWrap={'wrap'}
         >
             <Flex 
                 width={'100%'}
-                height={'60%'}
+                height={'55%'}
                 justifyContent={'center'}
                 alignItems={'center'}
             >
                 <Text 
-                    fontSize='5xl'
+                    fontSize='6xl'
                     fontWeight={'bold'}
                     textAlign={'center'}
                 >
@@ -25,7 +25,7 @@ const HomePageTitle: React.FC = () => {
             </Flex>
             <Flex
                 width={'100%'} 
-                height={'40%'} 
+                height={'35%'} 
                 justifyContent={'center'}
                 alignItems={'flex-start'}
             >
@@ -33,7 +33,7 @@ const HomePageTitle: React.FC = () => {
                     fontSize='2xl'
                     textAlign={'center'}
                 >
-                    {'[Description de l\'outil]'}
+                    {'Trouvez des collaborateurs pour vos projets en intelligence artificielle et en santé.'}
                 </Text>
             </Flex>
             

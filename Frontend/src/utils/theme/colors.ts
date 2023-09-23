@@ -11,6 +11,7 @@ const colors = {
     },
     blue: {
         main: '#142C49',
+        light: '#3c6ba3',
     },
     orange: {
         main: '#F2810C',

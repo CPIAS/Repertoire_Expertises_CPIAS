@@ -4,6 +4,7 @@ import AboutPage from './pages/aboutPage/AboutPage';
 import HomePage from './pages/homePage/HomePage';
 import MembersPage from './pages/membersPage/MembersPage';
 import SearchResultsPage from './pages/searchResultsPage/SearchResultsPage';
+import NotFoundPage from './pages/notFoundPage/NotFoundPage';
 
 const Router: React.FC = () => {
     return (
@@ -14,7 +15,7 @@ const Router: React.FC = () => {
                 <Route path="/recherche" element={<SearchResultsPage />} />
                 <Route path="/membres" element={<MembersPage />} />
                 <Route path="/apropos" element={<AboutPage />} />
-                {/* TODO: Create error 404 page */}
+                <Route path="*" element={<NotFoundPage />} />
             </Routes>
         </BrowserRouter>
     );

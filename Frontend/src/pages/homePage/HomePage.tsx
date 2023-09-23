@@ -1,12 +1,24 @@
-import { Flex, Text } from '@chakra-ui/react';
-import React from 'react';
+import { QuestionOutlineIcon } from '@chakra-ui/icons';
+import { Button, Flex } from '@chakra-ui/react';
+import React, { useState } from 'react';
 import Header from '../../components/header/Header';
+import UserGuideModal from '../../components/modals/UserGuideModal';
 import SearchBar from '../../components/searchBar/SearchBar';
 import colors from '../../utils/theme/colors';
 import HomePageFooter from './components/HomePageFooter';
 import HomePageTitle from './components/HomePageTitle';
 
 const HomePage: React.FC = () => {
+    const [isUserGuideModalOpen, setIsUserGuideModalOpen] = useState(false);
+
+    const openUserGuideModal = () => {
+        setIsUserGuideModalOpen(true);
+    };
+
+    const closeUserGuideModal = () => {
+        setIsUserGuideModalOpen(false);
+    };
+
     return (
         <Flex 
             width={'100%'}
@@ -38,7 +50,7 @@ const HomePage: React.FC = () => {
             
                 <Flex 
                     width={'85%'}
-                    height={'40vh'}
+                    height={'35vh'}
                     justifyContent={'center'}
                 >
                     <HomePageTitle />
@@ -55,14 +67,30 @@ const HomePage: React.FC = () => {
                 </Flex>
                 <Flex 
                     width={'85%'}
-                    height={'25vh'}
+                    height={'27.5vh'}
                     justifyContent={'center'}
                     alignItems={'flex-start'}
                 >
-                    <Text>
-                        {'[Guide d\'utilisation]'}
-                    </Text>
+                    <Button
+                        size={'lg'}
+                        backgroundColor={colors.blue.main}
+                        color={colors.darkAndLight.white}
+                        leftIcon={<QuestionOutlineIcon boxSize={6}/>}
+                        fontWeight={'normal'}
+                        _hover={{
+                            backgroundColor: colors.blue.light,
+                        }}
+                        _active={{
+                            backgroundColor: colors.blue.light,
+                        }}
+                        onClick={()=>{
+                            openUserGuideModal();
+                        }}
+                    >
+                        {'Guide d\'utilisation'}
+                    </Button>
                 </Flex>
+                <UserGuideModal isOpen={isUserGuideModalOpen} onClose={closeUserGuideModal} />
                 <Flex 
                     width={'100%'}
                     height={'35vh'}

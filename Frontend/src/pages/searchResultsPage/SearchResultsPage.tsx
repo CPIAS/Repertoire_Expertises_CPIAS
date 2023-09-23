@@ -85,7 +85,8 @@ const SearchResultsPage: React.FC = () => {
                                 navigate(-1);
                             }}
                             _hover={{
-                                backgroundColor: colors.orange.light
+                                backgroundColor: colors.blue.main,
+                                color: colors.darkAndLight.white
                             }}
 
                         />
