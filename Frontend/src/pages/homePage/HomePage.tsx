@@ -63,7 +63,7 @@ const HomePage: React.FC = () => {
                     justifyContent={'center'}
                     alignItems={'flex-start'}
                 >
-                    <SearchBar />
+                    <SearchBar isAutoFocus={true}/>
                 </Flex>
                 <Flex 
                     width={'85%'}

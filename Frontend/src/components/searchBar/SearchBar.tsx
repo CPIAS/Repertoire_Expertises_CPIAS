@@ -9,10 +9,12 @@ const ENTER_KEY = 'Enter';
 
 interface SearchBarProps {
     defaultValue?: string;
+    isAutoFocus?: boolean;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
-    defaultValue
+    defaultValue,
+    isAutoFocus = false
 }) => {
     const [searchQuery, setSearchQuery] = useState<string>('');
     const navigate = useNavigate ();
@@ -52,6 +54,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                     onKeyDown={handleEnterKeyPress}
                     defaultValue={defaultValue ?? searchQuery}
                     boxShadow={`0px 0px 7.5px 0px ${colors.grey.dark}`}
+                    autoFocus={isAutoFocus}
                 />
                 <InputRightElement 
                     width={'4rem'} 
