@@ -24,63 +24,77 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                 isLoading ?
                     <Loader/> 
                     :
-                    <Tabs 
-                        size='lg' 
+                    <Flex
                         width={'90%'}
-                        
-                        backgroundColor={'white'}
-                        borderTopRadius={'0.5rem'}
-                        variant='enclosed'
+                        flexWrap={'wrap'}
+                        gap={'1rem'}
                     >
-                        <TabList 
-                            paddingX={'1rem'}
-                            border={'none'}
-                            borderTopRadius={'0.5rem'}
-                            borderX={`1px solid ${colors.grey.dark}`}
-                            borderTop={`1px solid ${colors.grey.dark}`}
+                    
+                        <Flex
+                            width={'100%'}
+                            fontSize={'3xl'}
+                            fontWeight={'bold'}
                         >
-                            <Tab 
-                                paddingX={'5rem'}
-                                _active={{
-                                    backgroundColor: colors.grey.main,
-                                }}
-                                _selected={{ 
-                                    borderBottom: `3.5px solid ${colors.orange.main}`,
-                                }}
-                            >
-                                {'Expertises'}
-                            </Tab>
-                            <Tab
-                                paddingX={'5rem'}
-                                _active={{
-                                    backgroundColor: colors.grey.main,
-                                }}
-                                _selected={{ 
-                                    borderBottom: `3.5px solid ${colors.orange.main}`,
-                                }}
-                            >
-                                {'Collaborations'}
-                            </Tab>
-                        </TabList>
-
-                        <TabPanels 
-                            borderX={`1px solid ${colors.grey.dark}`}
-                            borderBottomRadius={'0.15rem'}
-                            width={'90%'} 
-                            height={'auto' || '100%'}
-                            paddingX={'1rem'}
+                            {`${members.length} résultats`}
+                        </Flex>
+                    
+                        <Tabs 
+                            size='lg' 
+                            width={'100%'}
                             backgroundColor={'white'}
+                            borderTopRadius={'0.5rem'}
+                            variant='enclosed'
                         >
-                            <TabPanel width={'100%'}>
-                                <MemberCard members={members} />
-                            </TabPanel>
-                            <TabPanel
-                                width={'90%'} 
+                            <TabList 
+                                paddingX={'1rem'}
+                                border={'none'}
+                                borderTopRadius={'0.5rem'}
+                                borderX={`1px solid ${colors.grey.dark}`}
+                                borderTop={`1px solid ${colors.grey.dark}`}
                             >
-                                <p>TODO</p>
-                            </TabPanel>
-                        </TabPanels>
-                    </Tabs>
+                                <Tab 
+                                    paddingX={'5rem'}
+                                    _active={{
+                                        backgroundColor: colors.grey.main,
+                                    }}
+                                    _selected={{ 
+                                        borderBottom: `3.5px solid ${colors.orange.main}`,
+                                    }}
+                                >
+                                    {'Expertises'}
+                                </Tab>
+                                <Tab
+                                    paddingX={'5rem'}
+                                    _active={{
+                                        backgroundColor: colors.grey.main,
+                                    }}
+                                    _selected={{ 
+                                        borderBottom: `3.5px solid ${colors.orange.main}`,
+                                    }}
+                                >
+                                    {'Collaborations'}
+                                </Tab>
+                            </TabList>
+
+                            <TabPanels 
+                                borderX={`1px solid ${colors.grey.dark}`}
+                                borderBottomRadius={'0.15rem'}
+                                width={'90%'} 
+                                height={'auto' || '100%'}
+                                paddingX={'1rem'}
+                                backgroundColor={'white'}
+                            >
+                                <TabPanel width={'100%'}>
+                                    <MemberCard members={members} />
+                                </TabPanel>
+                                <TabPanel
+                                    width={'90%'} 
+                                >
+                                    <p>TODO</p>
+                                </TabPanel>
+                            </TabPanels>
+                        </Tabs>
+                    </Flex>
             }
         </Flex>   
     );
