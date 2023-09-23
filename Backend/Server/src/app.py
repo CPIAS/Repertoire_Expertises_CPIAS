@@ -1,13 +1,20 @@
 import csv
+import os
 from datetime import datetime, timezone, timedelta
 
 from flask import Flask, jsonify, request
 
 from models import db, User
 
+database_path = os.path.abspath('../database')
+
+if not os.path.exists(database_path):
+    os.makedirs(database_path)
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{database_path}/users.db"
 db.init_app(app)
+
 with app.app_context():
     db.create_all()
 
@@ -32,9 +39,15 @@ def upload_csv_file():
             return jsonify({"message": "No selected file"}), 400
 
         if file:
-            file.save(file.filename)
+            resources_path = os.path.abspath('../resources')
 
-            with open(file.filename, 'r') as csv_file:
+            if not os.path.exists(resources_path):
+                os.makedirs(resources_path)
+
+            file_path = os.path.join(resources_path, file.filename)
+            file.save(file_path)
+
+            with open(file_path, 'r') as csv_file:
                 csv_file_reader = csv.reader(csv_file)
                 next(csv_file_reader)  # Skip the header row.
                 db.session.query(User).delete()
