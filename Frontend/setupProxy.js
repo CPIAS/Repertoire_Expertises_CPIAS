@@ -13,12 +13,11 @@ app.use((req, res, next) => {
 
 app.get('/users', (req, res) => {
     request(
-        { url: 'http://ec2-18-218-228-40.us-east-2.compute.amazonaws.com/users' },
+        { url: 'http://ec2-3-22-51-253.us-east-2.compute.amazonaws.com/users' },
         (error, response, body) => {
             if (error || response.statusCode !== 200) {
-                return res.status(500).json({ type: 'error', message: err.message });
+                return res.status(500).json('error');
             }
-            
             res.json(JSON.parse(body));
         }
     );

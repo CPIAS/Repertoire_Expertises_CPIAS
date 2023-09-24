@@ -4,14 +4,14 @@ import Header from '../../components/header/Header';
 import Loader from '../../components/loader/Loader';
 import MemberCard from '../../components/memberCard/MemberCard';
 import { Member } from '../../models/member';
-import mockMembers from './mockMembers.json';
+// import mockMembers from './mockMembers.json';
 import axios, { AxiosResponse } from 'axios';
 import humps from 'humps';
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 
 const MembersPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [members, setMembers] = useState<Member[]>(mockMembers); //TODO: Empty array by default
+    const [members, setMembers] = useState<Member[]>([]); //TODO: Empty array by default
 
     useEffect(() => {
         const fetchMembers = async () => {
