@@ -61,6 +61,35 @@ install_dependencies() {
         fi
         echo "Nginx installed."
     fi
+
+    if ! command -v openssl &>/dev/null; then
+        echo "Installing openssl..."
+        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install openssl -y &>/dev/null; then
+            echo "Failed to install openssl, please try again."
+            exit 1
+        fi
+        echo "openssl installed."
+    fi
+}
+
+generate_self_signed_key_cert_pair() {
+    # Set the certificate and key file paths
+    KEY_FILE_PATH="/etc/ssl/private/nginx-selfsigned.key"
+    CERT_FILE_PATH="/etc/ssl/certs/nginx-selfsigned.crt"
+
+    if [[ ! -f $KEY_FILE_PATH ]] || [[ ! -f $CERT_FILE_PATH ]]; then
+        # Get the public hostname of the ec2 instance
+        PUBLIC_HOSTNAME=$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)
+
+        # Set the certificate subject information
+        SUBJECT="/C=CA/ST=Quebec/L=Montreal/O=CHUM/OU=EIAS-CPIAS/CN=$PUBLIC_HOSTNAME"
+
+        # Generate a self-signed certificate and key
+        if ! sudo openssl req -x509 -newkey rsa:2048 -keyout "$KEY_FILE_PATH" -out "$CERT_FILE_PATH" -days 365 -nodes -subj "$SUBJECT" &>/dev/null; then
+            echo "Failed to generate self-signed key and certificate pair, please try again."
+            exit 1
+        fi
+    fi
 }
 
 echo "Checking OS and architecture..."
@@ -86,6 +115,19 @@ echo "Setting up a systemd service for the server..."
 sudo cp server.service /etc/systemd/system
 sudo systemctl start server
 sudo systemctl enable server
+echo "Done."
+
+echo "Generating self-signed key and certificate pair..."
+generate_self_signed_key_cert_pair
+echo "Done."
+
+echo "Generating Diffie-Hellman key exchange parameters (this will take a while)..."
+sudo openssl dhparam -out /etc/nginx/dhparam.pem 4096 &>/dev/null
+echo "Done."
+
+echo "Setting up TLS/SSL..."
+sudo cp ../tls_ssl/self-signed.conf /etc/nginx/snippets
+sudo cp ../tls_ssl/ssl-params.conf /etc/nginx/snippets
 echo "Done."
 
 echo "Setting up nginx..."
