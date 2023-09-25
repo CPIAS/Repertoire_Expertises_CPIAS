@@ -1,0 +1,112 @@
+stages:
+  - install
+  - lint
+  - build
+  - test
+  - deploy
+
+.client: &client
+  - 'echo "Running job: $CI_JOB_NAME in stage: $CI_JOB_STAGE"'
+  - allow_failure: true
+  - image: node:latest
+  - cd Frontend/
+
+.server: &server
+  - 'echo "Running job: $CI_JOB_NAME in stage: $CI_JOB_STAGE"'
+  - allow_failure: true
+  - image: python:3.11
+  - cd Backend/Server/src/
+
+.ai: &ai
+  - 'echo "Running job: $CI_JOB_NAME in stage: $CI_JOB_STAGE"'
+  - allow_failure: true
+  - image: python:latest
+  - cd Backend/AI/
+
+install:client:
+  stage: install
+  <<: *client
+  script:
+    - npm install
+  
+install:server:
+  stage: install
+  <<: *server
+  script:
+    - pip install -r requirements.txt
+
+install:ai:
+  stage: install
+  <<: *ai
+  script:
+    - echo "This job installs the required packages for the ai model"
+
+lint:client:
+  stage: lint
+  <<: *client
+  script:
+    - npm run lint
+
+lint:server:
+  stage: lint
+  <<: *server
+  script:
+    - python -m pip install flake8
+    - flake8 src
+
+lint:ai:
+  stage: lint
+  <<: *ai
+  script:
+    - python -m pip install flake8
+    - flake8 .
+
+build:client:
+  stage: build
+  <<: *client
+  script:
+    - npm run build
+
+build:server:
+  stage: build
+  <<: *server
+  script:
+    - echo "This job builds the server"
+
+build:ai:
+  stage: build
+  <<: *ai
+  script:
+    - echo "This job builds the ai model"
+
+test:client:
+  stage: test
+  <<: *client
+  script:
+    - npm run test
+
+test:server:
+  stage: test
+  <<: *server
+  script:
+    - echo "This job tests the server"
+
+test:ai:
+  stage: test
+  <<: *ai
+  script:
+    - echo "This job tests the ai model"
+
+deploy:client:
+  stage: deploy
+  <<: *client
+  script:
+    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
+  environment: production
+
+deploy:server:
+  stage: deploy
+  <<: *server
+  script:
+    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
+  environment: production
