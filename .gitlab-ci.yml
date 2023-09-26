@@ -5,111 +5,119 @@ stages:
   - test
   - deploy
 
-.client: &client
+.common_script: &common_script
   allow_failure: true
+  script:
+    - 'echo "Running job: $CI_JOB_NAME in stage: $CI_JOB_STAGE"'
+
+client_config: &client_config
+  <<: *common_script
   image: node:latest
-  script:
-  - 'echo "Running job: $CI_JOB_NAME in stage: $CI_JOB_STAGE"'
-  - cd Frontend/
 
-.server: &server
-  allow_failure: true
+server_config: &server_config
+  <<: *common_script
   image: python:3.11
-  script:
-  - 'echo "Running job: $CI_JOB_NAME in stage: $CI_JOB_STAGE"'
-  - cd Backend/Server/src/
 
-.ai: &ai
-  allow_failure: true
+ai_config: &ai_config
+  <<: *common_script
   image: python:latest
-  script:
-  - 'echo "Running job: $CI_JOB_NAME in stage: $CI_JOB_STAGE"'
-  - cd Backend/AI/
 
 install:client:
   stage: install
-  <<: *client
+  <<: *client_config
   script:
-    - npm install
+    - cd Frontend/
+    - npm ci
   
 install:server:
   stage: install
-  <<: *server
+  <<: *server_config
   script:
+    - cd Backend/Server/src/
     - pip install -r requirements.txt
 
 install:ai:
   stage: install
-  <<: *ai
+  <<: *ai_config
   script:
+    - cd Backend/AI/
     - echo "This job installs the required packages for the ai model"
 
 lint:client:
   stage: lint
-  <<: *client
+  <<: *client_config
   script:
+    - cd Frontend/
     - npm run lint
 
 lint:server:
   stage: lint
-  <<: *server
+  <<: *server_config
   script:
+    - cd Backend/Server/src/
     - python -m pip install flake8
     - flake8 src
 
 lint:ai:
   stage: lint
-  <<: *ai
+  <<: *ai_config
   script:
+    - cd Backend/AI/
     - python -m pip install flake8
     - flake8 .
 
 build:client:
   stage: build
-  <<: *client
+  <<: *client_config
   script:
+    - cd Frontend/
     - npm run build
 
 build:server:
   stage: build
-  <<: *server
+  <<: *server_config
   script:
+    - cd Backend/Server/src/
     - echo "This job builds the server"
 
 build:ai:
   stage: build
-  <<: *ai
+  <<: *ai_config
   script:
+    - cd Backend/AI/
     - echo "This job builds the ai model"
 
 test:client:
   stage: test
-  <<: *client
+  <<: *client_config
   script:
+    - cd Frontend/
     - npm run test
 
 test:server:
   stage: test
-  <<: *server
+  <<: *server_config
   script:
+    - cd Backend/Server/src/
     - echo "This job tests the server"
 
 test:ai:
   stage: test
-  <<: *ai
+  <<: *ai_config
   script:
+    - cd Backend/AI/
     - echo "This job tests the ai model"
 
 deploy:client:
   stage: deploy
-  <<: *client
+  <<: *client_config
   script:
     - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
   environment: production
 
 deploy:server:
   stage: deploy
-  <<: *server
+  <<: *server_config
   script:
     - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
   environment: production
