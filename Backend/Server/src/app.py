@@ -4,6 +4,7 @@ from datetime import datetime, timezone, timedelta
 
 from flask import Flask, jsonify, request
 
+from decorators import require_api_key
 from models import db, User
 
 database_path = os.path.abspath('../database')
@@ -19,7 +20,7 @@ with app.app_context():
     db.create_all()
 
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET'], endpoint='welcome')
 def welcome():
     formatted_datetime = datetime.now(timezone(-timedelta(hours=4), 'EDT')).strftime("%Y-%m-%d %H:%M:%S")
     response = (f"Welcome to the server of the search engine and networking platform in the healthcare AI field.<br>"
@@ -27,7 +28,8 @@ def welcome():
     return response, 200, {'Content-Type': 'text/html; charset=utf-8'}
 
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['POST'], endpoint='upload_csv_file')
+@require_api_key
 def upload_csv_file():
     try:
         if 'csv_file' not in request.files:
@@ -80,13 +82,15 @@ def upload_csv_file():
         return jsonify({"message": "File upload failed. An error occurred while uploading the csv file or populating the database."}), 500
 
 
-@app.route('/users', methods=['GET'])
+@app.route('/users', methods=['GET'], endpoint='get_users')
+@require_api_key
 def get_users():
     users = User.query.all()
     return users
 
 
-@app.route('/users/<int:user_id>', methods=['GET'])
+@app.route('/users/<int:user_id>', methods=['GET'], endpoint='get_user')
+@require_api_key
 def get_user(user_id):
     user = User.query.get(user_id)
     if user:
