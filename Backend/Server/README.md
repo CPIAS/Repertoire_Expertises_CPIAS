@@ -2,12 +2,12 @@
 
 <p>Final integrator project in software engineering</p>
 
-# Description
+## Description
 
 <p>A server for the search engine and networking platform in the healthcare AI field</p>
 
-## How to run the server ?
+## How to setup the server ?
 
-<p>The server should be run on Ubuntu (22.04 AMD64).</p>
+<p>The server should be installed on Ubuntu (22.04 AMD64).</p>
 
-    usage: gunicorn -c gunicorn_config.py wsgi:app
+    usage: ./setup.sh
