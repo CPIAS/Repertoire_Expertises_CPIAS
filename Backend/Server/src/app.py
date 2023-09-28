@@ -2,7 +2,7 @@ import csv
 import os
 from datetime import datetime, timezone, timedelta
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 
 from decorators import require_api_key
 from models import db, User
@@ -12,7 +12,7 @@ database_path = os.path.abspath('../database')
 if not os.path.exists(database_path):
     os.makedirs(database_path)
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates')
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{database_path}/users.db"
 db.init_app(app)
 
@@ -20,12 +20,10 @@ with app.app_context():
     db.create_all()
 
 
-@app.route('/', methods=['GET'], endpoint='welcome')
-def welcome():
+@app.route('/', methods=['GET'], endpoint='index')
+def index():
     formatted_datetime = datetime.now(timezone(-timedelta(hours=4), 'EDT')).strftime("%Y-%m-%d %H:%M:%S")
-    response = (f"Welcome to the server of the search engine and networking platform in the healthcare AI field.<br>"
-                f"Current Datetime: {formatted_datetime}")
-    return response, 200, {'Content-Type': 'text/html; charset=utf-8'}
+    return render_template('index.html', formatted_datetime=formatted_datetime)
 
 
 @app.route('/upload', methods=['POST'], endpoint='upload_csv_file')
