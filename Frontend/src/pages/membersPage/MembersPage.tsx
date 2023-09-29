@@ -11,7 +11,7 @@ const API_HOST = process.env.REACT_APP_SERVER_URL;
 
 const MembersPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [members, setMembers] = useState<Member[]>([]); //TODO: Empty array by default
+    const [members, setMembers] = useState<Member[]>([]);
 
     useEffect(() => {
         const fetchMembers = async () => {

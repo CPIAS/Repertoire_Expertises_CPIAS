@@ -1,9 +1,10 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
-
 const express = require('express');
 const request = require('request');
+const dotenv = require('dotenv');
 
+dotenv.config();
 const app = express();
 
 app.use((req, res, next) => {
@@ -13,7 +14,13 @@ app.use((req, res, next) => {
 
 app.get('/users', (req, res) => {
     request(
-        { url: 'http://ec2-3-22-51-253.us-east-2.compute.amazonaws.com/users' },
+        { 
+            url: 'https://ec2-3-22-51-253.us-east-2.compute.amazonaws.com/users',
+            headers: {
+                'Authorization': process.env.REACT_APP_API_KEY, 
+            },
+            rejectUnauthorized: false,
+        },
         (error, response, body) => {
             if (error || response.statusCode !== 200) {
                 return res.status(500).json('error');

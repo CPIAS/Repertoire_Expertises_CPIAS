@@ -102,6 +102,7 @@ const SearchResultsPage: React.FC = () => {
                         width={'100%'} 
                         height={'85%'}
                         justifyContent={'center'}
+                        alignItems={'flex-start'}
                     >
                         <ResultsTabs members={members} isLoading={isLoading}/>
                     </Flex>                    

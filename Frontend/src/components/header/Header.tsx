@@ -63,7 +63,7 @@ const Header: React.FC = () => {
                 <Image src='/images/cpias-logo.png' alt='cpias' alignSelf="center" height={'10vh'}/>
             </Flex>
             <Flex
-                width={'80%'}
+                width={'auto%'}
                 height={'100%'}
                 alignItems={'center'}
                 
