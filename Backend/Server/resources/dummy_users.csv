@@ -1,0 +1,21 @@
+user_id,first_name,last_name,subscription_date,email,membership_category,membership_category_other,job_position,affiliation_organization,affiliation_organization_other,skills,years_experience_ia,years_experience_healthcare,community_involvement,suggestions
+1,John,Doe,2023-01-15,johndoe@email.com,Researcher,,Data Analyst,XYZ Corporation,,Data Analysis,4,2,Volunteer at Local Charity,Improve data visualization tools
+2,Jane,Smith,2022-12-10,janesmith@email.com,Student,,Software Engineer,Other,Analog Computer Inc,Programming,5,0,Member of Green Initiative,Enhance user interface
+3,Michael,Johnson,2023-02-20,michael@email.com,Industrialist,,Data Scientist,LMN Ltd,,Machine Learning,6,3,Youth Mentor,Expand dataset collection
+4,Emily,Williams,2023-03-05,emily@email.com,Research professional,,Product Manager,PQR Co,,Product Development,8,1,Environmental Cleanup Crew,Launch new feature
+5,Sarah,Brown,2022-11-25,sarah@email.com,Student,,UX Designer,UVW Designers,,User Experience,4,0,Animal Shelter Volunteer,Improve user testing process
+6,David,Anderson,2023-01-05,david@email.com,Researcher,,Software Developer,XYZ Corporation,,Web Development,7,2,Youth Sports Coach,Optimize code performance
+7,Laura,Clark,2022-12-15,laura@email.com,Research professional,,Researcher,Research Institute,,Data Collection,5,4,Community Garden Organizer,Conduct more surveys
+8,Matthew,Miller,2022-11-10,matthew@email.com,Industrialist,,Product Owner,ABC Inc,,Product Management,9,5,Youth Mentor,Enhance user feedback system
+9,Olivia,Davis,2023-03-10,olivia@email.com,Other,Innovation consultant,UI Designer,UVW Designers,,User Interface Design,3,1,Environmental Cleanup Crew,Revamp user interface
+10,William,White,2023-02-05,william@email.com,Researcher,,Data Analyst,LMN Ltd,,Data Analysis,5,2,Animal Shelter Volunteer,Improve data accuracy
+11,Elizabeth,Martin,2022-11-30,elizabeth@email.com,Industrialist,,Data Scientist,Other,Qbit Corporation,Machine Learning,7,3,Youth Mentor,Expand machine learning models
+12,James,Moore,2023-01-20,james@email.com,Research professional,,Software Engineer,XYZ Corporation,,Programming,6,0,Community Garden Organizer,Automate data entry
+13,Chloe,Johnson,2022-12-01,chloe@email.com,Student,,UX Designer,ABC Inc,,User Experience,4,1,Youth Sports Coach,Enhance user engagement
+14,Christopher,Lee,2023-02-10,christopher@email.com,Industrialist,,Product Manager,Research Institute,,Product Development,8,2,Volunteer at Local Charity,Launch new product line
+15,Emma,Hall,2023-03-15,emma@email.com,Researcher,,Software Developer,UVW Designers,,Web Development,7,1,Environmental Cleanup Crew,Optimize website performance
+16,Aiden,Anderson,2022-11-05,aiden@email.com,Research professional,,Researcher,LMN Ltd,,Data Collection,4,4,Community Garden Organizer,Analyze survey data
+17,Ella,Young,2022-12-20,ella@email.com,Industrialist,,Product Owner,PQR Co,,Product Management,9,5,Animal Shelter Volunteer,Improve adoption process
+18,Liam,Baker,2023-01-10,liam@email.com,Researcher,,UI Designer,XYZ Corporation,,User Interface Design,5,2,Youth Sports Coach,Enhance app usability
+19,Ava,King,2022-11-15,ava@email.com,Student,,Data Analyst,ABC Inc,,Data Analysis,6,1,Volunteer at Local Charity,Optimize data visualization
+20,Noah,Wright,2023-02-15,noah@email.com,Other,Manager,Data Scientist,Research Institute,,Machine Learning,7,3,Youth Mentor,Enhance data modeling
