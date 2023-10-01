@@ -1,7 +1,6 @@
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { Flex } from '@chakra-ui/react';
 import axios from 'axios';
-import https from 'https';
 import humps from 'humps';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -14,6 +13,7 @@ import ResultsTabs from './components/ResultsTabs';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 const API_KEY = process.env.REACT_APP_API_KEY;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
@@ -29,7 +29,6 @@ const SearchResultsPage: React.FC = () => {
                     headers: {
                         'Authorization': API_KEY,
                     },
-                    httpsAgent: new https.Agent({ rejectUnauthorized: false }),
                 });
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
