@@ -140,7 +140,7 @@ pages:
   script:
     - cd Frontend/
     - npm ci --cache .npm --prefer-offline
-    - npm run deploy -- --base-href $BASE_HREF
+    - npm run build -- --base-href $BASE_HREF
     - mkdir ../public
     - mv dist/Frontend/* ../public/
   artifacts:
