@@ -23,7 +23,6 @@ client_config: &client_config
     key: "${CI_COMMIT_REF_SLUG}-client"
     paths:
       - client/node_modules/
-  policy: pull
 
 server_config: &server_config
   <<: *common_script
