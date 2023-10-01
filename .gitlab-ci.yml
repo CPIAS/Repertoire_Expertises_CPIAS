@@ -110,7 +110,7 @@ test:client:
   script:
     - cd Frontend/
     # - npm run test
-    echo "This job builds the tests the client"
+    - echo "This job builds the tests the client"
 
 test:server:
   stage: test
