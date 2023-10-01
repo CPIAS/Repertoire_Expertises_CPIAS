@@ -13,6 +13,17 @@ stages:
 client_config: &client_config
   <<: *common_script
   image: node:latest
+  only:
+    refs:
+      - master
+      - merge_requests
+    changes:
+      - client/**/*
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-client"
+    paths:
+      - client/node_modules/
+  policy: pull
 
 server_config: &server_config
   <<: *common_script
@@ -27,8 +38,14 @@ install:client:
   <<: *client_config
   script:
     - cd Frontend/
-    - npm ci
-  
+      - npm ci --cache .npm --prefer-offline
+  cache:
+    key: '${CI_COMMIT_REF_SLUG}-client'
+    paths:
+      - client/node_modules/
+      - client/.npm/
+    policy: pull-push
+
 install:server:
   stage: install
   <<: *server_config
@@ -72,6 +89,9 @@ build:client:
   script:
     - cd Frontend/
     - npm run build
+  artifacts:
+    paths:
+      - client/dist/
 
 build:server:
   stage: build
