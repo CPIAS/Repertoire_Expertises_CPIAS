@@ -67,7 +67,7 @@ lint:server:
   stage: lint
   <<: *server_config
   script:
-    - cd Backend/Server/src/
+    - cd Backend/Server
     - python -m pip install flake8
     - flake8 src
 
@@ -111,7 +111,6 @@ test:client:
   script:
     - cd Frontend/
     - echo "This job tests the client"
-    # - npm run test
 
 test:server:
   stage: test
@@ -127,12 +126,6 @@ test:ai:
     - cd Backend/AI/
     - echo "This job tests the ai model"
 
-# deploy:client:
-#   stage: deploy
-#   <<: *client_config
-#   script:
-#     - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
-#   environment: production
 pages:
   image: node:latest
   stage: deploy
