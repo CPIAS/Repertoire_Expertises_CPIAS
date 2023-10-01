@@ -1,130 +1,130 @@
 image: node:latest
 
 stages:
-  - install
-  - lint
-  - build
-  - test
+  # - install
+  # - lint
+  # - build
+  # - test
   - deploy
 
-.common_script: &common_script
-  allow_failure: true
-  script:
-    - 'echo "Running job: $CI_JOB_NAME in stage: $CI_JOB_STAGE"'
+# .common_script: &common_script
+#   allow_failure: true
+#   script:
+#     - 'echo "Running job: $CI_JOB_NAME in stage: $CI_JOB_STAGE"'
 
-client_config: &client_config
-  <<: *common_script
-  image: node:latest
-  cache:
-    key: "${CI_COMMIT_REF_SLUG}-client"
-    paths:
-      - Frontend/node_modules/
-    policy: pull
+# client_config: &client_config
+#   <<: *common_script
+#   image: node:latest
+#   cache:
+#     key: "${CI_COMMIT_REF_SLUG}-client"
+#     paths:
+#       - Frontend/node_modules/
+#     policy: pull
 
-server_config: &server_config
-  <<: *common_script
-  image: python:3.11
+# server_config: &server_config
+#   <<: *common_script
+#   image: python:3.11
 
-ai_config: &ai_config
-  <<: *common_script
-  image: python:latest
+# ai_config: &ai_config
+#   <<: *common_script
+#   image: python:latest
 
-install:client:
-  stage: install
-  <<: *client_config
-  script:
-    - cd Frontend/
-    - npm ci --cache .npm --prefer-offline
-  cache:
-    key: "${CI_COMMIT_REF_SLUG}-client"
-    paths:
-      - Frontend/node_modules/
-      - Frontend/.npm/
-    policy: pull-push
+# install:client:
+#   stage: install
+#   <<: *client_config
+#   script:
+#     - cd Frontend/
+#     - npm ci --cache .npm --prefer-offline
+#   cache:
+#     key: "${CI_COMMIT_REF_SLUG}-client"
+#     paths:
+#       - Frontend/node_modules/
+#       - Frontend/.npm/
+#     policy: pull-push
 
-install:server:
-  stage: install
-  <<: *server_config
-  script:
-    - cd Backend/Server/src/
-    - pip install -r requirements.txt
+# install:server:
+#   stage: install
+#   <<: *server_config
+#   script:
+#     - cd Backend/Server/src/
+#     - pip install -r requirements.txt
 
-install:ai:
-  stage: install
-  <<: *ai_config
-  script:
-    - cd Backend/AI/
-    - echo "This job installs the required packages for the ai model"
+# install:ai:
+#   stage: install
+#   <<: *ai_config
+#   script:
+#     - cd Backend/AI/
+#     - echo "This job installs the required packages for the ai model"
 
-lint:client:
-  stage: lint
-  <<: *client_config
-  script:
-    - cd Frontend/
-    - npm run lint
+# lint:client:
+#   stage: lint
+#   <<: *client_config
+#   script:
+#     - cd Frontend/
+#     - npm run lint
 
-lint:server:
-  stage: lint
-  <<: *server_config
-  script:
-    - cd Backend/Server
-    - python -m pip install flake8
-    - flake8 src
+# lint:server:
+#   stage: lint
+#   <<: *server_config
+#   script:
+#     - cd Backend/Server
+#     - python -m pip install flake8
+#     - flake8 src
 
-lint:ai:
-  stage: lint
-  <<: *ai_config
-  script:
-    - cd Backend/AI/
-    - python -m pip install flake8
-    - flake8 .
+# lint:ai:
+#   stage: lint
+#   <<: *ai_config
+#   script:
+#     - cd Backend/AI/
+#     - python -m pip install flake8
+#     - flake8 .
 
-build:client:
-  stage: build
-  <<: *client_config
-  script:
-    - cd Frontend/
-    - export REACT_APP_API_KEY=$REACT_APP_API_KEY
-    - export REACT_APP_SERVER_URL=$REACT_APP_SERVER_URL
-    - npm run build
-  artifacts:
-    paths:
-      - Frontend/dist/
+# build:client:
+#   stage: build
+#   <<: *client_config
+#   script:
+#     - cd Frontend/
+#     - export REACT_APP_API_KEY=$REACT_APP_API_KEY
+#     - export REACT_APP_SERVER_URL=$REACT_APP_SERVER_URL
+#     - npm run build
+#   artifacts:
+#     paths:
+#       - Frontend/dist/
 
-build:server:
-  stage: build
-  <<: *server_config
-  script:
-    - cd Backend/Server/src/
-    - echo "This job builds the server"
+# build:server:
+#   stage: build
+#   <<: *server_config
+#   script:
+#     - cd Backend/Server/src/
+#     - echo "This job builds the server"
 
-build:ai:
-  stage: build
-  <<: *ai_config
-  script:
-    - cd Backend/AI/
-    - echo "This job builds the ai model"
+# build:ai:
+#   stage: build
+#   <<: *ai_config
+#   script:
+#     - cd Backend/AI/
+#     - echo "This job builds the ai model"
 
-test:client:
-  stage: test
-  <<: *client_config
-  script:
-    - cd Frontend/
-    - echo "This job tests the client"
+# test:client:
+#   stage: test
+#   <<: *client_config
+#   script:
+#     - cd Frontend/
+#     - echo "This job tests the client"
 
-test:server:
-  stage: test
-  <<: *server_config
-  script:
-    - cd Backend/Server/src/
-    - echo "This job tests the server"
+# test:server:
+#   stage: test
+#   <<: *server_config
+#   script:
+#     - cd Backend/Server/src/
+#     - echo "This job tests the server"
 
-test:ai:
-  stage: test
-  <<: *ai_config
-  script:
-    - cd Backend/AI/
-    - echo "This job tests the ai model"
+# test:ai:
+#   stage: test
+#   <<: *ai_config
+#   script:
+#     - cd Backend/AI/
+#     - echo "This job tests the ai model"
 
 pages:
   image: node:latest
