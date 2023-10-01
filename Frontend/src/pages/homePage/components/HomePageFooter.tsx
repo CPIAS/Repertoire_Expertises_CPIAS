@@ -35,7 +35,7 @@ const HomePageFooter: React.FC = () => {
                     alignItems={'center'}
                 >
                     <Link href="https://eiaschum.ca/" isExternal>
-                        <Image src={'/images/partners/eias.png'} alt={'eias'} width='180px'/>
+                        <Image src={'./images/partners/eias.png'} alt={'eias'} width='180px'/>
                     </Link>
                 </Flex>
 
@@ -45,7 +45,7 @@ const HomePageFooter: React.FC = () => {
                     alignItems={'center'}
                 >
                     <Link href="https://www.chumontreal.qc.ca/crchum" isExternal>
-                        <Image src={'/images/partners/crchum.png'} alt={'crchum'} width='250px'/>
+                        <Image src={'./images/partners/crchum.png'} alt={'crchum'} width='250px'/>
                     </Link>
                 </Flex>
 
@@ -55,7 +55,7 @@ const HomePageFooter: React.FC = () => {
                     alignItems={'center'}
                 >
                     <Link href="https://santenumerique.umontreal.ca" isExternal>
-                        <Image src={'/images/partners/consortium.png'} alt={'consortium-santé-numérique'} width='180px'/>
+                        <Image src={'./images/partners/consortium.png'} alt={'consortium-santé-numérique'} width='180px'/>
                     </Link>
                 </Flex>
 
@@ -65,7 +65,7 @@ const HomePageFooter: React.FC = () => {
                     alignItems={'center'}
                 >
                     <Link href="https://polymtl.ca/" isExternal>
-                        <Image src={'/images/partners/polymtl.png'} alt={'polytechnique-montreal'} width='250px'/>
+                        <Image src={'./images/partners/polymtl.png'} alt={'polytechnique-montreal'} width='250px'/>
                     </Link>
                 </Flex>
 
@@ -75,7 +75,7 @@ const HomePageFooter: React.FC = () => {
                     alignItems={'center'}
                 >
                     <Link href="https://ivado.ca/" isExternal>
-                        <Image src={'/images/partners/ivado.png'} alt={'ivado'} width='250px'/>
+                        <Image src={'./images/partners/ivado.png'} alt={'ivado'} width='250px'/>
                     </Link>
                     
                 </Flex>
