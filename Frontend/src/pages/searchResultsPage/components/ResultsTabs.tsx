@@ -8,11 +8,13 @@ import colors from '../../../utils/theme/colors';
 interface SearchResultsProps {
     members: Member[];
     isLoading: boolean;
+    noResultsText: string;
 }
 
 const ResultsTabs: React.FC<SearchResultsProps> = ({ 
     members,
-    isLoading
+    isLoading,
+    noResultsText,
 }) => {
     return (
         <Flex 
@@ -37,7 +39,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                             fontSize={'3xl'}
                             fontWeight={'bold'}
                         >
-                            {members.length > 0 ? `${members.length} résultats` : 'Aucun résultat'}
+                            {members.length > 0 ? `${members.length} résultats` : noResultsText}
                         </Flex>
                     
                         {members.length > 0 &&

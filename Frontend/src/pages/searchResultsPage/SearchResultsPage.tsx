@@ -1,6 +1,6 @@
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { Flex } from '@chakra-ui/react';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import humps from 'humps';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -12,22 +12,30 @@ import colors from '../../utils/theme/colors';
 import ResultsTabs from './components/ResultsTabs';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
+const API_KEY = process.env.REACT_APP_API_KEY;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [members, setMembers] = useState<Member[]>([]);
+    const [noResultsText, setNoResultsText] = useState<string>('Aucun résultat');
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
 
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response: AxiosResponse<Member[]> = await axios.get(`${API_HOST}/users`);
+                const response = await axios.get(`${API_HOST}/users`, {
+                    headers: {
+                        'Authorization': API_KEY,
+                    },
+                });
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error while fetching members: ', error);
+                setNoResultsText('Une erreur est survenue.');
                 setIsLoading(false);
             }
         };
@@ -104,7 +112,7 @@ const SearchResultsPage: React.FC = () => {
                         justifyContent={'center'}
                         alignItems={'flex-start'}
                     >
-                        <ResultsTabs members={members} isLoading={isLoading}/>
+                        <ResultsTabs members={members} isLoading={isLoading} noResultsText={noResultsText}/>
                     </Flex>                    
                 </Flex>
             </Flex>

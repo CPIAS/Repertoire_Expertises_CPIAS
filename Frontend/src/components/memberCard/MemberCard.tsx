@@ -45,20 +45,22 @@ const MemberCard: React.FC<{ members: Member[] }> = ({ members }) => {
                                     {`${member.membershipCategory} - ${member.affiliationOrganization}`}
                                 </Flex>
                             </Flex>
-                            <Flex
-                                width={'100%'}
-                                alignItems={'center'}
-                            >
-                                <Tag 
-                                    colorScheme='orange'
-                                    borderRadius='full'
-                                    size={'md'}
-                                    border={'1px solid'}
-                                    borderColor={colors.orange.main}
+                            {member.skills.length > 0 &&
+                                <Flex
+                                    width={'100%'}
+                                    alignItems={'center'}
                                 >
-                                    {`${member.skills}`}
-                                </Tag>
-                            </Flex>
+                                    <Tag 
+                                        colorScheme='orange'
+                                        borderRadius='full'
+                                        size={'md'}
+                                        border={'1px solid'}
+                                        borderColor={colors.orange.main}
+                                    >
+                                        {`${member.skills}`}
+                                    </Tag>
+                                </Flex>
+                            }
                         </Flex>
                         <AccordionIcon 
                             boxSize={16}

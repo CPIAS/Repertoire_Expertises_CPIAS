@@ -60,7 +60,7 @@ const Header: React.FC = () => {
                 alignItems={'center'}
                 backgroundColor={colors.blue.main}
             >
-                <Image src='/images/cpias-logo.png' alt='cpias' alignSelf="center" height={'10vh'}/>
+                <Image src='./images/cpias-logo.png' alt='cpias' alignSelf="center" height={'10vh'}/>
             </Flex>
             <Flex
                 width={'auto%'}

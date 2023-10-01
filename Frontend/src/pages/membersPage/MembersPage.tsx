@@ -5,22 +5,30 @@ import Loader from '../../components/loader/Loader';
 import MemberCard from '../../components/memberCard/MemberCard';
 import { Member } from '../../models/member';
 // import mockMembers from './mockMembers.json';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import humps from 'humps';
 const API_HOST = process.env.REACT_APP_SERVER_URL;
+const API_KEY = process.env.REACT_APP_API_KEY;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const MembersPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [noMemberText, setNoMemberText] = useState<string>('Aucun résultat');
     const [members, setMembers] = useState<Member[]>([]);
 
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response: AxiosResponse<Member[]> = await axios.get(`${API_HOST}/users`);
+                const response = await axios.get(`${API_HOST}/users`, {
+                    headers: {
+                        'Authorization': API_KEY,
+                    },
+                });
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error while fetching members: ', error);
+                setNoMemberText('Une erreur est survenue.');
                 setIsLoading(false);
             }
         };
@@ -63,7 +71,7 @@ const MembersPage: React.FC = () => {
                         paddingTop={'5vh'}
                         height={'100%'}
                         justifyContent={'center'}
-                        alignItems={'center'}
+                        alignContent={'flex-start'}
                         flexWrap={'wrap'}
                     >
                         <Flex 
@@ -77,7 +85,6 @@ const MembersPage: React.FC = () => {
                         </Flex>
                         <Flex
                             width={'100%'}
-                            alignItems={'center'}
                             justifyContent={'space-between'}
                             paddingBottom={'1.5rem'}
                         >
@@ -85,9 +92,20 @@ const MembersPage: React.FC = () => {
                         <Flex 
                             width={'100%'} 
                         >
-                            <MemberCard members={members} />
+                            {members.length > 0 ?
+                                <MemberCard members={members} />
+                                :
+                                <Flex
+                                    width={'100%'}
+                                    
+                                    fontSize={'2xl'}
+                                    fontWeight={'bold'}
+                                >
+                                    {noMemberText}
+                                </Flex>
+                            }
+                        
                         </Flex>
-                   
                     </Flex>
                 }
             </Flex>
