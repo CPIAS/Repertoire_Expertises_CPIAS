@@ -142,7 +142,7 @@ pages:
     - npm ci --cache .npm --prefer-offline
     - npm run build -- --base-href $BASE_HREF
     - mkdir ../public
-    - mv dist/Frontend/* ../public/
+    - mv build/* ../public/
   artifacts:
     paths:
       - public
