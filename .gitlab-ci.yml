@@ -5,13 +5,13 @@ cache:
         # - server/node_modules/
     policy: pull
 
-.only-client: &only-client
-    only:
-        refs:
-            - master
-            - merge_requests
-        changes:
-            - client/**/*
+.client_config: &client_config
+    # only:
+    #     refs:
+    #         - master
+    #         - merge_requests
+    #     changes:
+    #         - client/**/*
     cache:
         key: '${CI_COMMIT_REF_SLUG}-client'
         paths:
@@ -64,7 +64,7 @@ ai_config: &ai_config
 
 install:client:
     stage: install
-    <<: *only-client
+    <<: *client_config
     script:
         - cd client
         - npm ci --cache .npm --prefer-offline
@@ -100,7 +100,7 @@ install:ai:
 lint:client:
     stage: lint
     allow_failure: true
-    <<: *only-client
+    <<: *client_config
     script:
         - cd client
         - npm run lint
