@@ -28,7 +28,10 @@ install:client:
   script:
     - cd Frontend/
     - npm ci
-  
+  cache:
+    paths:
+      - Frontend/node_modules
+
 install:server:
   stage: install
   <<: *server_config
@@ -49,6 +52,10 @@ lint:client:
   script:
     - cd Frontend/
     - npm run lint
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-client-deps
+    paths:
+      - Frontend/node_modules
 
 lint:server:
   stage: lint
@@ -72,6 +79,10 @@ build:client:
   script:
     - cd Frontend/
     - npm run build
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-client-deps
+    paths:
+      - Frontend/node_modules
 
 build:server:
   stage: build
@@ -93,6 +104,10 @@ test:client:
   script:
     - cd Frontend/
     - npm run test
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-client-deps
+    paths:
+      - Frontend/node_modules
 
 test:server:
   stage: test
