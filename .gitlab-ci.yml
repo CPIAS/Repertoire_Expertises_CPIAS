@@ -84,6 +84,8 @@ build:client:
   <<: *client_config
   script:
     - cd Frontend/
+    - export REACT_APP_API_KEY=$REACT_APP_API_KEY
+    - export REACT_APP_SERVER_URL=$REACT_APP_SERVER_URL
     - npm run build
   artifacts:
     paths:
@@ -140,6 +142,8 @@ pages:
   script:
     - cd Frontend/
     - npm ci --cache .npm --prefer-offline
+    - export REACT_APP_API_KEY=$REACT_APP_API_KEY
+    - export REACT_APP_SERVER_URL=$REACT_APP_SERVER_URL
     - npm run build -- --base-href $BASE_HREF
     - mkdir ../public
     - mv build/* ../public/
