@@ -144,8 +144,6 @@ pages:
     - npm ci --cache .npm --prefer-offline
     - export REACT_APP_API_KEY=$REACT_APP_API_KEY
     - export REACT_APP_SERVER_URL=$REACT_APP_SERVER_URL
-    - 'echo "My API Key: $REACT_APP_API_KEY"'
-    - 'echo "SERVER URL: $REACT_APP_SERVER_URL"'
     - npm run build
     - mkdir ../public
     - mv build/* ../public/
