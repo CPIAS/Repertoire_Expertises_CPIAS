@@ -144,9 +144,9 @@ pages:
     paths:
       - public
 
-deploy:server:
-  stage: deploy
-  <<: *server_config
-  script:
-    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
-  environment: production
+# deploy:server:
+#   stage: deploy
+#   <<: *server_config
+#   script:
+#     - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
+#   environment: production
