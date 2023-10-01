@@ -1,24 +1,22 @@
 cache:
-    key: '${CI_COMMIT_REF_SLUG}-client'
-    paths:
-        - client/node_modules/
-        # - server/node_modules/
-    policy: pull
+  key: "${CI_COMMIT_REF_SLUG}-client"
+  paths:
+    - client/node_modules/
+    # - server/node_modules/
+  policy: pull
 
 .client_config: &client_config
-    # only:
-    #     refs:
-    #         - master
-    #         - merge_requests
-    #     changes:
-    #         - client/**/*
-    cache:
-        key: '${CI_COMMIT_REF_SLUG}-client'
-        paths:
-            - client/node_modules/
-        policy: pull
-
-
+  # only:
+  #     refs:
+  #         - master
+  #         - merge_requests
+  #     changes:
+  #         - client/**/*
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-client"
+    paths:
+      - client/node_modules/
+    policy: pull
 
 stages:
   - install
@@ -39,7 +37,6 @@ stages:
 #     key: "${CI_COMMIT_REF_SLUG}-client"
 #     paths:
 #       - client/node_modules/
-
 
 server_config: &server_config
   <<: *common_script
@@ -63,18 +60,17 @@ ai_config: &ai_config
 #     policy: pull-push
 
 install:client:
-    stage: install
-    <<: *client_config
-    script:
-        - cd client
-        - npm ci --cache .npm --prefer-offline
-    cache:
-        key: '${CI_COMMIT_REF_SLUG}-client'
-        paths:
-            - client/node_modules/
-            - client/.npm/
-        policy: pull-push
-
+  stage: install
+  <<: *client_config
+  script:
+    - cd Frontend
+    - npm ci --cache .npm --prefer-offline
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-client"
+    paths:
+      - client/node_modules/
+      - client/.npm/
+    policy: pull-push
 
 install:server:
   stage: install
@@ -98,13 +94,12 @@ install:ai:
 #     - npm run lint
 
 lint:client:
-    stage: lint
-    allow_failure: true
-    <<: *client_config
-    script:
-        - cd client
-        - npm run lint
-
+  stage: lint
+  allow_failure: true
+  <<: *client_config
+  script:
+    - cd Frontend
+    - npm run lint
 
 lint:server:
   stage: lint
