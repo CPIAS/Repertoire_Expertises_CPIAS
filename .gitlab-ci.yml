@@ -141,6 +141,7 @@ pages:
     - npm run build -- --base-href $REACT_APP_BASE_HREF
     - mkdir ../public
     - mv build/* ../public/
+    - echo '/* /index.html 200' > public/_redirects
     - cp public/index.html public/404.html
   artifacts:
     paths:
