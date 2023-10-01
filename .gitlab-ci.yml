@@ -37,8 +37,8 @@ install:client:
   cache:
     key: '${CI_COMMIT_REF_SLUG}-client'
     paths:
-      - client/node_modules/
-      - client/.npm/
+      - Frontend/node_modules/
+      - Frontend/.npm/
     policy: pull-push
 
   
