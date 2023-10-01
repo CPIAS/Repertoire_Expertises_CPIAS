@@ -146,7 +146,7 @@ pages:
     - export REACT_APP_SERVER_URL=$REACT_APP_SERVER_URL
     - 'echo "My API Key: $REACT_APP_API_KEY"'
     - 'echo "SERVER URL: $REACT_APP_SERVER_URL"'
-    - npm run build -- --base-href $BASE_HREF
+    - npm run build
     - mkdir ../public
     - mv build/* ../public/
   artifacts:
