@@ -136,7 +136,7 @@ pages:
   stage: deploy
   only:
     refs:
-      - master
+      - main
   script:
     - cd Frontend/
     - npm ci --cache .npm --prefer-offline
