@@ -13,12 +13,6 @@ stages:
 client_config: &client_config
   <<: *common_script
   image: node:latest
-  only:
-    refs:
-      - master
-      - merge_requests
-    changes:
-      - client/**/*
   cache:
     key: "${CI_COMMIT_REF_SLUG}-client"
     paths:
