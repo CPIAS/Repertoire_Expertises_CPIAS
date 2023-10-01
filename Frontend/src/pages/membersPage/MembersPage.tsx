@@ -5,9 +5,10 @@ import Loader from '../../components/loader/Loader';
 import MemberCard from '../../components/memberCard/MemberCard';
 import { Member } from '../../models/member';
 // import mockMembers from './mockMembers.json';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import humps from 'humps';
 const API_HOST = process.env.REACT_APP_SERVER_URL;
+const API_KEY = process.env.REACT_APP_API_KEY;
 
 const MembersPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -16,7 +17,11 @@ const MembersPage: React.FC = () => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response: AxiosResponse<Member[]> = await axios.get(`${API_HOST}/users`);
+                const response = await axios.get(`${API_HOST}/users`, {
+                    headers: {
+                        'Authorization': API_KEY,
+                    },
+                });
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
             } catch (error) {
