@@ -19,6 +19,7 @@ const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [members, setMembers] = useState<Member[]>([]);
+    const [noResultsText, setNoResultsText] = useState<string>('Aucun résultat');
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
 
@@ -34,6 +35,7 @@ const SearchResultsPage: React.FC = () => {
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error while fetching members: ', error);
+                setNoResultsText('Une erreur est survenue.');
                 setIsLoading(false);
             }
         };
@@ -110,7 +112,7 @@ const SearchResultsPage: React.FC = () => {
                         justifyContent={'center'}
                         alignItems={'flex-start'}
                     >
-                        <ResultsTabs members={members} isLoading={isLoading}/>
+                        <ResultsTabs members={members} isLoading={isLoading} noResultsText={noResultsText}/>
                     </Flex>                    
                 </Flex>
             </Flex>

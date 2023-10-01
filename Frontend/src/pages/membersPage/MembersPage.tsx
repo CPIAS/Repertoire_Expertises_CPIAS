@@ -13,6 +13,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const MembersPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [noMemberText, setNoMemberText] = useState<string>('Aucun résultat');
     const [members, setMembers] = useState<Member[]>([]);
 
     useEffect(() => {
@@ -27,6 +28,7 @@ const MembersPage: React.FC = () => {
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error while fetching members: ', error);
+                setNoMemberText('Une erreur est survenue.');
                 setIsLoading(false);
             }
         };
@@ -69,7 +71,7 @@ const MembersPage: React.FC = () => {
                         paddingTop={'5vh'}
                         height={'100%'}
                         justifyContent={'center'}
-                        alignItems={'center'}
+                        alignContent={'flex-start'}
                         flexWrap={'wrap'}
                     >
                         <Flex 
@@ -83,7 +85,6 @@ const MembersPage: React.FC = () => {
                         </Flex>
                         <Flex
                             width={'100%'}
-                            alignItems={'center'}
                             justifyContent={'space-between'}
                             paddingBottom={'1.5rem'}
                         >
@@ -91,9 +92,20 @@ const MembersPage: React.FC = () => {
                         <Flex 
                             width={'100%'} 
                         >
-                            <MemberCard members={members} />
+                            {members.length > 0 ?
+                                <MemberCard members={members} />
+                                :
+                                <Flex
+                                    width={'100%'}
+                                    
+                                    fontSize={'2xl'}
+                                    fontWeight={'bold'}
+                                >
+                                    {noMemberText}
+                                </Flex>
+                            }
+                        
                         </Flex>
-                   
                     </Flex>
                 }
             </Flex>
