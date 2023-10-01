@@ -1,6 +1,7 @@
 {
   "name": "cpias",
   "version": "0.1.0",
+  "homepage": "/log89xx/23-3/equipe-15/project_4/",
   "private": true,
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
@@ -53,6 +54,5 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/humps": "^2.0.4",
     "eslint-plugin-react": "^7.33.2"
-  },
-  "homepage": "/log89xx/23-3/equipe-15/project_4/"
+  }
 }

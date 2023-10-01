@@ -8,7 +8,7 @@ import SearchResultsPage from './pages/searchResultsPage/SearchResultsPage';
 
 const Router: React.FC = () => {
     return (
-        <HashRouter basename={process.env.REACT_APP_BASE_HREF}>
+        <HashRouter>
             <Routes>
                 <Route path="/" element={<Navigate to="/accueil" replace />} />              
                 <Route path="/accueil" element={<HomePage />} />
