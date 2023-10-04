@@ -8,12 +8,14 @@ from flask import Flask, jsonify, request, render_template
 from ai import LLM
 from decorators import require_api_key
 from models import db, User
+from flask_cors import CORS
 
 ###################################################################################################################
 #                                             GLOBAL VARIABLES                                                    #
 ###################################################################################################################
 
 app = Flask(__name__, template_folder='../templates')
+CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified for a production environment.
 database_path = os.path.abspath('../database')
 llm = LLM(Path("../raw_data/expertise_extended_english_renamed.csv"))
 llm_is_ready = False
@@ -94,7 +96,8 @@ def upload_csv_file():
                 for row in csv_file_reader:
                     user = User(
                         user_id=int(row[0]) if str.isnumeric(row[0]) else None,
-                        subscription_date=datetime.strptime(row[1], "%m-%d-%Y %H:%M:%S") if is_valid_date_format(row[1], "%m-%d-%Y %H:%M:%S") else None,
+                        subscription_date=datetime.strptime(row[1], "%m-%d-%Y %H:%M:%S") if is_valid_date_format(row[1],
+                                                                                                                 "%m-%d-%Y %H:%M:%S") else None,
                         first_name=row[2],
                         last_name=row[3],
                         email=row[4],
