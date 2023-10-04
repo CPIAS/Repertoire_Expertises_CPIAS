@@ -70,6 +70,24 @@ install_dependencies() {
         fi
         echo "openssl installed."
     fi
+
+    if ! command -v lshw &>/dev/null; then
+        echo "Installing GPU driver..."
+        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install lshw -y &>/dev/null; then
+            echo "Failed to install GPU driver, please try again."
+            exit 1
+        fi
+        echo "GPU driver installed."
+    fi
+
+    if ! command -v curl &>/dev/null; then
+        echo "Installing curl..."
+        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install curl -y &>/dev/null; then
+            echo "Failed to install curl, please try again."
+            exit 1
+        fi
+        echo "curl installed."
+    fi
 }
 
 generate_self_signed_key_cert_pair() {
@@ -104,15 +122,23 @@ echo "Installing dependencies..."
 install_dependencies
 echo "Done."
 
+echo "Installing Ollama..."
+sudo curl https://ollama.ai/install.sh | sh
+echo "Done."
+
+echo "Pulling llama2 LLM..."
+ollama pull llama2:7b-chat-q4_0
+echo "Done."
+
 echo "Setting up the server..."
-python3.10 -m venv ../venv
-source ../venv/bin/activate
+python3.10 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt &>/dev/null
 deactivate
 echo "Done."
 
 echo "Setting up a systemd service for the server..."
-sudo cp server.service /etc/systemd/system
+sudo cp src/server.service /etc/systemd/system
 sudo systemctl start server
 sudo systemctl enable server
 echo "Done."
@@ -126,12 +152,12 @@ sudo openssl dhparam -out /etc/nginx/dhparam.pem 4096 &>/dev/null
 echo "Done."
 
 echo "Setting up TLS/SSL..."
-sudo cp ../tls_ssl/self-signed.conf /etc/nginx/snippets
-sudo cp ../tls_ssl/ssl-params.conf /etc/nginx/snippets
+sudo cp tls_ssl/self-signed.conf /etc/nginx/snippets
+sudo cp tls_ssl/ssl-params.conf /etc/nginx/snippets
 echo "Done."
 
 echo "Setting up nginx..."
-sudo cp server.conf /etc/nginx/sites-available
+sudo cp src/server.conf /etc/nginx/sites-available
 sudo ln -s /etc/nginx/sites-available/server.conf /etc/nginx/sites-enabled &>/dev/null
 sudo rm /etc/nginx/sites-enabled/default
 sudo systemctl restart nginx

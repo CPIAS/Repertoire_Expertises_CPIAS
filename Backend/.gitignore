@@ -340,4 +340,10 @@ $RECYCLE.BIN/
 # Server database file
 database/
 
+# AI vector store
+vector_store/
+
+# Saved resources
+resources/
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,visualstudiocode,python,flask
