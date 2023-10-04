@@ -124,6 +124,8 @@ echo "Done."
 
 echo "Installing Ollama..."
 sudo curl https://ollama.ai/install.sh | sh
+ollama serve &
+sleep 5
 echo "Done."
 
 echo "Pulling llama2 LLM..."
