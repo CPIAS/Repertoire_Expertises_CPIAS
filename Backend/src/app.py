@@ -142,7 +142,7 @@ def get_user(user_id):
         return jsonify({"message": "User not found"}), 404
 
 
-@app.route('/search', methods=['POST'])
+@app.route('/search', methods=['POST'], endpoint='search')
 @require_api_key
 def search():
     try:
