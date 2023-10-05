@@ -17,7 +17,7 @@ from flask_cors import CORS
 app = Flask(__name__, template_folder='../templates')
 CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified for a production environment.
 database_path = os.path.abspath('../database')
-llm = LLM(Path("../raw_data/expertise_extended_english_renamed.csv"))
+llm = LLM(Path("../resources/expertise_extended_english_renamed.csv"))
 llm_is_ready = False
 
 

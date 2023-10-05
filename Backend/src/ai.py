@@ -25,7 +25,7 @@ class LLM:
         # define embedding
         embeddings = OllamaEmbeddings(base_url="http://localhost:11434", model="llama2:7b-chat-q4_0", temperature=0.1)
 
-        # create vector database from raw_data
+        # create vector database from resources
         persist_directory = "../vector_store"
 
         if os.path.exists(persist_directory):
