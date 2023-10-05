@@ -337,7 +337,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# Server database file
-database/
-
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,visualstudiocode,python,flask

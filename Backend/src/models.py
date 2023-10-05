@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime
-
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -21,8 +20,8 @@ class User(db.Model):
     affiliation_organization = db.Column(db.Text, nullable=True)
     affiliation_organization_other = db.Column(db.Text, nullable=True)
     skills = db.Column(db.Text, nullable=True)
-    years_experience_ia = db.Column(db.Integer, nullable=True)
-    years_experience_healthcare = db.Column(db.Integer, nullable=True)
+    years_experience_ia = db.Column(db.Float, nullable=True)
+    years_experience_healthcare = db.Column(db.Float, nullable=True)
     community_involvement = db.Column(db.Text, nullable=True)
     suggestions = db.Column(db.Text, nullable=True)
 
@@ -37,7 +36,7 @@ class User(db.Model):
     affiliation_organization: str
     affiliation_organization_other: str
     skills: str
-    years_experience_ia: int
-    years_experience_healthcare: int
+    years_experience_ia: float
+    years_experience_healthcare: float
     community_involvement: str
     suggestions: str
