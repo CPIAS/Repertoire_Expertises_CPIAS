@@ -23,6 +23,7 @@
     "react-icons": "^3.11.0",
     "react-router-dom": "^6.16.0",
     "react-scripts": "5.0.1",
+    "saturn-cli": "^0.2.2",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },

@@ -15,7 +15,7 @@ const MembersPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [noMemberText, setNoMemberText] = useState<string>('Aucun résultat');
     const [members, setMembers] = useState<Member[]>([]);
-
+    console.log(process.env.REACT_APP_SERVER_URL);
     useEffect(() => {
         const fetchMembers = async () => {
             try {

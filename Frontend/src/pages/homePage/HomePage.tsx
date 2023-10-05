@@ -10,7 +10,7 @@ import HomePageTitle from './components/HomePageTitle';
 
 const HomePage: React.FC = () => {
     const [isUserGuideModalOpen, setIsUserGuideModalOpen] = useState(false);
-
+    console.log(process.env.REACT_APP_SERVER_URL);
     const openUserGuideModal = () => {
         setIsUserGuideModalOpen(true);
     };
