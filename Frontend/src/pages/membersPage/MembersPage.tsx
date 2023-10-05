@@ -8,7 +8,7 @@ import { Member } from '../../models/member';
 import axios from 'axios';
 import humps from 'humps';
 const API_HOST = process.env.REACT_APP_SERVER_URL;
-const API_KEY = process.env.REACT_APP_API_KEY;
+// const API_KEY = process.env.REACT_APP_API_KEY;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const MembersPage: React.FC = () => {
@@ -19,11 +19,7 @@ const MembersPage: React.FC = () => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await axios.get(`${API_HOST}/users`, {
-                    headers: {
-                        'Authorization': API_KEY,
-                    },
-                });
+                const response = await axios.get(`${API_HOST}/users`);
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
             } catch (error) {
