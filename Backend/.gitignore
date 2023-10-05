@@ -337,12 +337,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# Server database file
-database/
-
-# AI vector store
-vector_store/
-
 # Saved resources
 resources/
 
