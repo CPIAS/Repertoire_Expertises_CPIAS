@@ -26,11 +26,7 @@ const SearchResultsPage: React.FC = () => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await axios.get(`${API_HOST}/users`, {
-                    headers: {
-                        'Authorization': API_KEY,
-                    },
-                });
+                const response = await axios.post(`${API_HOST}/search`, query);
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
             } catch (error) {
