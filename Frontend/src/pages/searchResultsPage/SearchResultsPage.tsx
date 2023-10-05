@@ -12,7 +12,7 @@ import colors from '../../utils/theme/colors';
 import ResultsTabs from './components/ResultsTabs';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
-const API_KEY = process.env.REACT_APP_API_KEY;
+// const API_KEY = process.env.REACT_APP_API_KEY;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const SearchResultsPage: React.FC = () => {
