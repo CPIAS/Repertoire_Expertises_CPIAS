@@ -1,34 +1,21 @@
 import { Flex } from '@chakra-ui/react';
 import React from 'react';
 import Graph from 'react-graph-vis';
-
-type Node = {
-    id: number;
-    label: string;
-    color?: string;
-};
-
-type Edge = {
-    from: number;
-    to: number;
-};
-
-type NetworkGraph = {
-    nodes: Node[];
-    edges: Edge[]
-}
+import { useSearchParams } from 'react-router-dom';
 
 const NetworkGraph: React.FC = () => {
+    const [searchParams] = useSearchParams();
+    const query = searchParams.get('q') as string;
     const mockGraphData = {
         nodes: [
-            { id: 0, label: 'Artificial Intelligence', color: '#FFCCCB', shapes: 'square', size: 50 },
-            { id: 1, label: 'Brain Imaging', color: '#FFCCCB', shapes: 'square', size: 50 },
-            { id: 2, label: 'Data Analysis', color: '#FFCCCB', shapes: 'square', size: 50 },
-            { id: 3, label: 'John Doe', shapes: 'square', size: 50 },
-            { id: 4, label: 'Jane Smith', shapes: 'square', size: 50 },
-            { id: 5, label: 'Marcus Brady', shapes: 'square', size: 50 },
-            { id: 6, label: 'Thomas Johnson', shapes: 'square', size: 50 },
-            { id: 7, label: 'Jonathan William', shapes: 'square', size: 50 }
+            { id: 0, label: query, color: '#FFCCCB' },
+            { id: 1, label: 'Brain Imaging', color: '#FFCCCB' },
+            { id: 2, label: 'Data Analysis', color: '#FFCCCB' },
+            { id: 3, label: 'John Doe' },
+            { id: 4, label: 'Jane Smith' },
+            { id: 5, label: 'Marcus Brady' },
+            { id: 6, label: 'Thomas Johnson' },
+            { id: 7, label: 'Jonathan William' }
         ],
         edges: [
             { from: 0, to: 3 },
@@ -55,9 +42,11 @@ const NetworkGraph: React.FC = () => {
             },
             color: 'black',
         },
-        nodes: {
-            shapes: 'square',
-            size: 50
+        physics: {
+            stabilization: {
+                enabled: true,
+                iterations: 5000
+            }
         },
         autoResize: true,
         height: '100%',
@@ -74,7 +63,7 @@ const NetworkGraph: React.FC = () => {
     return (
         <Flex
             width={'100%'}
-            height={'50vh'}
+            height={'65vh'}
             justifyContent={'center'}
             alignContent={'center'}
             alignItems={'center'}
@@ -89,4 +78,4 @@ const NetworkGraph: React.FC = () => {
     );
 };
 
-export default NetworkGraph;
+export default React.memo(NetworkGraph);
