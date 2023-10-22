@@ -1,10 +1,27 @@
 import { EmailIcon } from '@chakra-ui/icons';
-import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Link, Tag } from '@chakra-ui/react';
-import React from 'react';
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Button, Flex, Link, Tag } from '@chakra-ui/react';
+import React, { useState } from 'react';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
+import ProfileCorrectionModal from '../modals/ProfileCorrectionModal';
 
 const MemberCard: React.FC<{ members: Member[] }> = ({ members }) => {
+    const [profileCorrectionModalStates, setProfileCorrectionModalStates] = useState(
+        members.map(() => false)
+    );
+
+    const openProfileCorrectionModal = (member: Member, index: number) => {
+        const updatedStates = [...profileCorrectionModalStates];
+        updatedStates[index] = true;
+        setProfileCorrectionModalStates(updatedStates);
+    };
+
+    const closeProfileCorrectionModal = (index: number) => {
+        const updatedStates = [...profileCorrectionModalStates];
+        updatedStates[index] = false;
+        setProfileCorrectionModalStates(updatedStates);
+    };
+
     return (
         <Accordion 
             width={'100%'} 
@@ -13,7 +30,7 @@ const MemberCard: React.FC<{ members: Member[] }> = ({ members }) => {
             borderRadius={'0.5rem'}
             
         >
-            {members.map((member) => (
+            {members.map((member, index) => (
                 <AccordionItem
                     key={member.userId}
                     width={'100%'}
@@ -85,6 +102,16 @@ const MemberCard: React.FC<{ members: Member[] }> = ({ members }) => {
                                 {member.email}
                             </Link>
                         </Flex>
+                        <Button
+                            onClick={()=>openProfileCorrectionModal(member, index)}
+                        >
+                            {'Send email'}
+                            <ProfileCorrectionModal 
+                                member={member}
+                                isOpen={profileCorrectionModalStates[index]}
+                                onClose={() => closeProfileCorrectionModal(index)} 
+                            />
+                        </Button>
                     </AccordionPanel>
                 </AccordionItem>
             ))}
