@@ -41,7 +41,10 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                             fontSize={'3xl'}
                             fontWeight={'bold'}
                         >
-                            {members.length > 0 ? `${members.length} résultats` : noResultsText}
+                            {members.length > 0 ? 
+                                members.length > 1 ? `${members.length} experts identifiés` : `${members.length} expert identifié`
+                                : noResultsText
+                            }
                         </Flex>
                     
                         {members.length > 0 &&
@@ -49,6 +52,8 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                 width={'100%'}
                                 borderRadius={'0.5rem'}
                                 border={`1px solid ${colors.grey.dark}`}
+                                justifyContent={'center'}
+                                flexWrap={'wrap'}
                             >
                                 <Tabs 
                                     size='lg' 
@@ -57,6 +62,9 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                     backgroundColor={'white'}
                                     borderRadius={'0.5rem'}
                                     variant='enclosed'
+                                    justifyContent={'center'}
+                                    alignContent={'center'}
+                                    alignItems={'center'}
                                 >
                                     <TabList 
                                         paddingX={'1rem'}
@@ -71,7 +79,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                 borderBottom: `3.5px solid ${colors.orange.main}`,
                                             }}
                                         >
-                                            {'Expertises'}
+                                            {'Cartographie'}
                                         </Tab>
                                         <Tab
                                             paddingX={'5rem'}
@@ -82,7 +90,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                 borderBottom: `3.5px solid ${colors.orange.main}`,
                                             }}
                                         >
-                                            {'Collaborations'}
+                                            {'Liste des experts'}
                                         </Tab>
                                     </TabList>
 
@@ -92,10 +100,11 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                         height={'auto' || '100%'}
                                         paddingX={'1rem'}
                                         backgroundColor={'white'}
+                                        justifyContent={'center'}
+                                        alignContent={'center'}
+                                        alignItems={'center'}
                                     >
-                                        <TabPanel width={'100%'}>
-                                            <MemberCard members={members} />
-                                        </TabPanel>
+
                                         <TabPanel
                                             width={'100%'} 
                                             height={'auto' || '100%'}   
@@ -104,6 +113,9 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                             alignItems={'center'}
                                         >
                                             <NetworkGraph />
+                                        </TabPanel>
+                                        <TabPanel width={'100%'}>
+                                            <MemberCard members={members} />
                                         </TabPanel>
                                     </TabPanels>
                                 </Tabs>
