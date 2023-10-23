@@ -1,5 +1,5 @@
 import { Flex } from '@chakra-ui/react';
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import Graph from 'react-graph-vis';
 import { useSearchParams } from 'react-router-dom';
 
@@ -54,9 +54,41 @@ const NetworkGraph: React.FC = () => {
         clickToUse: true
     };
 
+    const graphRef = useRef<HTMLDivElement | null>(null);
+    const [zoomLevel, setZoomLevel] = useState(1);
+
     const events = {
         select: function (event: any) {
             const { nodes, edges } = event;
+        }
+    };
+
+    const handleZoomIn = () => {
+        if (graphRef.current) {
+            const newZoom = zoomLevel * 1.1; // Increase the zoom level
+            setZoomLevel(newZoom);
+            updateGraphZoom(newZoom);
+        }
+    };
+
+    const handleZoomOut = () => {
+        if (graphRef.current) {
+            const newZoom = zoomLevel * 0.9; // Decrease the zoom level
+            setZoomLevel(newZoom);
+            updateGraphZoom(newZoom);
+        }
+    };
+
+    const handleResetZoom = () => {
+        if (graphRef.current) {
+            setZoomLevel(1); // Reset zoom to 1
+            updateGraphZoom(1);
+        }
+    };
+
+    const updateGraphZoom = (zoom: number) => {
+        if (graphRef.current) {
+            graphRef.current.style.transform = `scale(${zoom})`;
         }
     };
 
@@ -68,12 +100,26 @@ const NetworkGraph: React.FC = () => {
             alignContent={'center'}
             alignItems={'center'}
             border={'1px solid grey'}
+            position="relative"
         >
-            <Graph
-                graph={mockGraphData}
-                options={options}
-                events={events}
-            />
+            <NetworkGraph />
+
+            <Flex
+                position="absolute"
+                top={4}
+                right={4}
+                flexDirection="column"
+            >
+                <Button onClick={handleZoomIn} fontSize="2xl">
+                    +
+                </Button>
+                <Button onClick={handleZoomOut} fontSize="2xl">
+                    -
+                </Button>
+                <Button onClick={handleResetZoom} fontSize="2xl">
+                    ⟲
+                </Button>
+            </Flex>
         </Flex>
     );
 };
