@@ -1,4 +1,4 @@
-import { Flex } from '@chakra-ui/react';
+import { Flex, Button } from '@chakra-ui/react';
 import React, { useState, useRef } from 'react';
 import Graph from 'react-graph-vis';
 import { useSearchParams } from 'react-router-dom';
@@ -6,7 +6,8 @@ import { useSearchParams } from 'react-router-dom';
 const NetworkGraph: React.FC = () => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
-    const mockGraphData = {
+
+    const graph = {
         nodes: [
             { id: 0, label: query, color: '#FFCCCB' },
             { id: 1, label: 'Brain Imaging', color: '#FFCCCB' },
@@ -102,7 +103,13 @@ const NetworkGraph: React.FC = () => {
             border={'1px solid grey'}
             position="relative"
         >
-            <NetworkGraph />
+            <div ref={graphRef}>
+                <Graph
+                    graph={graph}
+                    options={options}
+                    events={events}
+                />
+            </div>
 
             <Flex
                 position="absolute"
