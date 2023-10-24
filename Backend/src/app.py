@@ -196,9 +196,9 @@ def request_profile_correction():
             "{}"
         '''.format(f"{requester_first_name} {requester_last_name}", requester_email, f"{member_first_name} {member_last_name}", member_id, message)
 
-        sender = "log8970.cpias.sa@gmail.com"
-        recipients = "log8970.adm@gmail.com"
-        password = "mnhd aoek prxc rhab"
+        sender = os.environ.get('EMAIL_SENDER')
+        recipients = os.environ.get('EMAIL_RECIPIENT')
+        password = os.environ.get('EMAIL_SENDER_PASSWORD')
 
         msg = MIMEMultipart()
         msg['Subject'] = subject
