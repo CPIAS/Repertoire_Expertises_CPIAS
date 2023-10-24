@@ -1,5 +1,5 @@
 import { EmailIcon } from '@chakra-ui/icons';
-import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Button, Flex, Link, Tag } from '@chakra-ui/react';
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Link, Tag } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
@@ -102,16 +102,26 @@ const MemberCard: React.FC<{ members: Member[] }> = ({ members }) => {
                                 {member.email}
                             </Link>
                         </Flex>
-                        <Button
-                            onClick={()=>openProfileCorrectionModal(member, index)}
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-end'}
                         >
-                            {'Send email'}
-                            <ProfileCorrectionModal 
-                                member={member}
-                                isOpen={profileCorrectionModalStates[index]}
-                                onClose={() => closeProfileCorrectionModal(index)} 
-                            />
-                        </Button>
+                            <Link 
+                                fontWeight={'medium'}
+                                color={colors.grey.dark}
+                                onClick={()=>openProfileCorrectionModal(member, index)}
+                            >
+                                {'Corriger les informations'}
+                                {profileCorrectionModalStates[index] && (
+                                    <ProfileCorrectionModal 
+                                        member={member}
+                                        isOpen={profileCorrectionModalStates[index]}
+                                        onClose={() => closeProfileCorrectionModal(index)} 
+                                    />
+                                )}
+                            </Link>
+                        </Flex>
+                        
                     </AccordionPanel>
                 </AccordionItem>
             ))}

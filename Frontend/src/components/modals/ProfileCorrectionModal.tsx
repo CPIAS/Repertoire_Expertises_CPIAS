@@ -34,13 +34,21 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
     onClose 
 }) => {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const [firstName, setFirstName] = useState<string>(member.firstName);
-    const [lastName, setLastName] = useState<string>(member.lastName);
-    const [email, setEmail] = useState<string>(member.email);
+    const [firstName, setFirstName] = useState<string>('');
+    const [lastName, setLastName] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
     const [message, setMessage] = useState<string>('');
+    const [isFirstNameFieldDirty, setIsFirstNameFieldDirty] = useState<boolean>(false);
+    const [isLastNameFieldDirty, setIsLastNameFieldDirty] = useState<boolean>(false);
+    const [isEmailFieldDirty, setIsEmailFieldDirty] = useState<boolean>(false);
+    const [isMessageFieldDirty, setIsMessageFieldDirty] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isWaitingForResponse, setIsWaitingForResponse] = useState<boolean>(false);
     const toast = useToast();
+
+    const checkFormIsValid = () => {
+        return (message.trim().length > 0 && firstName.trim().length > 0 && lastName.trim().length > 0 && email.trim().length > 0);
+    };
 
     const handleButtonClick = () => {
         if (fileInputRef.current) {
@@ -51,7 +59,19 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files !== null ? event.target.files[0] : null;
         if (selectedFile) {
-            setSelectedFile(selectedFile);
+            if (selectedFile.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|tiff)$/.test(selectedFile.name.toLowerCase())) {
+                setSelectedFile(selectedFile);
+                
+            } else {
+                setSelectedFile(null);
+                toast({
+                    title: 'Fichier invalide.',
+                    description: 'Veuillez ajouter une image.',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
         }
     };
 
@@ -59,9 +79,11 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
         setIsWaitingForResponse(true);
         const formData = new FormData();
         formData.append('id', String(member.userId));
-        formData.append('firstName', firstName);
-        formData.append('lastName', lastName);
-        formData.append('email', email);
+        formData.append('memberLastName', String(member.lastName));
+        formData.append('memberFirstName', String(member.firstName));
+        formData.append('requesterFirstName', firstName);
+        formData.append('requesterLastName', lastName);
+        formData.append('requesterEmail', email);
         formData.append('message', message);
         if (selectedFile) 
             formData.append('profilePicture', selectedFile);
@@ -78,7 +100,7 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                     title: 'Demande de modification transmise à l\'administrateur.',
                     description: 'Nous vous tiendrons informé de l\'état de votre demande.',
                     status: 'success',
-                    duration: 3000,
+                    duration: 5000,
                     isClosable: true,
                 });
                 onClose();
@@ -88,7 +110,7 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                     title: 'Une erreur est survenue.',
                     description: 'Veuillez réessayer plus tard.',
                     status: 'error',
-                    duration: 3000,
+                    duration: 5000,
                     isClosable: true,
                 });
                 setIsWaitingForResponse(false);
@@ -116,7 +138,7 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                     fontSize={'xl'}
                     borderBottom={`1px solid ${colors.grey.dark}`}
                 >
-                    {`Demande de modification des informations de ${member.firstName} ${member.lastName}.`}
+                    {`Demande de modification des informations de ${member.firstName} ${member.lastName}`}
                 </ModalHeader>
                 <ModalCloseButton margin={'0.5rem'}/>
                 <ModalBody
@@ -146,70 +168,175 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                                 justifyContent={'space-between'}
                                 alignContent={'center'}
                                 alignItems={'center'}
+                                flexWrap={'wrap'}
+                                gap={'1rem'}
                             >
                                 <Flex
-                                    width={'48.5%'}
-                                    justifyContent={'space-between'}
-                                    alignContent={'center'}
-                                    alignItems={'center'}
-                                    gap={'0.5rem'}
+                                    width={'100%'}
+                                    flexWrap={'wrap'}
                                 >
-                                    <Text
-                                        width={'15%'}
+                                    <Flex
+                                        width={'100%'}
+                                        alignItems={'center'}
                                     >
-                                        {'Nom : '}
-                                    </Text>
-                                    <Input
-                                        value={member.lastName}
-                                        onChange={(e: ChangeEvent<HTMLInputElement>)=>{
-                                            setLastName(e.target.value);
-                                        }}
-                                    />
+                                        <Flex
+                                            width={'10%'}
+                                        >
+                                            <Text>
+                                                {'Prénom : '}
+                                            </Text>
+                                        </Flex>
+                                        <Flex
+                                            width={'90%'}
+                                        >
+                                            <Input
+                                                border={isFirstNameFieldDirty && firstName.trim().length === 0 ? `1px solid ${colors.red.main}` : `1px solid ${colors.grey.light}`}
+                                                onChange={(e: ChangeEvent<HTMLInputElement>)=>{
+                                                    setFirstName(e.target.value);
+                                                    setIsFirstNameFieldDirty(true);
+                                                }}
+                                            />
+                                        </Flex>
+                                    </Flex>
+                                        
+                                    <Flex
+                                        width={'100%'}
+                                        flexWrap={'wrap'}
+                                    >
+                                        <Flex
+                                            width={'10%'}
+                                        >
+                                        </Flex>
+                                   
+                                        <Flex
+                                            width={'90%'}
+                                            justifyContent={'center'}
+                                            alignItems={'center'}
+                                            gap={'0.5rem'}
+                                            paddingTop={'0.25rem'}
+                                            style={{ visibility: isFirstNameFieldDirty && firstName.trim().length === 0 ? 'visible' : 'hidden' }}
+                                        >
+                                            <CloseIcon boxSize={3} color={colors.red.main}/>
+                                            <Text
+                                                fontSize={'xs'}
+                                                color={colors.red.main}
+                                            >
+                                                {'Ce champ est requis.'}
+                                            </Text>
+                                        </Flex>
+                                    </Flex>
                                 </Flex>
                                 <Flex
-                                    width={'48.5%'}
-                                    justifyContent={'space-between'}
-                                    alignContent={'center'}
-                                    alignItems={'center'}
-                                    gap={'0.5rem'}
+                                    width={'100%'}
+                                    flexWrap={'wrap'}
                                 >
-                                    <Text
-                                        width={'25%'}
+                                    <Flex
+                                        width={'100%'}
+                                        alignItems={'center'}
                                     >
-                                        {'Prénom : '}
-                                    </Text>
-                                    <Input
-                                        value={member.firstName}
-                                        onChange={(e: ChangeEvent<HTMLInputElement>)=>{
-                                            setFirstName(e.target.value);
-                                        }}
-                                    />
+                                        <Flex
+                                            width={'10%'}
+                                        >
+                                            <Text>
+                                                {'Nom : '}
+                                            </Text>
+                                        </Flex>
+                                        <Flex
+                                            width={'90%'}
+                                        >
+                                            <Input
+                                                border={isLastNameFieldDirty && lastName.trim().length === 0 ? `1px solid ${colors.red.main}` : `1px solid ${colors.grey.light}`}
+                                                onChange={(e: ChangeEvent<HTMLInputElement>)=>{
+                                                    setLastName(e.target.value);
+                                                    setIsLastNameFieldDirty(true);
+                                                }}
+                                            />
+                                        </Flex>
+                                    </Flex>
+                                        
+                                    <Flex
+                                        width={'100%'}
+                                        flexWrap={'wrap'}
+                                    >
+                                        <Flex
+                                            width={'10%'}
+                                        >
+                                        </Flex>
+                                   
+                                        <Flex
+                                            width={'90%'}
+                                            justifyContent={'center'}
+                                            alignItems={'center'}
+                                            gap={'0.5rem'}
+                                            paddingTop={'0.25rem'}
+                                            style={{ visibility: isLastNameFieldDirty && lastName.trim().length === 0 ? 'visible' : 'hidden' }}
+                                        >
+                                            <CloseIcon boxSize={3} color={colors.red.main}/>
+                                            <Text
+                                                fontSize={'xs'}
+                                                color={colors.red.main}
+                                            >
+                                                {'Ce champ est requis.'}
+                                            </Text>
+                                        </Flex>
+                                    </Flex>
                                 </Flex>
-                                
-                            </Flex>
-                            <Flex
-                                width={'100%'}
-                                justifyContent={'flex-start'}
-                                alignContent={'center'}
-                                alignItems={'center'}
-                                gap={'0.5rem'}
-                                paddingY={'1rem'}
-                            >
- 
-                                <Text
-                                    width={'10%'}
+                                <Flex
+                                    width={'100%'}
+                                    flexWrap={'wrap'}
                                 >
-                                    {'Courriel : '}
-                                </Text>
-                                <Input
-                                    onChange={(e: ChangeEvent<HTMLInputElement>)=>{
-                                        setEmail(e.target.value);
-                                    }}
-                                    value={member.email}
-                                />
-  
+                                    <Flex
+                                        width={'100%'}
+                                        alignItems={'center'}
+                                    >
+                                        <Flex
+                                            width={'10%'}
+                                        >
+                                            <Text>
+                                                {'Courriel : '}
+                                            </Text>
+                                        </Flex>
+                                        <Flex
+                                            width={'90%'}
+                                        >
+                                            <Input
+                                                border={isEmailFieldDirty && email.trim().length === 0 ? `1px solid ${colors.red.main}` : `1px solid ${colors.grey.light}`}
+                                                onChange={(e: ChangeEvent<HTMLInputElement>)=>{
+                                                    setEmail(e.target.value);
+                                                    setIsEmailFieldDirty(true);
+                                                }}
+                                            />
+                                        </Flex>
+                                    </Flex>
+                                        
+                                    <Flex
+                                        width={'100%'}
+                                        flexWrap={'wrap'}
+                                    >
+                                        <Flex
+                                            width={'10%'}
+                                        >
+                                        </Flex>
+                                   
+                                        <Flex
+                                            width={'90%'}
+                                            justifyContent={'center'}
+                                            alignItems={'center'}
+                                            gap={'0.5rem'}
+                                            paddingTop={'0.25rem'}
+                                            style={{ visibility: isEmailFieldDirty && email.trim().length === 0 ? 'visible' : 'hidden' }}
+                                        >
+                                            <CloseIcon boxSize={3} color={colors.red.main}/>
+                                            <Text
+                                                fontSize={'xs'}
+                                                color={colors.red.main}
+                                            >
+                                                {'Ce champ est requis.'}
+                                            </Text>
+                                        </Flex>
+                                    </Flex>
+                                </Flex>
                             </Flex>
-                        
                             <Flex
                                 width={'100%'}
                                 alignContent={'center'}
@@ -217,25 +344,48 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                                 paddingY={'1rem'}
                             >
                                 <Text textAlign={'justify'}>
-                                    {'Veuillez indiquer les informations que vous souhaitez faire modifier. Votre demande sera ensuite transmise à un administrateur.'}
+                                    {'Veuillez indiquer les informations que vous souhaitez faire modifier. Votre demande sera ensuite transmise à un administrateur de la plateforme.'}
                                 </Text>
                             
                             </Flex>
                             <Flex
                                 width={'100%'}
-                                height={'40%'}
-                                justifyContent={'center'}
-                                alignItems={'center'}
+                                flexWrap={'wrap'}
                             >
-                                <Textarea 
+                                <Flex
                                     width={'100%'}
-                                    height={'100%'}
-                                    resize={'none'}
-                                    placeholder={'Votre message...'}
-                                    onChange={(e: ChangeEvent<HTMLTextAreaElement>)=>{
-                                        setMessage(e.target.value);
-                                    }}
-                                />
+                                    alignItems={'center'}
+                                >
+                                    <Textarea 
+                                        width={'100%'}
+                                        height={'100%'}
+                                        resize={'none'}
+                                        placeholder={'Votre message...'}
+                                        border={isMessageFieldDirty && message.trim().length === 0 ? `1px solid ${colors.red.main}` : `1px solid ${colors.grey.light}`}
+                                        onChange={(e: ChangeEvent<HTMLTextAreaElement>)=>{
+                                            setMessage(e.target.value);
+                                            setIsMessageFieldDirty(true);
+                                        }}
+                                    />
+                                </Flex>
+                                        
+                                <Flex
+                                    width={'100%'}
+                                    flexWrap={'wrap'}
+                                    justifyContent={'center'}
+                                    alignItems={'center'}
+                                    gap={'0.5rem'}
+                                    paddingTop={'0.25rem'}
+                                    style={{ visibility: isMessageFieldDirty && message.trim().length === 0 ? 'visible' : 'hidden' }}
+                                >
+                                    <CloseIcon boxSize={3} color={colors.red.main}/>
+                                    <Text
+                                        fontSize={'xs'}
+                                        color={colors.red.main}
+                                    >
+                                        {'Ce champ est requis.'}
+                                    </Text>
+                                </Flex>
                             </Flex>
                             <Flex
                                 width={'100%'}
@@ -248,24 +398,31 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                                 <Flex
                                     width={'100%'}
                                     flexWrap={'wrap'}
-                                    gap={'0.5rem'}    
+                                    gap={'0.5rem'}
                                 >
                                 
                                     <Flex 
                                         width={'100%'}
-                                        
+                                        alignItems={'center'}
+                                        gap={'0.25rem'}
                                     >
                                         <Text
                                             fontWeight={'bold'}
                                         >
                                             {'Changer de photo de profil'}
                                         </Text>
+                                        <Text
+                                            fontSize={'sm'}
+                                            fontStyle={'italic'}
+                                        >
+                                            {'(optionnel)'}
+                                        </Text>
                                     </Flex>
                                     <Flex
                                         width={'100%'}
                                         alignItems={'center'}
                                         justifyContent={'center'}
-                                        gap={'1rem'}
+                                        gap={'1rem'} 
                                     >
                                     
                                         <Button 
@@ -273,7 +430,7 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                                             backgroundColor={colors.darkAndLight.white}
                                             color={colors.blue.main}
                                             fontWeight={'normal'}
-                                            border={`2px solid ${colors.blue.light}`}
+                                            border={`2px solid ${colors.blue.lighter}`}
                                             _hover={{
                                                 backgroundColor: colors.blue.lighter,
                                             }}
@@ -293,29 +450,29 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                                             style={{ display: 'none' }}
                                         />
                                         {selectedFile && 
-                                        <Flex
-                                            maxWidth={'30%'}
-                                            backgroundColor={colors.grey.main}
-                                            padding={'1rem'}
-                                            alignItems={'center'}
-                                            justifyContent={'space-between'}
-                                            gap={'1rem'}
-                                        >
-                                            <CloseIcon 
-                                                cursor={'pointer'}
-                                                onClick={()=>{
-                                                    setSelectedFile(null);
-                                                }}
-                                                _hover={{
-                                                    color:colors.grey.dark 
-                                                }}
-                                            />
-                                            <Text
-                                                noOfLines={1}
+                                            <Flex
+                                                maxWidth={'30%'}
+                                                backgroundColor={colors.grey.main}
+                                                padding={'1rem'}
+                                                alignItems={'center'}
+                                                justifyContent={'space-between'}
+                                                gap={'1rem'}
                                             >
-                                                {selectedFile?.name}
-                                            </Text>
-                                        </Flex>
+                                                <CloseIcon 
+                                                    cursor={'pointer'}
+                                                    onClick={()=>{
+                                                        setSelectedFile(null);
+                                                    }}
+                                                    _hover={{
+                                                        color:colors.grey.dark 
+                                                    }}
+                                                />
+                                                <Text
+                                                    noOfLines={1}
+                                                >
+                                                    {selectedFile?.name}
+                                                </Text>
+                                            </Flex>
                                         }
                                     </Flex>
                                 </Flex>
@@ -326,6 +483,7 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                             width={'60%'}
                             justifyContent={'space-evenly'}
                             alignItems={'center'}
+                            paddingTop={'1rem'} 
                         >
                             <Button
                                 size={'lg'}
@@ -355,6 +513,7 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                                 }}
                                 onClick={()=>sendEmail()}
                                 isLoading={isWaitingForResponse}
+                                isDisabled={!checkFormIsValid()}
                             >
                                 {'Soumettre'}
                             </Button>
