@@ -96,7 +96,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                         </TabPanel>
                                         <TabPanel
                                             width={'90%'} 
-
+                                            
                                         >
                                             <p>TODO</p>
                                         </TabPanel>
