@@ -18,6 +18,9 @@ const colors = {
         main: '#F2810C',
         light: '#FF9A31'
     },
+    red: {
+        main: '#FF2400',
+    },
 
 };
 
