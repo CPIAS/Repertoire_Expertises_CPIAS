@@ -16,7 +16,6 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
     isLoading,
     noResultsText,
 }) => {
-
     return (
         <Flex 
             width={'100%'}
@@ -97,7 +96,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                         </TabPanel>
                                         <TabPanel
                                             width={'90%'} 
-                                            
+
                                         >
                                             <p>TODO</p>
                                         </TabPanel>
