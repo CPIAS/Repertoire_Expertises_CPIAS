@@ -1,11 +1,11 @@
 import concurrent.futures
 import csv
-from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
 import os
 import smtplib
 from concurrent.futures import Future
 from datetime import datetime, timedelta, timezone
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
@@ -74,7 +74,7 @@ def index():
 
 
 @app.route('/upload', methods=['POST'], endpoint='upload_csv_file')
-# @require_api_key
+@require_api_key
 def upload_csv_file():
     try:
         if 'csv_file' not in request.files:
@@ -129,7 +129,7 @@ def upload_csv_file():
 
 
 @app.route('/users', methods=['GET'], endpoint='get_users')
-# @require_api_key
+@require_api_key
 def get_users():
     users = User.query.all()
     if users:
@@ -139,7 +139,7 @@ def get_users():
 
 
 @app.route('/users/<int:user_id>', methods=['GET'], endpoint='get_user')
-# @require_api_key
+@require_api_key
 def get_user(user_id):
     user = User.query.get(user_id)
     if user:
@@ -149,7 +149,7 @@ def get_user(user_id):
 
 
 @app.route('/search', methods=['POST'], endpoint='search')
-# @require_api_key
+@require_api_key
 def search():
     try:
         global llm
@@ -175,23 +175,26 @@ def search():
         return jsonify({"message": "An error occurred while searching for the answer to the question."}), 500
 
 @app.route('/request_profile_correction', methods=['POST'])
+@require_api_key
 def request_profile_correction():
     try:
-        user_id = request.form.get('id')
-        user_email = request.form.get('email')
-        user_first_name = request.form.get('firstName')
-        user_last_name = request.form.get('lastName')
-        user_message = request.form.get('message')
+        member_id = request.form.get('id')
+        member_last_name = request.form.get('memberLastName')
+        member_first_name = request.form.get('memberFirstName')
+        requester_email = request.form.get('requesterEmail')
+        requester_first_name = request.form.get('requesterFirstName')
+        requester_last_name = request.form.get('requesterLastName')
+        message = request.form.get('message')
         uploaded_file = request.files.get('profilePicture')
         
-        subject = 'Répertoire des expertises de la CPIAS - Demande de modification du profil de {}'.format(f"{user_first_name} {user_last_name}")
+        subject = 'Répertoire des expertises de la CPIAS - Demande de modification du profil de {}'.format(f"{member_first_name} {member_last_name}")
         message = '''
             Bonjour,
-            {} ({}, ID={}) a réclamé une modification des informations sur le répertoire des expertises de la CPIAS.
+            {} ({}) a réclamé une modification des informations de {} (ID={}) sur le répertoire des expertises de la CPIAS.
                 
             Contenu du message :
             "{}"
-        '''.format(f"{user_first_name} {user_last_name}", user_email, user_id, user_message)
+        '''.format(f"{requester_first_name} {requester_last_name}", requester_email, f"{member_first_name} {member_last_name}", member_id, message)
 
         sender = "log8970.cpias.sa@gmail.com"
         recipients = "log8970.adm@gmail.com"
