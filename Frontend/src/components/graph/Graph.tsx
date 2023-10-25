@@ -45,19 +45,13 @@ const NetworkGraph: React.FC = () => {
         physics: {
             stabilization: {
                 enabled: true,
-                iterations: 5000
+                iterations: 1000
             }
         },
         autoResize: true,
         height: '100%',
         width: '100%',
         clickToUse: true
-    };
-
-    const events = {
-        select: function (event: any) {
-            const { nodes, edges } = event;
-        }
     };
 
     return (
@@ -72,7 +66,6 @@ const NetworkGraph: React.FC = () => {
             <Graph
                 graph={mockGraphData}
                 options={options}
-                events={events}
             />
         </Flex>
     );
