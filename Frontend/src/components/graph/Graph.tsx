@@ -1,5 +1,5 @@
-import { Flex } from '@chakra-ui/react';
-import React from 'react';
+import { Flex, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverHeader, PopoverBody } from '@chakra-ui/react';
+import React, { useState } from 'react';
 import Graph from 'react-graph-vis';
 import { useSearchParams } from 'react-router-dom';
 
@@ -8,14 +8,14 @@ const NetworkGraph: React.FC = () => {
     const query = searchParams.get('q') as string;
     const mockGraphData = {
         nodes: [
-            { id: 0, label: query, color: '#FFCCCB' },
-            { id: 1, label: 'Brain Imaging', color: '#FFCCCB' },
-            { id: 2, label: 'Data Analysis', color: '#FFCCCB' },
-            { id: 3, label: 'John Doe' },
-            { id: 4, label: 'Jane Smith' },
-            { id: 5, label: 'Marcus Brady' },
-            { id: 6, label: 'Thomas Johnson' },
-            { id: 7, label: 'Jonathan William' }
+            { id: 0, label: query, title: 'id 0', color: '#FFCCCB' },
+            { id: 1, label: 'Brain Imaging', title: 'id 1', color: '#FFCCCB' },
+            { id: 2, label: 'Data Analysis', title: 'id 2', color: '#FFCCCB' },
+            { id: 3, label: 'John Doe', title: 'id 3' },
+            { id: 4, label: 'Jane Smith', title: 'id 4' },
+            { id: 5, label: 'Marcus Brady', title: 'id 5' },
+            { id: 6, label: 'Thomas Johnson', title: 'id 6' },
+            { id: 7, label: 'Jonathan William', title: 'id 7' }
         ],
         edges: [
             { from: 0, to: 3 },
@@ -30,10 +30,13 @@ const NetworkGraph: React.FC = () => {
             { from: 2, to: 5 },
         ]
     };
-
+    
     const options = {
         layout: {
             hierarchical: false,
+        },
+        interaction: {
+            navigationButtons: true
         },
         edges: {
             arrows: {
@@ -54,6 +57,13 @@ const NetworkGraph: React.FC = () => {
         clickToUse: true
     };
 
+    const [selectedNode, setSelectedNode] = useState<{ id: number, title: string | undefined } | null>(null);
+    const handleNodeClick = (event: any) => {
+        const nodeId = event.nodes[0];
+        const selectedNodeData = mockGraphData.nodes.find(node => node.id === nodeId);
+        setSelectedNode(selectedNodeData || null);
+    };
+
     return (
         <Flex
             width={'100%'}
@@ -66,7 +76,28 @@ const NetworkGraph: React.FC = () => {
             <Graph
                 graph={mockGraphData}
                 options={options}
+                events={{ click: handleNodeClick }}
             />
+            {/* Popover to display the node's title */}
+            {selectedNode && (
+                <Popover>
+                    <PopoverTrigger>
+                        <div
+                            style={{ cursor: 'pointer' }}
+                        >
+                            {selectedNode.title || 'No title'}
+                        </div>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                        <PopoverArrow />
+                        <PopoverCloseButton />
+                        <PopoverHeader>Node Title</PopoverHeader>
+                        <PopoverBody>
+                            {selectedNode.title || 'No title'}
+                        </PopoverBody>
+                    </PopoverContent>
+                </Popover>
+            )}
         </Flex>
     );
 };
