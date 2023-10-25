@@ -1,14 +1,20 @@
 import concurrent.futures
 import csv
 import os
+import smtplib
 from concurrent.futures import Future
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from pathlib import Path
-from flask import Flask, jsonify, request, render_template
+
 from ai import LLM
 from decorators import require_api_key
-from models import db, User
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
+from models import User, db
+from werkzeug.utils import secure_filename
 
 ###################################################################################################################
 #                                             GLOBAL VARIABLES                                                    #
@@ -167,6 +173,55 @@ def search():
 
     except:
         return jsonify({"message": "An error occurred while searching for the answer to the question."}), 500
+
+@app.route('/request_profile_correction', methods=['POST'])
+@require_api_key
+def request_profile_correction():
+    try:
+        member_id = request.form.get('id')
+        member_last_name = request.form.get('memberLastName')
+        member_first_name = request.form.get('memberFirstName')
+        requester_email = request.form.get('requesterEmail')
+        requester_first_name = request.form.get('requesterFirstName')
+        requester_last_name = request.form.get('requesterLastName')
+        message = request.form.get('message')
+        uploaded_file = request.files.get('profilePicture')
+        
+        subject = 'Répertoire des expertises de la CPIAS - Demande de modification du profil de {}'.format(f"{member_first_name} {member_last_name}")
+        message = '''
+            Bonjour,
+            {} ({}) a réclamé une modification des informations de {} (ID={}) sur le répertoire des expertises de la CPIAS.
+                
+            Contenu du message :
+            "{}"
+        '''.format(f"{requester_first_name} {requester_last_name}", requester_email, f"{member_first_name} {member_last_name}", member_id, message)
+
+        sender = os.environ.get('EMAIL_SENDER')
+        recipients = os.environ.get('EMAIL_RECIPIENT')
+        password = os.environ.get('EMAIL_SENDER_PASSWORD')
+
+        msg = MIMEMultipart()
+        msg['Subject'] = subject
+        msg['From'] = sender
+        msg['To'] = recipients
+
+        body = MIMEText(message, 'plain')
+        msg.attach(body)
+
+        if uploaded_file:
+            # Create attachment and adds it to the message.
+            attachment_data = uploaded_file.read()
+            part = MIMEApplication(attachment_data)
+            part.add_header('content-disposition', 'attachment', filename=secure_filename(uploaded_file.filename))
+            msg.attach(part)
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+            smtp_server.login(sender, password)
+            smtp_server.sendmail(sender, recipients, msg.as_string())
+        return jsonify({"message": "Email sent successfully."}), 200
+    except:
+        return jsonify({"message": "An error occurred and email could not be sent."}), 500
+
 
 
 ###################################################################################################################

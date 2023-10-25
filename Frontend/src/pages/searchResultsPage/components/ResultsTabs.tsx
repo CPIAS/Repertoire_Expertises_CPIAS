@@ -1,6 +1,5 @@
 import { Flex, Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import React from 'react';
-import NetworkGraph from '../../../components/graph/Graph';
 import Loader from '../../../components/loader/Loader';
 import MemberCard from '../../../components/memberCard/MemberCard';
 import { Member } from '../../../models/member';
@@ -17,7 +16,6 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
     isLoading,
     noResultsText,
 }) => {
-
     return (
         <Flex 
             width={'100%'}
@@ -106,13 +104,10 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                     >
 
                                         <TabPanel
-                                            width={'100%'} 
-                                            height={'auto' || '100%'}   
-                                            justifyContent={'center'}
-                                            alignContent={'center'}
-                                            alignItems={'center'}
+                                            width={'90%'} 
+                                            
                                         >
-                                            <NetworkGraph />
+                                            <p>TODO</p>
                                         </TabPanel>
                                         <TabPanel width={'100%'}>
                                             <MemberCard members={members} />

@@ -126,23 +126,6 @@ test:ai:
     - cd Backend/AI/
     - echo "This job tests the ai model"
 
-pages:
-  image: node:latest
-  stage: deploy
-  script:
-    - cd Frontend/
-    - npm ci --cache .npm --prefer-offline
-    - export REACT_APP_API_KEY=$REACT_APP_API_KEY
-    - export REACT_APP_SERVER_URL=$REACT_APP_SERVER_URL
-    - export REACT_APP_BASE_HREF=$REACT_APP_BASE_HREF
-    - npm run build -- --base-href $REACT_APP_BASE_HREF
-    - mkdir ../public
-    - mv build/* ../public/
-    - cp public/index.html public/404.html
-  artifacts:
-    paths:
-      - public
-
 deploy:server:
   stage: deploy
   <<: *server_config
