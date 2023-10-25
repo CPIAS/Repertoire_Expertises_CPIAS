@@ -8,7 +8,7 @@ import Header from '../../components/header/Header';
 import SearchBar from '../../components/searchBar/SearchBar';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
-// import mockMembers from '../membersPage/mockMembers.json';
+import mockMembers from '../membersPage/mockMembers.json';
 import ResultsTabs from './components/ResultsTabs';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
@@ -18,7 +18,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [members, setMembers] = useState<Member[]>([]);
+    const [members, setMembers] = useState<Member[]>(mockMembers);
     const [noResultsText, setNoResultsText] = useState<string>('Aucun résultat');
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
