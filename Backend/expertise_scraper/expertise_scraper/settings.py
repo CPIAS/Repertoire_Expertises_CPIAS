@@ -16,6 +16,7 @@ SCRAPEOPS_API_KEY = '38045649-5782-4d0d-b593-b5ab802cffe9'
 SCRAPE_OPS_FAKE_USER_AGENT_ENDPOINT = 'https://headers.scrapeops.io/v1/browser-headers'
 SCRAPEOPS_FAKEUSER_AGENT_ENABLED = True
 SCRAPE_OPS_NUM_RESULTS = 5
+SCRAPEOPS_PROXY_ENABLED = True
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "expertise_scraper (+http://www.yourdomain.com)"
@@ -57,6 +58,7 @@ ROBOTSTXT_OBEY = False
 DOWNLOADER_MIDDLEWARES = {
    # "expertise_scraper.middlewares.ExpertiseScraperDownloaderMiddleware": 543,
     'expertise_scraper.middlewares.ScrapeOpsFakeBrowserHeaderAgentMiddleware': 400,
+    'scrapeops_scrapy_proxy_sdk.scrapeops_scrapy_proxy_sdk.ScrapeOpsScrapyProxySdk': 725,
 }
 
 # Enable or disable extensions
