@@ -1,4 +1,4 @@
-import { Flex, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverHeader, PopoverBody } from '@chakra-ui/react';
+import { Flex, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerBody, Text } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import Graph from 'react-graph-vis';
 import { useSearchParams } from 'react-router-dom';
@@ -6,6 +6,9 @@ import { useSearchParams } from 'react-router-dom';
 const NetworkGraph: React.FC = () => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
+    const [selectedNode, setSelectedNode] = useState<{ id: number, title: string, label: string } | null>(null);
+
+    const [isDrawerOpen, setDrawerOpen] = useState(false);  
     const mockGraphData = {
         nodes: [
             { id: 0, label: query, title: 'id 0', color: '#FFCCCB' },
@@ -35,9 +38,6 @@ const NetworkGraph: React.FC = () => {
         layout: {
             hierarchical: false,
         },
-        interaction: {
-            navigationButtons: true
-        },
         edges: {
             arrows: {
                 to: { enabled: false, scaleFactor: 1 },
@@ -48,7 +48,7 @@ const NetworkGraph: React.FC = () => {
         physics: {
             stabilization: {
                 enabled: true,
-                iterations: 1000
+                iterations: 5000
             }
         },
         autoResize: true,
@@ -57,11 +57,23 @@ const NetworkGraph: React.FC = () => {
         clickToUse: true
     };
 
-    const [selectedNode, setSelectedNode] = useState<{ id: number, title: string | undefined } | null>(null);
-    const handleNodeClick = (event: any) => {
-        const nodeId = event.nodes[0];
-        const selectedNodeData = mockGraphData.nodes.find(node => node.id === nodeId);
-        setSelectedNode(selectedNodeData || null);
+    const events = {
+        select: (event: any) => {
+            if (event.nodes.length) {
+                const nodeId = event.nodes[0];
+                const selectedNodeData = mockGraphData.nodes.find(node => node.id === nodeId);
+
+                const defaultNodeData = {
+                    id: 0,
+                    title: 'No title',
+                    label: 'No label',
+                    ...selectedNodeData
+                };
+
+                setSelectedNode(defaultNodeData);
+                setDrawerOpen(true);
+            }
+        },
     };
 
     return (
@@ -76,27 +88,25 @@ const NetworkGraph: React.FC = () => {
             <Graph
                 graph={mockGraphData}
                 options={options}
-                events={{ click: handleNodeClick }}
+                events={events}
             />
-            {/* Popover to display the node's title */}
             {selectedNode && (
-                <Popover>
-                    <PopoverTrigger>
-                        <div
-                            style={{ cursor: 'pointer' }}
-                        >
-                            {selectedNode.title || 'No title'}
-                        </div>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                        <PopoverArrow />
-                        <PopoverCloseButton />
-                        <PopoverHeader>Node Title</PopoverHeader>
-                        <PopoverBody>
-                            {selectedNode.title || 'No title'}
-                        </PopoverBody>
-                    </PopoverContent>
-                </Popover>
+                <Drawer
+                    isOpen={isDrawerOpen}
+                    placement="right"
+                    onClose={() => setDrawerOpen(false)}
+                    
+                >
+                    <DrawerOverlay>
+                        <DrawerContent>
+                            <DrawerCloseButton />
+                            <DrawerHeader>{selectedNode.title}</DrawerHeader>
+                            <DrawerBody>
+                                <Text>{selectedNode.label}</Text>
+                            </DrawerBody>
+                        </DrawerContent>
+                    </DrawerOverlay>
+                </Drawer>
             )}
         </Flex>
     );
