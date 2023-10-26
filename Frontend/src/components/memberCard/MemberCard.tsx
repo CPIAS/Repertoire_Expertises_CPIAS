@@ -5,12 +5,13 @@ import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
 import ProfileCorrectionModal from '../modals/ProfileCorrectionModal';
 
-const MemberCard: React.FC<{ members: Member[] }> = ({ members }) => {
+const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ members, isReadOnly = false }) => {
     const [profileCorrectionModalStates, setProfileCorrectionModalStates] = useState(
         members.map(() => false)
     );
 
     const openProfileCorrectionModal = (member: Member, index: number) => {
+        if (isReadOnly) return;
         const updatedStates = [...profileCorrectionModalStates];
         updatedStates[index] = true;
         setProfileCorrectionModalStates(updatedStates);
@@ -63,20 +64,23 @@ const MemberCard: React.FC<{ members: Member[] }> = ({ members }) => {
                                 </Flex>
                             </Flex>
                             {member.skills.length > 0 &&
-                                <Flex
-                                    width={'100%'}
-                                    alignItems={'center'}
-                                >
-                                    <Tag 
-                                        colorScheme='orange'
-                                        borderRadius='full'
-                                        size={'md'}
-                                        border={'1px solid'}
-                                        borderColor={colors.orange.main}
+                                member.skills.split(',').map((skill, index) => (
+                                    <Flex
+                                        key= {`${index}_flex`}
+                                        alignItems={'center'}
                                     >
-                                        {`${member.skills}`}
-                                    </Tag>
-                                </Flex>
+                                        <Tag 
+                                            colorScheme='orange'
+                                            borderRadius='full'
+                                            size={'md'}
+                                            border={'1px solid'}
+                                            borderColor={colors.orange.main}
+                                        >
+                                            {`${skill}`}
+                                        </Tag>
+                                    </Flex>
+                                ))
+                                
                             }
                         </Flex>
                         <AccordionIcon 

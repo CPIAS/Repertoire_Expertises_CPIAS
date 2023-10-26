@@ -19,7 +19,6 @@ const MembersPage: React.FC = () => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                console.log(`${API_HOST}/users`);
                 const response = await axios.get(`${API_HOST}/users`);
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
