@@ -5,9 +5,7 @@ import {
     Flex,
     Modal,
     ModalBody,
-    ModalCloseButton,
     ModalContent,
-    ModalHeader,
     ModalOverlay,
     Step,
     StepIcon,
@@ -52,21 +50,15 @@ const UserGuideModal: React.FC<ModalProps> = ({
         <Modal 
             isOpen={isOpen} 
             onClose={closeModal}
-            size='5xl'
+            size='6xl'
             isCentered
             
         >
             <ModalOverlay/>
-            <ModalContent paddingX={'1rem'} height={'75vh'}>
-                <ModalHeader 
-                    textAlign={'center'}
-                    fontSize={'2xl'}
-                    borderBottom={`1px solid ${colors.grey.dark}`}
+            <ModalContent paddingX={'1rem'} height={'67.5vh'}>
+                <ModalBody
+                    overflow={'scroll'}
                 >
-                    {'Guide d\'utilisation'}
-                </ModalHeader>
-                <ModalCloseButton margin={'0.5rem'}/>
-                <ModalBody>
                     <Flex 
                         width={'100%'}
                         height={'100%'}
@@ -77,12 +69,13 @@ const UserGuideModal: React.FC<ModalProps> = ({
                     >
                         <Flex
                             width={'100%'}
-                            height={'10%'}
+                            height={'15%'}
+                            paddingTop={'1rem'}
                             justifyContent={'center'}
                             alignItems={'center'}
                         >
                         
-                            <Stepper size='md' index={activeStep} colorScheme='green' width={'100%'}>
+                            <Stepper size='md' index={activeStep} colorScheme='facebook' width={'100%'}>
                                 {steps.map((step, index) => (
                                     <Step key={index} onClick={() => setActiveStep(index)}>
                                         <StepIndicator>
@@ -104,9 +97,10 @@ const UserGuideModal: React.FC<ModalProps> = ({
                         </Flex>
                         <Flex
                             width={'100%'}
-                            height={'75%'}
+                            height={'70%'}
                             justifyContent={'center'}
                             alignItems={'center'}
+                            alignContent={'center'}
                             paddingX={'1rem'}
                         >
                             <UserGuide activeStep={activeStep} />
