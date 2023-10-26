@@ -12,6 +12,10 @@ BOT_NAME = "expertise_scraper"
 SPIDER_MODULES = ["expertise_scraper.spiders"]
 NEWSPIDER_MODULE = "expertise_scraper.spiders"
 
+SCRAPEOPS_API_KEY = '38045649-5782-4d0d-b593-b5ab802cffe9'
+SCRAPE_OPS_FAKE_USER_AGENT_ENDPOINT = 'https://headers.scrapeops.io/v1/browser-headers'
+SCRAPEOPS_FAKEUSER_AGENT_ENABLED = True
+SCRAPE_OPS_NUM_RESULTS = 5
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "expertise_scraper (+http://www.yourdomain.com)"
@@ -50,9 +54,10 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    "expertise_scraper.middlewares.ExpertiseScraperDownloaderMiddleware": 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+   # "expertise_scraper.middlewares.ExpertiseScraperDownloaderMiddleware": 543,
+    'expertise_scraper.middlewares.ScrapeOpsFakeBrowserHeaderAgentMiddleware': 400,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
