@@ -4,7 +4,6 @@ import { Flex, InputGroup, InputRightElement } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import colors from '../../utils/theme/colors';
-// import { AutoResizeTextarea } from './AutoResizeTextarea';
 import { AutoResizeTextarea } from './AutoResizeTextarea';
 
 const ENTER_KEY = 'Enter';
