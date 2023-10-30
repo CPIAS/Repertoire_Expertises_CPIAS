@@ -96,7 +96,7 @@ const SearchResultsPage: React.FC = () => {
                         />
                         <Flex
                             marginLeft={'2rem'}
-                            width={'50%'}
+                            width={'100%'}
                         >
                             <SearchBar defaultValue={query}/>
                         </Flex>
