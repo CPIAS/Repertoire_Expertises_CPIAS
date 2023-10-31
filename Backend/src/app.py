@@ -21,9 +21,13 @@ from werkzeug.utils import secure_filename
 ###################################################################################################################
 
 app = Flask(__name__, template_folder='../templates')
-CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified for a production environment.
+CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified in a production environment.
 database_path = os.path.abspath('../database')
-llm = LLM(Path("../resources/expertise_extended_english_renamed.csv"))
+llm = LLM(
+    qa_llm_model='mistral:instruct',
+    keywords_llm_model='camembert/camembert-large',
+    users_csv_file=Path('../resources/cleaned_expertise_extended_renamed.csv')
+)
 llm_is_ready = False
 
 
@@ -102,8 +106,7 @@ def upload_csv_file():
                 for row in csv_file_reader:
                     user = User(
                         user_id=int(row[0]) if str.isnumeric(row[0]) else None,
-                        subscription_date=datetime.strptime(row[1], "%m-%d-%Y %H:%M:%S") if is_valid_date_format(row[1],
-                                                                                                                 "%m-%d-%Y %H:%M:%S") else None,
+                        registration_date=datetime.strptime(row[1], "%m-%d-%Y %H:%M:%S") if is_valid_date_format(row[1], "%m-%d-%Y %H:%M:%S") else None,
                         first_name=row[2],
                         last_name=row[3],
                         email=row[4],
@@ -116,7 +119,8 @@ def upload_csv_file():
                         years_experience_ia=float(row[11]) if str.isnumeric(row[11]) else None,
                         years_experience_healthcare=float(row[12]) if str.isnumeric(row[12]) else None,
                         community_involvement=row[13],
-                        suggestions=row[14]
+                        suggestions=row[14],
+                        tags=', '.join(llm.get_keywords(row[10]))
                     )
                     db.session.add(user)
 
@@ -148,9 +152,9 @@ def get_user(user_id):
         return jsonify({"message": "User not found"}), 404
 
 
-@app.route('/search', methods=['POST'], endpoint='search')
+@app.route('/search', methods=['POST'], endpoint='search_users')
 @require_api_key
-def search():
+def search_users():
     try:
         global llm
         global llm_is_ready
@@ -161,7 +165,7 @@ def search():
         question = request.get_data(as_text=True)
 
         if question:
-            user_ids: list[int] = llm.query(question)
+            user_ids: list[int] = llm.get_user_recommendations(question)
             users = User.query.filter(User.user_id.in_(user_ids)).all()
 
             if users:
@@ -174,7 +178,8 @@ def search():
     except:
         return jsonify({"message": "An error occurred while searching for the answer to the question."}), 500
 
-@app.route('/request_profile_correction', methods=['POST'])
+
+@app.route('/request_profile_correction', methods=['POST'], endpoint='request_profile_correction')
 @require_api_key
 def request_profile_correction():
     try:
@@ -222,6 +227,50 @@ def request_profile_correction():
     except:
         return jsonify({"message": "An error occurred and email could not be sent."}), 500
 
+
+@app.route('/filter', methods=['POST'], endpoint='filter_users')
+@require_api_key
+def filter_users():
+    try:
+        criteria = request.json
+        query = User.query
+
+        for attr in dir(User):
+            if attr in criteria:
+                if attr == 'years_experience_ia' or attr == 'years_experience_healthcare':
+                    query = query.filter(getattr(User, attr) >= criteria[attr])
+                elif attr == 'affiliation_organization' or attr == 'community_involvement' or attr == 'suggestions' or attr == 'skills':
+                    query = query.filter(getattr(User, attr).like(f"%{criteria[attr]}%"))
+                else:
+                    query = query.filter(getattr(User, attr) == criteria[attr])
+
+        matching_users = query.all()
+        return matching_users, 200
+
+    except:
+        return jsonify({'message': 'An error occurred when filtering users.'}), 500
+
+
+@app.route('/keywords', methods=['POST'], endpoint='get_keywords_from_user_expertise')
+@require_api_key
+def get_keywords_from_user_expertise():
+    try:
+        global llm
+        global llm_is_ready
+
+        if not llm_is_ready:
+            return jsonify({"message": "LLM not available"}), 503
+
+        user_expertise = request.get_data(as_text=True)
+
+        if user_expertise:
+            keywords = llm.get_keywords(user_expertise)
+            return keywords, 200
+        else:
+            return jsonify({"message": "No user expertise provided"}), 400
+
+    except:
+        return jsonify({"message": "An error occurred while extracting keywords from user expertise."}), 500
 
 
 ###################################################################################################################
