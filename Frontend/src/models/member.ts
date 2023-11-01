@@ -15,3 +15,4 @@ export interface Member {
     yearsExperienceHealthcare: number;
     yearsExperienceIa: number;
 }
+
