@@ -8,7 +8,7 @@ import Header from '../../components/header/Header';
 import SearchBar from '../../components/searchBar/SearchBar';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
-import mockMembers from '../membersPage/mockMembers.json';
+// import mockMembers from '../membersPage/mockMembers.json';
 import ResultsTabs from './components/ResultsTabs';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
@@ -18,7 +18,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [members, setMembers] = useState<Member[]>(mockMembers);
+    const [members, setMembers] = useState<Member[]>([]);
     const [noResultsText, setNoResultsText] = useState<string>('Aucun résultat');
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
@@ -38,6 +38,21 @@ const SearchResultsPage: React.FC = () => {
 
         fetchMembers();
     }, [query]);
+
+    // useEffect(() => {
+    //     const fetchMembers = async () => {
+    //         try {
+    //             const response = await axios.get(`${API_HOST}/users`);
+    //             setMembers(humps.camelizeKeys(response.data) as Member[]);
+    //             setIsLoading(false);
+    //         } catch (error) {
+    //             console.error('Error while fetching members: ', error);
+    //             setIsLoading(false);
+    //         }
+    //     };
+
+    //     fetchMembers();
+    // }, []);
 
     return (
         <Flex 
