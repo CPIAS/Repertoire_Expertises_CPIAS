@@ -2,8 +2,9 @@ import { Flex, Drawer, DrawerOverlay, DrawerContent, DrawerCloseButton, DrawerHe
 import React, { useState } from 'react';
 import Graph from 'react-graph-vis';
 import { useSearchParams } from 'react-router-dom';
+import { Member } from '../../models/member';
 
-const NetworkGraph: React.FC = () => {
+const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
     const [selectedNode, setSelectedNode] = useState<{ id: number, title: string, label: string } | null>(null);
@@ -12,27 +13,60 @@ const NetworkGraph: React.FC = () => {
     const mockGraphData = {
         nodes: [
             { id: 0, label: query, title: 'id 0', color: '#FFCCCB' },
-            { id: 1, label: 'Brain Imaging', title: 'id 1', color: '#FFCCCB' },
-            { id: 2, label: 'Data Analysis', title: 'id 2', color: '#FFCCCB' },
-            { id: 3, label: 'John Doe', title: 'id 3' },
-            { id: 4, label: 'Jane Smith', title: 'id 4' },
-            { id: 5, label: 'Marcus Brady', title: 'id 5' },
-            { id: 6, label: 'Thomas Johnson', title: 'id 6' },
-            { id: 7, label: 'Jonathan William', title: 'id 7' }
+            ...members.map((member, index) => (
+                {
+                    id: index + 1,
+                    label: member.userId === 0 ? query : `${member.firstName} ${member.lastName}`,
+                    title: `id ${index + 1}`,
+                    color: '#CCCBFF',
+                    jobPosition: member.jobPosition
+                }
+            ))
         ],
         edges: [
-            { from: 0, to: 3 },
-            { from: 0, to: 5 },
-            { from: 0, to: 5 },
-            { from: 0, to: 6 },
-            { from: 0, to: 7 },
-            { from: 1, to: 3 },
-            { from: 1, to: 6 },
-            { from: 1, to: 7 },
-            { from: 2, to: 4 },
-            { from: 2, to: 5 },
-        ]
+            // { from: 0, to: 3 },
+            // { from: 0, to: 5 },
+            // { from: 0, to: 5 },
+            // { from: 0, to: 6 },
+            // { from: 0, to: 7 },
+            // { from: 1, to: 3 },
+            // { from: 1, to: 6 },
+            // { from: 1, to: 7 },
+            // { from: 2, to: 4 },
+            // { from: 2, to: 5 },
+        ] as { from: number; to: number }[]
     };
+    
+    // for (let i = 0; i < members.length; i++) {
+    //     for (let j = i + 1; j < members.length; j++) {
+    //         if (members[i].jobPosition === members[j].jobPosition) {
+    //             mockGraphData.edges.push({ from: i + 1, to: j + 1 });
+    //         }
+    //     }
+    // }
+
+    const jobPositionMap = new Map();
+
+    for (let i = 0; i < members.length; i++) {
+        for (let j = i + 1; j < members.length; j++) {
+            if (members[i].jobPosition === members[j].jobPosition) {
+                const jobPosition = members[i].jobPosition;
+                if (!jobPositionMap.has(jobPosition)) {
+                    // Create a node for the common job position
+                    const newNodeId = mockGraphData.nodes.length + 1;
+                    mockGraphData.nodes.push({
+                        id: newNodeId,
+                        label: jobPosition,
+                        title: `id ${newNodeId}`,
+                        color: '#FFCCCB',
+                    });
+                    jobPositionMap.set(jobPosition, newNodeId);
+                }
+                mockGraphData.edges.push({ from: i + 1, to: jobPositionMap.get(jobPosition) });
+                mockGraphData.edges.push({ from: j + 1, to: jobPositionMap.get(jobPosition) });
+            }
+        }
+    }
     
     const options = {
         layout: {
@@ -102,7 +136,23 @@ const NetworkGraph: React.FC = () => {
                             <DrawerCloseButton />
                             <DrawerHeader>{selectedNode.title}</DrawerHeader>
                             <DrawerBody>
-                                <Text>{selectedNode.label}</Text>
+                                <Text>{
+                                    <Text>
+                                    First Name: {members[selectedNode.id - 1].firstName}<br />
+                                    Last Name: {members[selectedNode.id - 1].lastName}<br />
+                                    Email: {members[selectedNode.id - 1].email}<br />
+                                    Subscription Date: {members[selectedNode.id - 1].subscriptionDate}<br />
+                                    Affiliation Organization: {members[selectedNode.id - 1].affiliationOrganization}<br />
+                                    Community Involvement: {members[selectedNode.id - 1].communityInvolvement}<br />
+                                    Job Position: {members[selectedNode.id - 1].jobPosition}<br />
+                                    Membership Category: {members[selectedNode.id - 1].membershipCategory}<br />
+                                    Membership Category Other: {members[selectedNode.id - 1].membershipCategoryOther}<br />
+                                    Skills: {members[selectedNode.id - 1].skills}<br />
+                                    Suggestions: {members[selectedNode.id - 1].suggestions}<br />
+                                    Years of Experience in Healthcare: {members[selectedNode.id - 1].yearsExperienceHealthcare}<br />
+                                    Years of Experience in IA: {members[selectedNode.id - 1].yearsExperienceIa}
+                                    </Text>
+                                }</Text>
                             </DrawerBody>
                         </DrawerContent>
                     </DrawerOverlay>
