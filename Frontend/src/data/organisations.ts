@@ -1,0 +1,18 @@
+export const organisationsDropdownOptions = [
+    { value: 'Tous', label: 'Tous' },
+    { value: 'CHUM -Centre Hospitalier de l\'Université de Montréal', label: 'CHUM - Centre Hospitalier de l\'Université de Montréal' },
+    { value: 'Consortium Santé Numérique', label: 'Consortium Santé Numérique' },
+    { value: 'CRCHUM - Centre de recherche du centre hospitalier de l\'Université de Montréal', label: 'CRCHUM - Centre de recherche du centre hospitalier de l\'Université de Montréal' },
+    { value: 'CRCHUSJ - Centre de Recherche du Centre Hospitalier de Sainte Justine', label: 'CRCHUSJ - Centre de Recherche du Centre Hospitalier de Sainte Justine' },
+    { value: 'ÉIAS - École de l\'Intelligence Artificielle en Santé', label: 'ÉIAS - École de l\'Intelligence Artificielle en Santé' },
+    { value: 'ÉTS - École de Technologie Supérieure', label: 'ÉTS - École de Technologie Supérieure' },
+    { value: 'FMV - Faculté de Médecine Vétérinaire', label: 'FMV - Faculté de Médecine Vétérinaire' },
+    { value: 'INRS - Institut National de la Recherche Scientifique', label: 'INRS - Institut National de la Recherche Scientifique' },
+    { value: 'IVADO - Institut de Valorisation des Données', label: 'IVADO - Institut de Valorisation des Données' },
+    { value: 'LIO - Laboratoire de recherche en Imagerie et Orthopédie', label: 'LIO - Laboratoire de recherche en Imagerie et Orthopédie' },
+    { value: 'MSSS - Ministère de la Santé et des Services Sociaux', label: 'MSSS - Ministère de la Santé et des Services Sociaux' },
+    { value: 'Polytechnique Montréal', label: 'Polytechnique Montréal' },
+    { value: 'TÉLUQ -  Université TÉLUQ', label: 'TÉLUQ -  Université TÉLUQ' },
+    { value: 'UdeM - Université de Montréal', label: 'UdeM - Université de Montréal' },
+    { value: 'Université d\'Ottawa', label: 'Université d\'Ottawa' },
+];
