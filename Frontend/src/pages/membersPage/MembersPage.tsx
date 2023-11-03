@@ -23,6 +23,7 @@ const MembersPage: React.FC = () => {
     const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
     const [appliedFilters, setAppliedFilters] = useState<IFilters | undefined>(undefined);
     const [organizationsOptions, setOrganizationsOptions] = useState<string[]>([]);
+    const [membersCategoryOptions, setMembersCategoryOptions] = useState<string[]>([]);
     const [tagsOptions, setTagsOptions] = useState<string[]>([]);
 
     useEffect(() => {
@@ -44,6 +45,7 @@ const MembersPage: React.FC = () => {
     
     useEffect(() => {
         const uniqueOrganizations = new Set<string>();
+        const uniqueMemberCategory = new Set<string>();
         const uniqueTags = new Set<string>();
         for (const member of members) {
             for (const org of member.affiliationOrganization.split(',')) {
@@ -52,11 +54,11 @@ const MembersPage: React.FC = () => {
             for (const tags of member.tags.split(/,| et /)) {
                 uniqueTags.add(tags.trim());
             }
+            uniqueMemberCategory.add(member.membershipCategory.trim());
         }
-      
         setOrganizationsOptions(Array.from(uniqueOrganizations).sort().filter(org => org !== 'Autre'));
-        setTagsOptions(Array.from(uniqueTags).sort());
-            
+        setMembersCategoryOptions(Array.from(uniqueMemberCategory).sort().filter(cat => cat !== 'Autre' && cat.length > 1));
+        setTagsOptions(Array.from(uniqueTags).sort());    
     }, [members]);
 
     useEffect(() => {
@@ -64,10 +66,10 @@ const MembersPage: React.FC = () => {
         if (appliedFilters) {
             filtered = members.filter((member) => {
                 let includeMember = true;
-                if (appliedFilters.organization && appliedFilters.organization.length > 0) {
+                if (appliedFilters.organisation && appliedFilters.organisation.length > 0) {
                     if (!member.affiliationOrganization.split(',').some(org => {
                         const lowerCaseOrg = org.toLowerCase().trim();
-                        const lowerCaseAppliedFilters = appliedFilters?.organization?.map(filter => filter.toLowerCase().trim());
+                        const lowerCaseAppliedFilters = appliedFilters?.organisation?.map(filter => filter.toLowerCase().trim());
                         return lowerCaseAppliedFilters?.includes(lowerCaseOrg);
                     })) {
                         includeMember = false;
@@ -178,6 +180,7 @@ const MembersPage: React.FC = () => {
                         <Filters 
                             isOpen={isFilterSectionShown} 
                             organizationsOptions={organizationsOptions}
+                            memberCategoryOptions={membersCategoryOptions}
                             tagsOptions={tagsOptions}
                             setIsFilterSectionShown={setIsFilterSectionShown}
                             setAppliedFilters={setAppliedFilters}

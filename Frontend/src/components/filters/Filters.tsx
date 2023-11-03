@@ -1,6 +1,5 @@
 import { Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, useDisclosure } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import { memberTypeDropdownOptions } from '../../data/category';
 import { IFilters } from '../../models/filters';
 import colors from '../../utils/theme/colors';
 import MultiSelectDropdown, { DropdownOptions } from '../dropdowns/MultiSelectDropdown';
@@ -9,6 +8,7 @@ import RangeSliderWithLabels from '../rangeSlider/RangeSlider';
 type FiltersProps = {
     isOpen: boolean;
     organizationsOptions: string[];
+    memberCategoryOptions: string[];
     tagsOptions: string[];
     setIsFilterSectionShown: (isShown: boolean) => void;
     setAppliedFilters: (filters: IFilters | undefined) => void;
@@ -17,6 +17,7 @@ type FiltersProps = {
 const Filters: React.FC<FiltersProps> = ({
     isOpen,
     organizationsOptions,
+    memberCategoryOptions,
     tagsOptions,
     setIsFilterSectionShown,
     setAppliedFilters
@@ -24,6 +25,7 @@ const Filters: React.FC<FiltersProps> = ({
     const { onClose } = useDisclosure();
     const [selectedOrganisation, setSelectedOrganisation] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
     const [organizationDropdownOptions, setOrganizationDropdownOptions] = useState<DropdownOptions[]>([]);
+    const [memberCategoryDropdownOptions, setMemberCategoryDropdownOptions] = useState<DropdownOptions[]>([]);
     const [tagsDropdownOptions, setTagsDropdownOptions] = useState<DropdownOptions[]>([]);
     const [selectedExpertise, setSelectedExpertise] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
     const [selectedMemberType, setSelectedMemberType] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
@@ -46,6 +48,15 @@ const Filters: React.FC<FiltersProps> = ({
         organisationDropdown.unshift({value: 'Tous', label: 'Tous'});
         setOrganizationDropdownOptions(organisationDropdown);
     }, [organizationsOptions]);
+
+    useEffect(() => {
+        const typeDropdown: DropdownOptions[] = [];
+        for (const category of memberCategoryOptions) {
+            typeDropdown.push({value: category, label: category});
+        }
+        typeDropdown.unshift({value: 'Tous', label: 'Tous'});
+        setMemberCategoryDropdownOptions(typeDropdown);
+    }, [memberCategoryOptions]);
 
     useEffect(() => {
         const tagsDropdown: DropdownOptions[] = [];
@@ -156,13 +167,13 @@ const Filters: React.FC<FiltersProps> = ({
                                 fontSize={'md'}
                                 fontWeight={'bold'}
                             >
-                                {'Type d\'expertise'}
+                                {'Type de membre'}
                             </Flex>
                             <MultiSelectDropdown 
-                                options={tagsDropdownOptions}
+                                options={memberCategoryDropdownOptions}
                                 unit={'types'}
-                                selectedOptions={selectedExpertise}
-                                setSelectedOptions={setSelectedExpertise}
+                                selectedOptions={selectedMemberType}
+                                setSelectedOptions={setSelectedMemberType}
                             />
                         </Flex>
                         <Flex
@@ -179,13 +190,13 @@ const Filters: React.FC<FiltersProps> = ({
                                 fontSize={'md'}
                                 fontWeight={'bold'}
                             >
-                                {'Type de membre'}
+                                {'Type d\'expertise'}
                             </Flex>
                             <MultiSelectDropdown 
-                                options={memberCategoryDropdownOptions}
+                                options={tagsDropdownOptions}
                                 unit={'types'}
-                                selectedOptions={selectedMemberType}
-                                setSelectedOptions={setSelectedMemberType}
+                                selectedOptions={selectedExpertise}
+                                setSelectedOptions={setSelectedExpertise}
                             />
                         </Flex>
                         <Flex
