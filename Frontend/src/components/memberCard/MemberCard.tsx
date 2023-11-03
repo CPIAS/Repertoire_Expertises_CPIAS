@@ -1,5 +1,5 @@
 import { EmailIcon } from '@chakra-ui/icons';
-import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Image, Link, Tag } from '@chakra-ui/react';
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Image, Link, Tag, Text, Tooltip } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
@@ -78,6 +78,7 @@ const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ mem
                         >
                             <Flex
                                 marginRight={'0.5rem'}
+                                width={'10%'}
                             >
                                 <Image 
                                     // src={member.profilePicture ?? './images/avatar/generic-avatar.png'}
@@ -91,6 +92,7 @@ const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ mem
                                 flexWrap={'wrap'}
                                 alignItems={'center'}
                                 gap={'0.5rem'}
+                                width={'90%'}
                             >
                                 <Flex 
                                     width={'100%'}
@@ -101,7 +103,7 @@ const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ mem
                                         {`${member.firstName} ${member.lastName}`}
                                     </Flex>
                                     <Flex maxWidth={'80%'} alignItems={'center'}>
-                                        {`${member.membershipCategory} - ${member.affiliationOrganization.split(',')}`}
+                                        {getDescription(member)}
                                     </Flex>
                                 </Flex>
                                 <Flex

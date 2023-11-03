@@ -1,5 +1,6 @@
 import { Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, useDisclosure } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
+import { memberTypeDropdownOptions } from '../../data/category';
 import { IFilters } from '../../models/filters';
 import colors from '../../utils/theme/colors';
 import MultiSelectDropdown, { DropdownOptions } from '../dropdowns/MultiSelectDropdown';
@@ -8,7 +9,6 @@ import RangeSliderWithLabels from '../rangeSlider/RangeSlider';
 type FiltersProps = {
     isOpen: boolean;
     organizationsOptions: string[];
-    memberCategoryOptions: string[];
     tagsOptions: string[];
     setIsFilterSectionShown: (isShown: boolean) => void;
     setAppliedFilters: (filters: IFilters | undefined) => void;
@@ -17,15 +17,13 @@ type FiltersProps = {
 const Filters: React.FC<FiltersProps> = ({
     isOpen,
     organizationsOptions,
-    memberCategoryOptions,
     tagsOptions,
     setIsFilterSectionShown,
     setAppliedFilters
 }) => {
     const { onClose } = useDisclosure();
-    const [selectedOrganization, setSelectedOrganization] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
+    const [selectedOrganisation, setSelectedOrganisation] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
     const [organizationDropdownOptions, setOrganizationDropdownOptions] = useState<DropdownOptions[]>([]);
-    const [memberCategoryDropdownOptions, setMemberCategoryDropdownOptions] = useState<DropdownOptions[]>([]);
     const [tagsDropdownOptions, setTagsDropdownOptions] = useState<DropdownOptions[]>([]);
     const [selectedExpertise, setSelectedExpertise] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
     const [selectedMemberType, setSelectedMemberType] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
@@ -41,22 +39,13 @@ const Filters: React.FC<FiltersProps> = ({
     };
 
     useEffect(() => {
-        const organizationDropdown: DropdownOptions[] = [];
+        const organisationDropdown: DropdownOptions[] = [];
         for (const organization of organizationsOptions) {
-            organizationDropdown.push({value: organization, label: organization});
+            organisationDropdown.push({value: organization, label: organization});
         }
-        organizationDropdown.unshift({value: 'Tous', label: 'Tous'});
-        setOrganizationDropdownOptions(organizationDropdown);
+        organisationDropdown.unshift({value: 'Tous', label: 'Tous'});
+        setOrganizationDropdownOptions(organisationDropdown);
     }, [organizationsOptions]);
-
-    useEffect(() => {
-        const typeDropdown: DropdownOptions[] = [];
-        for (const category of memberCategoryOptions) {
-            typeDropdown.push({value: category, label: category});
-        }
-        typeDropdown.unshift({value: 'Tous', label: 'Tous'});
-        setMemberCategoryDropdownOptions(typeDropdown);
-    }, [memberCategoryOptions]);
 
     useEffect(() => {
         const tagsDropdown: DropdownOptions[] = [];
@@ -149,8 +138,31 @@ const Filters: React.FC<FiltersProps> = ({
                             <MultiSelectDropdown 
                                 options={organizationDropdownOptions}
                                 unit={'organisations'}
-                                selectedOptions={selectedOrganization}
-                                setSelectedOptions={setSelectedOrganization}
+                                selectedOptions={selectedOrganisation}
+                                setSelectedOptions={setSelectedOrganisation}
+                            />
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            paddingTop={'1.5rem'}
+                            justifyContent={'flex-start'}
+                            flexWrap={'wrap'}
+                            gap={'1rem'}
+                        >
+                            <Flex 
+                                width={'100%'} 
+                                paddingBottom={'0.25rem'}
+                                borderBottomWidth='1px'
+                                fontSize={'md'}
+                                fontWeight={'bold'}
+                            >
+                                {'Type d\'expertise'}
+                            </Flex>
+                            <MultiSelectDropdown 
+                                options={tagsDropdownOptions}
+                                unit={'types'}
+                                selectedOptions={selectedExpertise}
+                                setSelectedOptions={setSelectedExpertise}
                             />
                         </Flex>
                         <Flex
