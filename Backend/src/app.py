@@ -2,31 +2,37 @@ import concurrent.futures
 import csv
 import os
 import smtplib
+import logging
 from concurrent.futures import Future
 from datetime import datetime, timedelta, timezone
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
-
 from ai import LLM
 from decorators import require_api_key
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 from models import User, db
 from werkzeug.utils import secure_filename
+from settings import SERVER_SETTINGS
 
 ###################################################################################################################
 #                                             GLOBAL VARIABLES                                                    #
 ###################################################################################################################
-
-app = Flask(__name__, template_folder='../templates')
+app = Flask(__name__, template_folder=SERVER_SETTINGS['template_directory'])
 CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified in a production environment.
-database_path = os.path.abspath('../database')
+database_directory = os.path.abspath(SERVER_SETTINGS['database_directory'])
+resources_directory = os.path.abspath(SERVER_SETTINGS['resources_directory'])
 llm = LLM(
-    qa_llm_model='mistral:instruct',
-    keywords_llm_model='camembert/camembert-large',
-    users_csv_file=Path('../resources/cleaned_expertise_extended_renamed.csv')
+    qa_llm_model=SERVER_SETTINGS['qa_llm_model'],
+    keywords_llm_model=SERVER_SETTINGS['keywords_llm_model'],
+    users_csv_file=Path(SERVER_SETTINGS['users_csv_file'])
+)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename=SERVER_SETTINGS['server_log_file']
 )
 llm_is_ready = False
 
@@ -35,11 +41,12 @@ llm_is_ready = False
 #                                                 METHODS                                                         #
 ###################################################################################################################
 
-def is_valid_date_format(date_string, date_format):
+def is_valid_date_format(date_string: str, date_format: str):
     try:
         datetime.strptime(date_string, date_format)
         return True
-    except ValueError:
+    except ValueError as e:
+        logging.error(msg=str(e), exc_info=True)
         return False
 
 
@@ -47,20 +54,21 @@ def init_llm():
     try:
         global llm
         llm.init()
-    except:
+    except Exception as e:
+        logging.error(msg=str(e), exc_info=True)
         return False
     else:
         return True
 
 
 def init_database():
-    global database_path
+    global database_directory
     global app
 
-    if not os.path.exists(database_path):
-        os.makedirs(database_path)
+    if not os.path.exists(database_directory):
+        os.makedirs(database_directory)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{database_path}/users.db"
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{database_directory}/{SERVER_SETTINGS['sqlite_db']}"
     db.init_app(app)
 
     with app.app_context():
@@ -90,12 +98,12 @@ def upload_csv_file():
             return jsonify({"message": "No selected file"}), 400
 
         if file:
-            resources_path = os.path.abspath('../resources')
+            global resources_directory
 
-            if not os.path.exists(resources_path):
-                os.makedirs(resources_path)
+            if not os.path.exists(resources_directory):
+                os.makedirs(resources_directory)
 
-            file_path = os.path.join(resources_path, file.filename)
+            file_path = os.path.join(resources_directory, file.filename)
             file.save(file_path)
 
             with open(file_path, 'r') as csv_file:
@@ -127,8 +135,9 @@ def upload_csv_file():
                 db.session.commit()
 
             return jsonify({"message": "CSV file uploaded and database populated successfully"}), 200
-    except:
+    except Exception as e:
         db.session.rollback()
+        logging.error(msg=str(e), exc_info=True)
         return jsonify({"message": "File upload failed. An error occurred while uploading the csv file or populating the database."}), 500
 
 
@@ -174,7 +183,8 @@ def search_users():
         else:
             return jsonify({"message": "No question provided"}), 400
 
-    except:
+    except Exception as e:
+        logging.error(msg=str(e), exc_info=True)
         return jsonify({"message": "An error occurred while searching for the answer to the question."}), 500
 
 
@@ -222,8 +232,11 @@ def request_profile_correction():
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
             smtp_server.login(sender, password)
             smtp_server.sendmail(sender, recipients, msg.as_string())
+
         return jsonify({"message": "Email sent successfully."}), 200
-    except:
+
+    except Exception as e:
+        logging.error(msg=str(e), exc_info=True)
         return jsonify({"message": "An error occurred and email could not be sent."}), 500
 
 
@@ -246,7 +259,8 @@ def filter_users():
         matching_users = query.all()
         return matching_users, 200
 
-    except:
+    except Exception as e:
+        logging.error(msg=str(e), exc_info=True)
         return jsonify({'message': 'An error occurred when filtering users.'}), 500
 
 
@@ -268,7 +282,8 @@ def get_keywords_from_user_expertise():
         else:
             return jsonify({"message": "No user expertise provided"}), 400
 
-    except:
+    except Exception as e:
+        logging.error(msg=str(e), exc_info=True)
         return jsonify({"message": "An error occurred while extracting keywords from user expertise."}), 500
 
 
