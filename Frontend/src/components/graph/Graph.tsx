@@ -99,12 +99,12 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
             },
             color: 'black',
         },
-        // physics: {
-        //     stabilization: {
-        //         enabled: false,
-        //         //iterations: 5000
-        //     }
-        // },
+        physics: {
+            stabilization: {
+                enabled: true,
+                iterations: 5000
+            }
+        },
         autoResize: true,
         height: '100%',
         width: '100%',
@@ -162,21 +162,21 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
                                         {selectedNode.title.includes('Member') && ( // Check if it's a member node
                                             <>
                                                 <br />
-                                                First Name: {members[selectedNode.id - 1].firstName}<br />
-                                                Last Name: {members[selectedNode.id - 1].lastName}<br />
-                                                Email: {members[selectedNode.id - 1].email}<br />
-                                                Subscription Date: {members[selectedNode.id - 1].subscriptionDate}<br />
-                                                Affiliation Organization: {members[selectedNode.id - 1].affiliationOrganization}<br />
-                                                Community Involvement: {members[selectedNode.id - 1].communityInvolvement}<br />
-                                                Job Position: {members[selectedNode.id - 1].jobPosition}<br />
-                                                Membership Category: {members[selectedNode.id - 1].membershipCategory}<br />
-                                                Membership Category Other: {members[selectedNode.id - 1].membershipCategoryOther}<br />
-                                                Skills: {members[selectedNode.id - 1].skills}<br />
-                                                Suggestions: {members[selectedNode.id - 1].suggestions}<br />
-                                                Years of Experience in Healthcare: {members[selectedNode.id - 1].yearsExperienceHealthcare}<br />
-                                                Years of Experience in IA: {members[selectedNode.id - 1].yearsExperienceIa}<br />
-                                                Tags: {members[selectedNode.id - 1].tags}<br />
-                                                Profile Picture: {members[selectedNode.id - 1].profilePicture}<br />
+                                                First Name: {members[selectedNode.id].firstName}<br />
+                                                Last Name: {members[selectedNode.id].lastName}<br />
+                                                Email: {members[selectedNode.id].email}<br />
+                                                Subscription Date: {members[selectedNode.id].subscriptionDate}<br />
+                                                Affiliation Organization: {members[selectedNode.id].affiliationOrganization}<br />
+                                                Community Involvement: {members[selectedNode.id].communityInvolvement}<br />
+                                                Job Position: {members[selectedNode.id].jobPosition}<br />
+                                                Membership Category: {members[selectedNode.id].membershipCategory}<br />
+                                                Membership Category Other: {members[selectedNode.id].membershipCategoryOther}<br />
+                                                Skills: {members[selectedNode.id].skills}<br />
+                                                Suggestions: {members[selectedNode.id].suggestions}<br />
+                                                Years of Experience in Healthcare: {members[selectedNode.id].yearsExperienceHealthcare}<br />
+                                                Years of Experience in IA: {members[selectedNode.id].yearsExperienceIa}<br />
+                                                Tags: {members[selectedNode.id].tags}<br />
+                                                Profile Picture: {members[selectedNode.id].profilePicture}<br />
                                             </>
                                         )}
                                     </Text>
