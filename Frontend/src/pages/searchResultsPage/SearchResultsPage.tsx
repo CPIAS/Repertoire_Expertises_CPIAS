@@ -18,26 +18,41 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [members, setMembers] = useState<Member[]>(mockMembers);
-    const [noResultsText, setNoResultsText] = useState<string>('Aucun résultat');
+    const [members, setMembers] = useState<Member[]>([]);
+    const [noResultsText] = useState<string>('Aucun résultat');
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
+
+    // useEffect(() => {
+    //     const fetchMembers = async () => {
+    //         try {
+    //             const response = await axios.post(`${API_HOST}/search`, query);
+    //             setMembers(humps.camelizeKeys(response.data) as Member[]);
+    //             setIsLoading(false);
+    //         } catch (error) {
+    //             console.error('Error while fetching members: ', error);
+    //             setNoResultsText('Une erreur est survenue.');
+    //             setIsLoading(false);
+    //         }
+    //     };
+
+    //     fetchMembers();
+    // }, [query]);
 
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await axios.post(`${API_HOST}/search`, query);
+                const response = await axios.get(`${API_HOST}/users`);
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error while fetching members: ', error);
-                setNoResultsText('Une erreur est survenue.');
                 setIsLoading(false);
             }
         };
 
         fetchMembers();
-    }, [query]);
+    }, []);
 
     return (
         <Flex 

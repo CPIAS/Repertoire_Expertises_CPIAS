@@ -9,17 +9,20 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
     const query = searchParams.get('q') as string;
     const [selectedNode, setSelectedNode] = useState<{ id: number, title: string, label: string } | null>(null);
 
+    const limitedMembers = members
+        .slice(0, 15) // Slice to get the first 15 members
+        .filter(member => member.tags && member.tags.trim() !== '');
+
     const [isDrawerOpen, setDrawerOpen] = useState(false);  
     const mockGraphData = {
         nodes: [
-            { id: 0, label: query, title: 'id 0', color: '#FFCCCB' },
-            ...members.map((member, index) => (
+            ...limitedMembers.map((member, index) => (
                 {
                     id: index + 1,
                     label: member.userId === 0 ? query : `${member.firstName} ${member.lastName}`,
-                    title: `id ${index + 1}`,
+                    title: `Member id ${index + 1}`, // Specify it as a member node
                     color: '#CCCBFF',
-                    jobPosition: member.jobPosition
+                    tags: member.tags.split(',').map(tag => tag.trim()) // Split tags by commas and trim spaces
                 }
             ))
         ],
@@ -45,26 +48,43 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
     //     }
     // }
 
-    const jobPositionMap = new Map();
+    const tagsMap = new Map();
 
-    for (let i = 0; i < members.length; i++) {
-        for (let j = i + 1; j < members.length; j++) {
-            if (members[i].jobPosition === members[j].jobPosition) {
-                const jobPosition = members[i].jobPosition;
-                if (!jobPositionMap.has(jobPosition)) {
-                    // Create a node for the common job position
+    for (let i = 0; i < limitedMembers.length; i++) {
+        for (let j = i + 1; j < limitedMembers.length; j++) {
+            const tagsA = limitedMembers[i].tags.split(',').map(tag => tag.trim()); // Split tags by commas and trim spaces
+            const tagsB = limitedMembers[j].tags.split(',').map(tag => tag.trim()); // Split tags by commas and trim spaces
+
+            tagsA.forEach(tagA => {
+                if (!tagsMap.has(tagA)) {
                     const newNodeId = mockGraphData.nodes.length + 1;
                     mockGraphData.nodes.push({
                         id: newNodeId,
-                        label: jobPosition,
-                        title: `id ${newNodeId}`,
+                        label: tagA,
+                        title: `Tag id ${newNodeId}`,
                         color: '#FFCCCB',
+                        tags: []
                     });
-                    jobPositionMap.set(jobPosition, newNodeId);
+                    tagsMap.set(tagA, newNodeId);
                 }
-                mockGraphData.edges.push({ from: i + 1, to: jobPositionMap.get(jobPosition) });
-                mockGraphData.edges.push({ from: j + 1, to: jobPositionMap.get(jobPosition) });
-            }
+
+                tagsB.forEach(tagB => {
+                    if (!tagsMap.has(tagB)) {
+                        const newNodeId = mockGraphData.nodes.length + 1;
+                        mockGraphData.nodes.push({
+                            id: newNodeId,
+                            label: tagB,
+                            title: `Tag id ${newNodeId}`,
+                            color: '#FFCCCB',
+                            tags: []
+                        });
+                        tagsMap.set(tagB, newNodeId);
+                    }
+
+                    mockGraphData.edges.push({ from: i + 1, to: tagsMap.get(tagA) });
+                    mockGraphData.edges.push({ from: j + 1, to: tagsMap.get(tagB) });
+                });
+            });
         }
     }
     
@@ -79,12 +99,12 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
             },
             color: 'black',
         },
-        physics: {
-            stabilization: {
-                enabled: true,
-                iterations: 5000
-            }
-        },
+        // physics: {
+        //     stabilization: {
+        //         enabled: false,
+        //         //iterations: 5000
+        //     }
+        // },
         autoResize: true,
         height: '100%',
         width: '100%',
@@ -97,14 +117,14 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
                 const nodeId = event.nodes[0];
                 const selectedNodeData = mockGraphData.nodes.find(node => node.id === nodeId);
 
-                const defaultNodeData = {
-                    id: 0,
-                    title: 'No title',
-                    label: 'No label',
-                    ...selectedNodeData
-                };
+                // const defaultNodeData = {
+                //     id: 0,
+                //     title: 'No title',
+                //     label: 'No label',
+                //     ...selectedNodeData
+                // };
 
-                setSelectedNode(defaultNodeData);
+                setSelectedNode(selectedNodeData || null);
                 setDrawerOpen(true);
             }
         },
@@ -136,23 +156,31 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
                             <DrawerCloseButton />
                             <DrawerHeader>{selectedNode.title}</DrawerHeader>
                             <DrawerBody>
-                                <Text>{
+                                <Text>
                                     <Text>
-                                    First Name: {members[selectedNode.id - 1].firstName}<br />
-                                    Last Name: {members[selectedNode.id - 1].lastName}<br />
-                                    Email: {members[selectedNode.id - 1].email}<br />
-                                    Subscription Date: {members[selectedNode.id - 1].subscriptionDate}<br />
-                                    Affiliation Organization: {members[selectedNode.id - 1].affiliationOrganization}<br />
-                                    Community Involvement: {members[selectedNode.id - 1].communityInvolvement}<br />
-                                    Job Position: {members[selectedNode.id - 1].jobPosition}<br />
-                                    Membership Category: {members[selectedNode.id - 1].membershipCategory}<br />
-                                    Membership Category Other: {members[selectedNode.id - 1].membershipCategoryOther}<br />
-                                    Skills: {members[selectedNode.id - 1].skills}<br />
-                                    Suggestions: {members[selectedNode.id - 1].suggestions}<br />
-                                    Years of Experience in Healthcare: {members[selectedNode.id - 1].yearsExperienceHealthcare}<br />
-                                    Years of Experience in IA: {members[selectedNode.id - 1].yearsExperienceIa}
+                                        {selectedNode.label}
+                                        {selectedNode.title.includes('Member') && ( // Check if it's a member node
+                                            <>
+                                                <br />
+                                                First Name: {members[selectedNode.id - 1].firstName}<br />
+                                                Last Name: {members[selectedNode.id - 1].lastName}<br />
+                                                Email: {members[selectedNode.id - 1].email}<br />
+                                                Subscription Date: {members[selectedNode.id - 1].subscriptionDate}<br />
+                                                Affiliation Organization: {members[selectedNode.id - 1].affiliationOrganization}<br />
+                                                Community Involvement: {members[selectedNode.id - 1].communityInvolvement}<br />
+                                                Job Position: {members[selectedNode.id - 1].jobPosition}<br />
+                                                Membership Category: {members[selectedNode.id - 1].membershipCategory}<br />
+                                                Membership Category Other: {members[selectedNode.id - 1].membershipCategoryOther}<br />
+                                                Skills: {members[selectedNode.id - 1].skills}<br />
+                                                Suggestions: {members[selectedNode.id - 1].suggestions}<br />
+                                                Years of Experience in Healthcare: {members[selectedNode.id - 1].yearsExperienceHealthcare}<br />
+                                                Years of Experience in IA: {members[selectedNode.id - 1].yearsExperienceIa}<br />
+                                                Tags: {members[selectedNode.id - 1].tags}<br />
+                                                Profile Picture: {members[selectedNode.id - 1].profilePicture}<br />
+                                            </>
+                                        )}
                                     </Text>
-                                }</Text>
+                                </Text>
                             </DrawerBody>
                         </DrawerContent>
                     </DrawerOverlay>

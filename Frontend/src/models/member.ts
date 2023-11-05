@@ -14,4 +14,6 @@ export interface Member {
     suggestions: string;
     yearsExperienceHealthcare: number;
     yearsExperienceIa: number;
+    tags: string;
+    profilePicture?: string;
 }
