@@ -1,3 +1,4 @@
+import logging
 import os
 import string
 import spacy
@@ -27,6 +28,8 @@ from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA, LLMChain
 from langchain.schema import Document
 from spacy import Language
+from settings import SERVER_SETTINGS
+
 from Backend.src.ai_models import Experts, User
 from statistics import mean 
 from langchain.prompts.few_shot import FewShotPromptTemplate
@@ -34,43 +37,41 @@ from langchain.prompts.prompt import PromptTemplate
 from chromadb.config import Settings
 
 class LLM:
-    def __init__(self, qa_llm_model: str, keywords_llm_model: str, users_csv_file: Path):
-        self.qa_llm_model: str = qa_llm_model
-        self.users_csv_file: Path = users_csv_file
+    def __init__(self):
         self.qa_llm: Optional[Ollama] = None
         self.user_documents: Optional[list[Document]] = None
         self.qa_embeddings: Optional[OllamaEmbeddings] = None
         self.qa_vector_store: Optional[Chroma] = None
         self.qa_prompt: Optional[PromptTemplate] = None
         self.qa_chain: Optional[RetrievalQA] = None
-        self.keywords_llm_model: str = keywords_llm_model
         self.keywords_embeddings: Optional[TransformerDocumentEmbeddings] = None
         self.keywords_model: Optional[KeyBERT] = None
         self.keywords_prompt: Optional[PromptTemplate] = None
         self.keywords_chain: Optional[LLMChain] = None
         self.nlp: Optional[Language] = None
         self.stop_words: Optional[list[str]] = None
+        self.is_available: bool = False
         self.chromaDB_client = None
         self.users = None
         self.linkdln_data = None
         self.users = None
         self.chomaDB_collection = None
 
-    def __get_qa_llm(self, qa_llm_model: str, temperature: float = 0.0) -> Ollama:
+    @staticmethod
+    def __get_qa_llm(qa_llm_model: str, temperature: float = 0.0) -> Ollama:
         return Ollama(base_url='http://localhost:11434', model=qa_llm_model, temperature=temperature)
 
-    def __get_user_documents(self, csv_file: Path) -> list[Document]:
-        loader = CSVLoader(file_path=str(csv_file))
+    @staticmethod
+    def __get_user_documents(csv_file_path: str) -> list[Document]:
+        loader = CSVLoader(file_path=csv_file_path)
         return loader.load()
 
-    def __get_qa_embeddings(self, qa_llm_model: str, temperature: float = 0.0) -> OllamaEmbeddings:
+    @staticmethod
+    def __get_qa_embeddings(qa_llm_model: str, temperature: float = 0.0) -> OllamaEmbeddings:
         return OllamaEmbeddings(base_url="http://localhost:11434", model=qa_llm_model, temperature=temperature)
 
-    def __create_qa_vector_database(self,
-                                    qa_embeddings: OllamaEmbeddings,
-                                    user_documents: list[Document],
-                                    persist_directory: str = "../vector_store"
-                                    ) -> Chroma:
+    @staticmethod
+    def __create_qa_vector_database(qa_embeddings: OllamaEmbeddings, user_documents: list[Document], persist_directory: str = "../vector_store") -> Chroma:
         if os.path.exists(persist_directory):
             vector_store = Chroma(embedding_function=qa_embeddings, persist_directory=persist_directory)
         else:
@@ -79,7 +80,8 @@ class LLM:
 
         return vector_store
 
-    def __get_qa_prompt(self) -> PromptTemplate:
+    @staticmethod
+    def __get_qa_prompt() -> PromptTemplate:
         prompt_template = '''Use the following pieces of context to answer the question at the end. \
         If you don't know the answer, just say that you don't know, don't try to make up an answer.
         
@@ -90,13 +92,8 @@ class LLM:
 
         return PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 
-    def __get_qa_chain(self,
-                       qa_llm: Ollama,
-                       qa_vector_store: Chroma,
-                       qa_prompt: PromptTemplate,
-                       chain_type: str = "stuff",
-                       return_source_documents: bool = True
-                       ) -> RetrievalQA:
+    @staticmethod
+    def __get_qa_chain(qa_llm: Ollama, qa_vector_store: Chroma, qa_prompt: PromptTemplate, chain_type: str = "stuff", return_source_documents: bool = True) -> RetrievalQA:
         return RetrievalQA.from_chain_type(
             llm=qa_llm,
             retriever=qa_vector_store.as_retriever(search_type="mmr", search_kwargs={'k': 10, 'fetch_k': 20}),
@@ -105,13 +102,16 @@ class LLM:
             chain_type_kwargs={"prompt": qa_prompt}
         )
 
-    def __get_keywords_embeddings(self, keywords_llm: str) -> TransformerDocumentEmbeddings:
+    @staticmethod
+    def __get_keywords_embeddings(keywords_llm: str) -> TransformerDocumentEmbeddings:
         return TransformerDocumentEmbeddings(keywords_llm)
 
-    def __get_keywords_model(self, keywords_embeddings: TransformerDocumentEmbeddings) -> KeyBERT:
+    @staticmethod
+    def __get_keywords_model(keywords_embeddings: TransformerDocumentEmbeddings) -> KeyBERT:
         return KeyBERT(model=keywords_embeddings)
 
-    def __get_keywords_prompt(self) -> PromptTemplate:
+    @staticmethod
+    def __get_keywords_prompt() -> PromptTemplate:
         prompt_template = """
                 <s>
                 [INST]
@@ -144,15 +144,18 @@ class LLM:
         """
         return PromptTemplate(input_variables=["document"], template=prompt_template, parser=CommaSeparatedListOutputParser())
 
-    def __get_keywords_chain(self, qa_llm: Ollama, keywords_prompt: PromptTemplate, ) -> LLMChain:
+    @staticmethod
+    def __get_keywords_chain(qa_llm: Ollama, keywords_prompt: PromptTemplate, ) -> LLMChain:
         return LLMChain(llm=qa_llm, prompt=keywords_prompt)
 
-    def __get_nlp(self, model_name: str) -> Language:
+    @staticmethod
+    def __get_nlp(model_name: str) -> Language:
         if not spacy.util.is_package(model_name):
             spacy.cli.download(model_name)
         return spacy.load(model_name)
 
-    def __get_stop_words(self, nlp: Language) -> list[str]:
+    @staticmethod
+    def __get_stop_words(nlp: Language) -> list[str]:
         return list(nlp.Defaults.stop_words) + [p for p in string.punctuation]
 
     def __remove_stop_words(self, documents: list[str]) -> list[str]:
@@ -163,7 +166,8 @@ class LLM:
             filtered_documents.append(' '.join(filtered_tokens))
         return filtered_documents
 
-    def __get_user_ids_from_llm_response(self, response: list[Document]) -> list[int]:
+    @staticmethod
+    def __get_user_ids_from_llm_response(response: list[Document]) -> list[int]:
         user_ids = []
 
         for document in response:
@@ -175,28 +179,34 @@ class LLM:
         return user_ids
 
     def __init_qa_chain(self) -> None:
-        self.qa_llm = self.__get_qa_llm(self.qa_llm_model)
-        self.user_documents = self.__get_user_documents(self.users_csv_file)
-        self.qa_embeddings = self.__get_qa_embeddings(self.qa_llm_model)
+        self.qa_llm = self.__get_qa_llm(SERVER_SETTINGS['qa_llm_model'])
+        self.user_documents = self.__get_user_documents(SERVER_SETTINGS['users_csv_file'])
+        self.qa_embeddings = self.__get_qa_embeddings(SERVER_SETTINGS['qa_llm_model'])
         self.qa_vector_store = self.__create_qa_vector_database(self.qa_embeddings, self.user_documents)
         self.qa_prompt = self.__get_qa_prompt()
         self.qa_chain = self.__get_qa_chain(self.qa_llm, self.qa_vector_store, self.qa_prompt)
 
     def __init_keywords_chain(self) -> None:
-        self.keywords_embeddings = self.__get_keywords_embeddings(self.keywords_llm_model)
+        self.keywords_embeddings = self.__get_keywords_embeddings(SERVER_SETTINGS['keywords_llm_model'])
         self.keywords_model = self.__get_keywords_model(self.keywords_embeddings)
         self.keywords_prompt = self.__get_keywords_prompt()
         self.keywords_chain = self.__get_keywords_chain(self.qa_llm, self.keywords_prompt)
-        self.nlp = self.__get_nlp('fr_core_news_sm')
+        self.nlp = self.__get_nlp(SERVER_SETTINGS["spacy_nlp"])
         self.stop_words = self.__get_stop_words(self.nlp)
 
     def init(self) -> None:
-        self.__init_qa_chain()
-        self.__init_keywords_chain()
-        persist_directory =  str(Path("../vector_store"))
-        user_file_path = str(Path('../resources/USERS.csv'))
-        linkldin_data_file_path = str(Path('../resources/out.json'))
-        self.init_recommandation_pipeline(persist_directory, user_file_path, linkldin_data_file_path)
+        try:
+            self.__init_qa_chain()
+            self.__init_keywords_chain()
+            persist_directory = str(Path("../vector_store"))
+            user_file_path = str(Path('../resources/USERS.csv'))
+            linkldin_data_file_path = str(Path('../resources/out.json'))
+            self.init_recommandation_pipeline(persist_directory, user_file_path, linkldin_data_file_path)
+        except Exception as e:
+            logging.error(msg=str(e), exc_info=True)
+        else:
+            self.is_available = True
+            logging.info(msg="The LLM has been successfully initialized.")
 
     def get_user_recommendations(self, question: str) -> list[int]:
         response = self.qa_chain({"query": question})
