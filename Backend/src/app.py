@@ -1,78 +1,100 @@
 import concurrent.futures
-import csv
 import os
 import smtplib
 import logging
-from concurrent.futures import Future
+import gdown
+import time
 from datetime import datetime, timedelta, timezone
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from pathlib import Path
+from threading import Thread
 from ai import LLM
 from decorators import require_api_key
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
-from models import User, db
 from werkzeug.utils import secure_filename
 from settings import SERVER_SETTINGS
+from database import Database, User
+from schedule import every, repeat, run_pending
 
 ###################################################################################################################
 #                                             GLOBAL VARIABLES                                                    #
 ###################################################################################################################
+
 app = Flask(__name__, template_folder=SERVER_SETTINGS['template_directory'])
-CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified in a production environment.
-database_directory = os.path.abspath(SERVER_SETTINGS['database_directory'])
-resources_directory = os.path.abspath(SERVER_SETTINGS['resources_directory'])
-llm = LLM(
-    qa_llm_model=SERVER_SETTINGS['qa_llm_model'],
-    keywords_llm_model=SERVER_SETTINGS['keywords_llm_model'],
-    users_csv_file=Path(SERVER_SETTINGS['users_csv_file'])
-)
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    filename=SERVER_SETTINGS['server_log_file']
-)
-llm_is_ready = False
+llm = LLM()
+db = Database(app, llm)
 
 
 ###################################################################################################################
 #                                                 METHODS                                                         #
 ###################################################################################################################
 
-def is_valid_date_format(date_string: str, date_format: str):
-    try:
-        datetime.strptime(date_string, date_format)
-        return True
-    except ValueError as e:
-        logging.error(msg=str(e), exc_info=True)
-        return False
 
-
-def init_llm():
+def init_server() -> None:
     try:
-        global llm
-        llm.init()
+        CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified in a production environment.
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', filename=SERVER_SETTINGS['server_log_file'])
+
+        if not os.path.exists(SERVER_SETTINGS["users_csv_file"]):
+            download_users_csv_file_from_google_drive()
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            llm_future = executor.submit(llm.init)
+            llm_future.result()
+
+            if not llm.is_available:
+                raise Exception("Server initialization failed.")
+
+            db_future = executor.submit(db.init)
+            db_future.result()
+
+            if not llm.is_available:
+                raise Exception("Server initialization failed.")
+
     except Exception as e:
         logging.error(msg=str(e), exc_info=True)
-        return False
     else:
-        return True
+        logging.info(msg="The server has been successfully initialized.")
 
 
-def init_database():
-    global database_directory
-    global app
+def download_users_csv_file_from_google_drive() -> None:
+    if not os.path.exists(SERVER_SETTINGS["resources_directory"]):
+        os.makedirs(SERVER_SETTINGS["resources_directory"])
 
-    if not os.path.exists(database_directory):
-        os.makedirs(database_directory)
+    gdown.download(id=SERVER_SETTINGS["google_drive_csv_file_id"], output=SERVER_SETTINGS["users_csv_file"], quiet=True)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{database_directory}/{SERVER_SETTINGS['sqlite_db']}"
-    db.init_app(app)
 
-    with app.app_context():
-        db.create_all()
+@repeat(every().sunday.at("01:00", "Canada/Eastern"))
+def check_for_database_updates() -> None:
+    try:
+        if not db.is_available:
+            logging.warning("Unable to run database updates. Database is not available.")
+            return
+
+        if not llm.is_available:
+            logging.warning("Unable to run database updates. LLM is not available.")
+            return
+
+        download_users_csv_file_from_google_drive()
+        db.update(SERVER_SETTINGS["users_csv_file"])
+
+    except Exception as e:
+        logging.error(msg=str(e), exc_info=True)
+
+
+def check_scheduled_tasks():
+    while True:
+        run_pending()
+        # time.sleep(3600)  # Check every hour
+        time.sleep(10)
+
+
+def start_scheduled_tasks_thread():
+    t = Thread(target=check_scheduled_tasks)
+    t.daemon = True  # Make the thread a daemon, so it doesn't block program termination
+    t.start()
 
 
 ###################################################################################################################
@@ -85,66 +107,14 @@ def index():
     return render_template('index.html', formatted_datetime=formatted_datetime)
 
 
-@app.route('/upload', methods=['POST'], endpoint='upload_csv_file')
-@require_api_key
-def upload_csv_file():
-    try:
-        if 'csv_file' not in request.files:
-            return jsonify({"message": "No file part"}), 400
-
-        file = request.files['csv_file']
-
-        if file.filename == '':
-            return jsonify({"message": "No selected file"}), 400
-
-        if file:
-            global resources_directory
-
-            if not os.path.exists(resources_directory):
-                os.makedirs(resources_directory)
-
-            file_path = os.path.join(resources_directory, file.filename)
-            file.save(file_path)
-
-            with open(file_path, 'r') as csv_file:
-                csv_file_reader = csv.reader(csv_file)
-                next(csv_file_reader)  # Skip the header row.
-                db.session.query(User).delete()
-
-                for row in csv_file_reader:
-                    user = User(
-                        user_id=int(row[0]) if str.isnumeric(row[0]) else None,
-                        registration_date=datetime.strptime(row[1], "%m-%d-%Y %H:%M:%S") if is_valid_date_format(row[1], "%m-%d-%Y %H:%M:%S") else None,
-                        first_name=row[2],
-                        last_name=row[3],
-                        email=row[4],
-                        membership_category=row[5],
-                        membership_category_other=row[6],
-                        job_position=row[7],
-                        affiliation_organization=row[8],
-                        affiliation_organization_other=row[9],
-                        skills=row[10],
-                        years_experience_ia=float(row[11]) if str.isnumeric(row[11]) else None,
-                        years_experience_healthcare=float(row[12]) if str.isnumeric(row[12]) else None,
-                        community_involvement=row[13],
-                        suggestions=row[14],
-                        tags=', '.join(llm.get_keywords(row[10]))
-                    )
-                    db.session.add(user)
-
-                db.session.commit()
-
-            return jsonify({"message": "CSV file uploaded and database populated successfully"}), 200
-    except Exception as e:
-        db.session.rollback()
-        logging.error(msg=str(e), exc_info=True)
-        return jsonify({"message": "File upload failed. An error occurred while uploading the csv file or populating the database."}), 500
-
-
 @app.route('/users', methods=['GET'], endpoint='get_users')
 @require_api_key
 def get_users():
+    if not db.is_available:
+        return jsonify({"message": "Database not available"}), 503
+
     users = User.query.all()
+
     if users:
         return users, 200
     else:
@@ -154,7 +124,11 @@ def get_users():
 @app.route('/users/<int:user_id>', methods=['GET'], endpoint='get_user')
 @require_api_key
 def get_user(user_id):
-    user = User.query.get(user_id)
+    if not db.is_available:
+        return jsonify({"message": "Database not available"}), 503
+
+    user = db.session.get(User, user_id)
+
     if user:
         return jsonify(user), 200
     else:
@@ -165,11 +139,11 @@ def get_user(user_id):
 @require_api_key
 def search_users():
     try:
-        global llm
-        global llm_is_ready
-
-        if not llm_is_ready:
+        if not llm.is_available:
             return jsonify({"message": "LLM not available"}), 503
+
+        if not db.is_available:
+            return jsonify({"message": "Database not available"}), 503
 
         question = request.get_data(as_text=True)
 
@@ -200,7 +174,7 @@ def request_profile_correction():
         requester_last_name = request.form.get('requesterLastName')
         message = request.form.get('message')
         uploaded_file = request.files.get('profilePicture')
-        
+
         subject = 'Répertoire des expertises de la CPIAS - Demande de modification du profil de {}'.format(f"{member_first_name} {member_last_name}")
         message = '''
             Bonjour,
@@ -244,6 +218,9 @@ def request_profile_correction():
 @require_api_key
 def filter_users():
     try:
+        if not db.is_available:
+            return jsonify({"message": "Database not available"}), 503
+
         criteria = request.json
         query = User.query
 
@@ -268,10 +245,7 @@ def filter_users():
 @require_api_key
 def get_keywords_from_user_expertise():
     try:
-        global llm
-        global llm_is_ready
-
-        if not llm_is_ready:
+        if not llm.is_available:
             return jsonify({"message": "LLM not available"}), 503
 
         user_expertise = request.get_data(as_text=True)
@@ -287,24 +261,9 @@ def get_keywords_from_user_expertise():
         return jsonify({"message": "An error occurred while extracting keywords from user expertise."}), 500
 
 
-###################################################################################################################
-#                                      INITIALIZING SERVER SERVICES                                               #
-###################################################################################################################
-
-init_database()
-
-with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-    future = executor.submit(init_llm)
-
-
-    def callback(fut: Future[bool]):
-        global llm_is_ready
-        llm_is_ready = fut.result()
-
-
-    future.add_done_callback(callback)
-
 if __name__ == '__main__':
+    init_server()
+    start_scheduled_tasks_thread()
     app.run(
         debug=True,
         host='0.0.0.0',
