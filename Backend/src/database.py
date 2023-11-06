@@ -6,7 +6,7 @@ from datetime import datetime, date
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, Text, Date, Float
-from sqlalchemy.orm import scoped_session, Session
+from sqlalchemy.orm import scoped_session
 from typing import TypeVar, Type, Optional
 from settings import SERVER_SETTINGS
 from ai import LLM
@@ -15,12 +15,28 @@ from ai import LLM
 class Database:
     db: SQLAlchemy = SQLAlchemy()
     T = TypeVar('T', int, float)
+    user_attributes_to_csv_columns_map = [
+        ("registration_date", 1),
+        ("first_name", 2),
+        ("last_name", 3),
+        ("email", 4),
+        ("membership_category", 5),
+        ("membership_category_other", 6),
+        ("job_position", 7),
+        ("affiliation_organization", 8),
+        ("affiliation_organization_other", 9),
+        ("skills", 10),
+        ("years_experience_ia", 11),
+        ("years_experience_healthcare", 12),
+        ("community_involvement", 13),
+        ("suggestions", 14),
+    ]
 
     def __init__(self, app: Flask, llm: LLM):
         self.__database_directory: str = os.path.abspath(SERVER_SETTINGS['database_directory'])
         self.app: Flask = app
         self.llm: LLM = llm
-        self.session: scoped_session[Session] = self.db.session
+        self.session: scoped_session = self.db.session
         self.is_available: bool = False
 
     def init(self) -> None:
@@ -63,6 +79,26 @@ class Database:
         else:
             return number
 
+    def create_user_from_csv_row(self, row: list[str]):
+        return User(
+            user_id=self.get_number(row[0], int),
+            registration_date=self.get_date(row[1]),
+            first_name=row[2],
+            last_name=row[3],
+            email=row[4],
+            membership_category=row[5],
+            membership_category_other=row[6],
+            job_position=row[7],
+            affiliation_organization=row[8],
+            affiliation_organization_other=row[9],
+            skills=row[10],
+            years_experience_ia=self.get_number(row[11], float),
+            years_experience_healthcare=self.get_number(row[12], float),
+            community_involvement=row[13],
+            suggestions=row[14],
+            tags=', '.join(self.llm.get_keywords(row[10]))
+        )
+
     def is_empty(self) -> bool:
         with self.app.app_context():
             return len(self.session.query(User).all()) == 0
@@ -74,24 +110,7 @@ class Database:
                 next(csv_file_reader)  # Skip the header row.
 
                 for row in csv_file_reader:
-                    user = User(
-                        user_id=self.get_number(row[0], int),
-                        registration_date=self.get_date(row[1]),
-                        first_name=row[2],
-                        last_name=row[3],
-                        email=row[4],
-                        membership_category=row[5],
-                        membership_category_other=row[6],
-                        job_position=row[7],
-                        affiliation_organization=row[8],
-                        affiliation_organization_other=row[9],
-                        skills=row[10],
-                        years_experience_ia=self.get_number(row[11], float),
-                        years_experience_healthcare=self.get_number(row[12], float),
-                        community_involvement=row[13],
-                        suggestions=row[14],
-                        tags=', '.join(self.llm.get_keywords(row[10]))
-                    )
+                    user = self.create_user_from_csv_row(row)
                     self.session.add(user)
 
                 self.session.commit()
@@ -109,40 +128,20 @@ class Database:
                         user = self.session.get(User, user_id)
 
                         if user:
-                            user.registration_date = self.get_date(row[1]) if user.registration_date != self.get_date(row[1]) else user.registration_date
-                            user.first_name = row[2] if user.first_name != row[2] else user.first_name
-                            user.last_name = row[3] if user.last_name != row[3] else user.last_name
-                            user.email = row[4] if user.email != row[4] else user.email
-                            user.membership_category = row[5] if user.membership_category != row[5] else user.membership_category
-                            user.membership_category_other = row[6] if user.membership_category_other != row[6] else user.membership_category_other
-                            user.job_position = row[7] if user.job_position != row[7] else user.job_position
-                            user.affiliation_organization = row[8] if user.affiliation_organization != row[8] else user.affiliation_organization
-                            user.affiliation_organization_other = row[9] if user.affiliation_organization_other != row[9] else user.affiliation_organization_other
-                            user.skills = row[10] if user.skills != row[10] else user.skills
-                            user.years_experience_ia = self.get_number(row[11], float) if user.years_experience_ia != self.get_number(row[11], float) else user.years_experience_ia
-                            user.years_experience_healthcare = self.get_number(row[12], float) if user.years_experience_healthcare != self.get_number(row[12], float) else user.years_experience_healthcare
-                            user.community_involvement = row[13] if user.community_involvement != row[13] else user.community_involvement
-                            user.suggestions = row[14] if user.suggestions != row[14] else user.suggestions
-                            user.tags = ', '.join(self.llm.get_keywords(row[10])) if user.skills != row[10] else user.tags
+                            for attr, index in self.user_attributes_to_csv_columns_map:
+                                if attr == "registration_date":
+                                    new_value = self.get_date(row[index])
+                                elif attr in ["years_experience_ia", "years_experience_healthcare"]:
+                                    new_value = self.get_number(row[index], float)
+                                else:
+                                    new_value = row[index]
+
+                                if getattr(user, attr) != new_value:
+                                    setattr(user, attr, new_value)
+                                    if attr == "skills":
+                                        setattr(user, "tags", ', '.join(self.llm.get_keywords(new_value)))
                         else:
-                            new_user = User(
-                                user_id=user_id,
-                                registration_date=self.get_date(row[1]),
-                                first_name=row[2],
-                                last_name=row[3],
-                                email=row[4],
-                                membership_category=row[5],
-                                membership_category_other=row[6],
-                                job_position=row[7],
-                                affiliation_organization=row[8],
-                                affiliation_organization_other=row[9],
-                                skills=row[10],
-                                years_experience_ia=self.get_number(row[11], float),
-                                years_experience_healthcare=self.get_number(row[12], float),
-                                community_involvement=row[13],
-                                suggestions=row[14],
-                                tags=', '.join(self.llm.get_keywords(row[10]))
-                            )
+                            new_user = self.create_user_from_csv_row(row)
                             self.session.add(new_user)
 
                     self.session.commit()
