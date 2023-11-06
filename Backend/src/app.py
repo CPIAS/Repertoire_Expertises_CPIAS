@@ -87,8 +87,7 @@ def check_for_database_updates() -> None:
 def check_scheduled_tasks():
     while True:
         run_pending()
-        # time.sleep(3600)  # Check every hour
-        time.sleep(10)
+        time.sleep(3600)  # Check every hour
 
 
 def start_scheduled_tasks_thread():
