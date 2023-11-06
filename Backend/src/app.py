@@ -226,9 +226,9 @@ def filter_users():
 
         for attr in dir(User):
             if attr in criteria:
-                if attr == 'years_experience_ia' or attr == 'years_experience_healthcare':
+                if attr in ['years_experience_ia', 'years_experience_healthcare']:
                     query = query.filter(getattr(User, attr) >= criteria[attr])
-                elif attr == 'affiliation_organization' or attr == 'community_involvement' or attr == 'suggestions' or attr == 'skills':
+                elif attr in ['affiliation_organization', 'community_involvement', 'suggestions', 'skills']:
                     query = query.filter(getattr(User, attr).like(f"%{criteria[attr]}%"))
                 else:
                     query = query.filter(getattr(User, attr) == criteria[attr])
