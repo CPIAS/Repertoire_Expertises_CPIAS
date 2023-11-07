@@ -16,7 +16,6 @@
     "@types/react-dom": "^18.2.7",
     "axios": "^1.5.0",
     "d3": "^7.8.5",
-    "eslint": "^8.49.0",
     "framer-motion": "^6.5.1",
     "humps": "^2.0.1",
     "neo4jd3": "^0.0.5",
@@ -42,9 +41,6 @@
     "lint": "eslint src",
     "start:proxy": "node setupProxy.js"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -61,6 +57,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/d3": "^7.4.2",
     "@types/humps": "^2.0.4",
-    "eslint-plugin-react": "^7.33.2"
+    "eslint": "^8.53.0",
+    "eslint-plugin-react": "^7.27.1"
   }
 }
