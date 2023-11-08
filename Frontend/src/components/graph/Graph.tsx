@@ -8,10 +8,11 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
     const [selectedNode, setSelectedNode] = useState<{ id: number, title: string, label: string } | null>(null);
-
+    const tagsMap = new Map();
+    console.log(members);
     const limitedMembers = members
-        .slice(0, 15) // Slice to get the first 15 members
-        .filter(member => member.tags && member.tags.trim() !== '');
+        .slice(0, 15); // Slice to get the first 15 members
+        // .filter(member => member.tags && member.tags.trim() !== '');
 
     const [isDrawerOpen, setDrawerOpen] = useState(false);  
     const mockGraphData = {
@@ -21,11 +22,25 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
                     id: index + 1,
                     label: member.userId === 0 ? query : `${member.firstName} ${member.lastName}`,
                     title: `Member id ${index + 1}`, // Specify it as a member node
-                    color: '#CCCBFF',
+                    color: '#17b978',
+                    shape: 'ellipse', // Rectangles for members
+                    // shape: 'image', // Use custom image
+                    // image: '/path/to/rectangle.png', // Path to your custom rectangle image
                     tags: member.tags.split(',').map(tag => tag.trim()) // Split tags by commas and trim spaces
+                }
+            )),
+            ...Array.from(tagsMap.entries()).map(([tag, nodeId]) => (
+                {
+                    id: nodeId,
+                    label: tag,
+                    title: `Tag id ${nodeId}`,
+                    color: '#8b008b',
+                    shape: 'box', // Curved rectangles for tags
+                    tags: []
                 }
             ))
         ],
+
         edges: [
             // { from: 0, to: 3 },
             // { from: 0, to: 5 },
@@ -48,42 +63,35 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
     //     }
     // }
 
-    const tagsMap = new Map();
-
     for (let i = 0; i < limitedMembers.length; i++) {
-        for (let j = i + 1; j < limitedMembers.length; j++) {
-            const tagsA = limitedMembers[i].tags.split(',').map(tag => tag.trim()); // Split tags by commas and trim spaces
-            const tagsB = limitedMembers[j].tags.split(',').map(tag => tag.trim()); // Split tags by commas and trim spaces
-
-            tagsA.forEach(tagA => {
-                if (!tagsMap.has(tagA)) {
+        const tagsA = limitedMembers[i].tags.split(',').map(tag => tag.trim()); // Split tags by commas and trim spaces
+    
+        for (let j = 0; j < tagsA.length; j++) {
+            const tagA = tagsA[j];
+    
+            // Skip empty tags
+            if (!tagA) {
+                continue;
+            }
+    
+            // Split tags containing 'et' into separate tags
+            const splitTags = tagA.split('et').map(tag => tag.trim());
+    
+            splitTags.forEach(tagB => {
+                if (!tagsMap.has(tagB)) {
                     const newNodeId = mockGraphData.nodes.length + 1;
                     mockGraphData.nodes.push({
                         id: newNodeId,
-                        label: tagA,
+                        label: tagB,
                         title: `Tag id ${newNodeId}`,
-                        color: '#FFCCCB',
-                        tags: []
+                        color: '#8b008b',
+                        tags: [],
+                        shape: 'box'
                     });
-                    tagsMap.set(tagA, newNodeId);
+                    tagsMap.set(tagB, newNodeId);
                 }
-
-                tagsB.forEach(tagB => {
-                    if (!tagsMap.has(tagB)) {
-                        const newNodeId = mockGraphData.nodes.length + 1;
-                        mockGraphData.nodes.push({
-                            id: newNodeId,
-                            label: tagB,
-                            title: `Tag id ${newNodeId}`,
-                            color: '#FFCCCB',
-                            tags: []
-                        });
-                        tagsMap.set(tagB, newNodeId);
-                    }
-
-                    mockGraphData.edges.push({ from: i + 1, to: tagsMap.get(tagA) });
-                    mockGraphData.edges.push({ from: j + 1, to: tagsMap.get(tagB) });
-                });
+    
+                mockGraphData.edges.push({ from: i + 1, to: tagsMap.get(tagB) });
             });
         }
     }
@@ -162,21 +170,21 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
                                         {selectedNode.title.includes('Member') && ( // Check if it's a member node
                                             <>
                                                 <br />
-                                                First Name: {members[selectedNode.id].firstName}<br />
-                                                Last Name: {members[selectedNode.id].lastName}<br />
-                                                Email: {members[selectedNode.id].email}<br />
-                                                Subscription Date: {members[selectedNode.id].subscriptionDate}<br />
-                                                Affiliation Organization: {members[selectedNode.id].affiliationOrganization}<br />
-                                                Community Involvement: {members[selectedNode.id].communityInvolvement}<br />
-                                                Job Position: {members[selectedNode.id].jobPosition}<br />
-                                                Membership Category: {members[selectedNode.id].membershipCategory}<br />
-                                                Membership Category Other: {members[selectedNode.id].membershipCategoryOther}<br />
-                                                Skills: {members[selectedNode.id].skills}<br />
-                                                Suggestions: {members[selectedNode.id].suggestions}<br />
-                                                Years of Experience in Healthcare: {members[selectedNode.id].yearsExperienceHealthcare}<br />
-                                                Years of Experience in IA: {members[selectedNode.id].yearsExperienceIa}<br />
-                                                Tags: {members[selectedNode.id].tags}<br />
-                                                Profile Picture: {members[selectedNode.id].profilePicture}<br />
+                                                First Name: {members[selectedNode.id-1].firstName}<br />
+                                                Last Name: {members[selectedNode.id-1].lastName}<br />
+                                                Email: {members[selectedNode.id-1].email}<br />
+                                                Subscription Date: {members[selectedNode.id-1].subscriptionDate}<br />
+                                                Affiliation Organization: {members[selectedNode.id-1].affiliationOrganization}<br />
+                                                Community Involvement: {members[selectedNode.id-1].communityInvolvement}<br />
+                                                Job Position: {members[selectedNode.id-1].jobPosition}<br />
+                                                Membership Category: {members[selectedNode.id-1].membershipCategory}<br />
+                                                Membership Category Other: {members[selectedNode.id-1].membershipCategoryOther}<br />
+                                                Skills: {members[selectedNode.id-1].skills}<br />
+                                                Suggestions: {members[selectedNode.id-1].suggestions}<br />
+                                                Years of Experience in Healthcare: {members[selectedNode.id-1].yearsExperienceHealthcare}<br />
+                                                Years of Experience in IA: {members[selectedNode.id-1].yearsExperienceIa}<br />
+                                                Tags: {members[selectedNode.id-1].tags}<br />
+                                                Profile Picture: {members[selectedNode.id-1].profilePicture}<br />
                                             </>
                                         )}
                                     </Text>
