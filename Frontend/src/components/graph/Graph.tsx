@@ -35,9 +35,11 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
                     id: nodeId,
                     label: tag,
                     title: `Tag id ${nodeId}`,
-                    color: '#8b008b',
-                    shape: 'box', // Curved rectangles for tags
-                    tags: []
+                    color: {
+                        border: '#F2810C', // Contour color
+                        background: '#CCCBFF', // Background color
+                    },
+                    shape: '', // Curved rectangles for tags
                 }
             ))
         ],
@@ -85,8 +87,10 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
                         id: newNodeId,
                         label: tagB,
                         title: `Tag id ${newNodeId}`,
-                        color: '#8b008b',
-                        tags: [],
+                        color: {
+                            border: '#F2810C', // Contour color
+                            background: '#FEEBC8', // Background color
+                        },
                         shape: 'box'
                     });
                     tagsMap.set(tagB, newNodeId);
