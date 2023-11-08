@@ -112,7 +112,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                             alignContent={'center'}
                                             alignItems={'center'}
                                         >
-                                            <NetworkGraph />
+                                            <NetworkGraph members={members}/>
                                         </TabPanel>
                                         <TabPanel width={'100%'}>
                                             <MemberCard members={members} />
