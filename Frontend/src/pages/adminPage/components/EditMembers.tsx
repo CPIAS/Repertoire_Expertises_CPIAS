@@ -4,8 +4,8 @@ import { Flex, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-u
 import axios from 'axios';
 import humps from 'humps';
 import React, { useEffect, useState } from 'react';
-import { Member } from '../../../models/member';
 import EditMemberProfileModal from '../../../components/modals/EditMemberProfileModal';
+import { Member } from '../../../models/member';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 // const API_KEY = process.env.REACT_APP_API_KEY;
@@ -22,7 +22,6 @@ const EditMembers: React.FC = () => {
         setSelectedMember(member);
         setIsModalOpen(true);
     };
-
     useEffect(() => {
         const fetchMembers = async () => {
             try {
@@ -41,7 +40,7 @@ const EditMembers: React.FC = () => {
 
     const generateRows = () => {
         return members.map((member) => (
-            <Tr key={member.userId}>
+            <Tr key={member.userId} width={'100%'}>
                 <Td isNumeric>{member.userId}</Td>
                 <Td>{member.lastName}</Td>
                 <Td>{member.firstName}</Td>
@@ -63,35 +62,56 @@ const EditMembers: React.FC = () => {
             height={'100%'}
             justifyContent={'center'}
             alignContent={'center'}
+            flexWrap={'wrap'}
         >
             <EditMemberProfileModal 
                 selectedMember={selectedMember!}
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
             /> 
-            <Flex>
-                {''}
-            </Flex>
             <Flex
-                backgroundColor={'white'}
+                width={'100%'}
+                flexWrap={'wrap'}
+                justifyContent={'center'}
             >
-            
-                <TableContainer width={'100%'}>
-                    <Table>
-                        <Thead>
-                            <Tr>
-                                <Th isNumeric>{'ID'}</Th>
-                                <Th>{'Nom'}</Th>
-                                <Th>{'Prénom'}</Th>
-                                <Th>{'Membre depuis'}</Th>
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            {generateRows()}
-                        </Tbody>
-                    </Table>
-                </TableContainer>
+                <Flex
+                    width={'100%'}
+                    paddingTop={'2rem'}
+                    flexWrap={'wrap'}
+                    justifyContent={'center'}
+                >
+                    <Flex
+                        width={'100%'}
+                        fontWeight={'bold'}
+                        fontSize={'xl'}
+                        paddingBottom={'2rem'}
+                    >
+                        {'Gérer les membres'}
+                    </Flex>
+                
+                    <Flex
+                        backgroundColor={'white'}
+                        // width={'65%'}
+                    >
+                        <TableContainer width={'100%'}>
+                            <Table>
+                                <Thead>
+                                    <Tr>
+                                        <Th isNumeric>{'ID'}</Th>
+                                        <Th>{'Nom'}</Th>
+                                        <Th>{'Prénom'}</Th>
+                                        <Th>{'Membre depuis'}</Th>
+                                    </Tr>
+                                </Thead>
+                                <Tbody>
+                                    {generateRows()}
+                                </Tbody>
+                            </Table>
+                        </TableContainer>
+                    </Flex>
+                </Flex>
             </Flex>
+            
         </Flex>
     );
 };

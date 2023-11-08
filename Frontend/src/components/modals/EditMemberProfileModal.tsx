@@ -1,4 +1,4 @@
-import { Button, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
+import { Button, Flex, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { Member } from '../../models/member';
 
@@ -36,12 +36,15 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size='3xl'>
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size='6xl'>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>{'Détails du membre'}</ModalHeader>
                 <ModalCloseButton />
-                <ModalBody>
+                <ModalBody
+                    overflowY={'scroll'}
+                    maxHeight={'70vh'}
+                >
                     {editedMember && (
                         <>
                             <FormLabel htmlFor="userId" paddingTop={'1rem'}>ID</FormLabel>
@@ -72,17 +75,52 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                                 value={editedMember.email}
                                 onChange={(e) => handleFieldChange('email', e.target.value)}
                             />
+
+                            <FormLabel htmlFor="membershipCategory" paddingTop={'1rem'}>Type de membre</FormLabel>
+                            <Input
+                                id="membershipCategory"
+                                value={editedMember.membershipCategory}
+                                onChange={(e) => handleFieldChange('membershipCategory', e.target.value)}
+                            />
+
+                            <FormLabel htmlFor="jobPosition" paddingTop={'1rem'}>Titre d'emploi</FormLabel>
+                            <Input
+                                id="jobPosition"
+                                value={editedMember.jobPosition}
+                                onChange={(e) => handleFieldChange('jobPosition', e.target.value)}
+                            />
+
+                            <FormLabel htmlFor="affiliationOrganization" paddingTop={'1rem'}>Organisation d'affiliation</FormLabel>
+                            <Input
+                                id="affiliationOrganization"
+                                value={editedMember.affiliationOrganization}
+                                onChange={(e) => handleFieldChange('affiliationOrganization', e.target.value)}
+                            />
+
                         </>
                     )}
                 </ModalBody>
 
                 <ModalFooter>
-                    <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
-                        Fermer
-                    </Button>
-                    <Button colorScheme="green" onClick={handleSaveChanges}>
-                        Enregistrer
-                    </Button>
+                    <Flex 
+                        width={'100%'}
+                        justifyContent={'space-between'}
+                    >
+                    
+                        <Button colorScheme="red" onClick={() => setIsModalOpen(false)}>
+                            {'Supprimer le membre'}
+                        </Button>
+                        <Flex
+                            gap={'1rem'}
+                        >
+                            <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
+                                {'Fermer'}
+                            </Button>
+                            <Button colorScheme="green" onClick={handleSaveChanges}>
+                                {'Enregistrer'}
+                            </Button>
+                        </Flex>
+                    </Flex>
                 </ModalFooter>
             </ModalContent>
         </Modal>
