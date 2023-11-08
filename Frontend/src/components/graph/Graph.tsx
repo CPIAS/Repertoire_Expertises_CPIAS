@@ -2,10 +2,12 @@ import { Flex } from '@chakra-ui/react';
 import React from 'react';
 import Graph from 'react-graph-vis';
 import { useSearchParams } from 'react-router-dom';
+import { Member } from '../../models/member';
 
-const NetworkGraph: React.FC = () => {
+const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
+
     const mockGraphData = {
         nodes: [
             { id: 0, label: query, color: '#FFCCCB' },

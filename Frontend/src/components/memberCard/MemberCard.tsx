@@ -1,5 +1,5 @@
 import { EmailIcon } from '@chakra-ui/icons';
-import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Link, Tag } from '@chakra-ui/react';
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Image, Link, Tag, Text, Tooltip } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
@@ -21,6 +21,30 @@ const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ mem
         const updatedStates = [...profileCorrectionModalStates];
         updatedStates[index] = false;
         setProfileCorrectionModalStates(updatedStates);
+    };
+
+    const getDescription = (member: Member) => {
+        const filteredCategory = member.membershipCategory.trim() === 'Autre' ? '' : member.membershipCategory;
+        const filteredOrganization = member.affiliationOrganization.split(',').filter(organization => organization.trim() !== 'Autre');
+        const organizationsAbreviations = filteredOrganization.map((org) => org.split('- ')[0]);
+        const organizations = filteredOrganization.map((org) => org.split('- ')[1]);
+        const shouldIncludeParentheses = (filteredCategory && filteredOrganization.length > 0);
+      
+        return (
+            <>
+                {filteredCategory}
+                {shouldIncludeParentheses ? ' (' : ''}
+                {organizationsAbreviations.map((org, index) => (
+                    <Tooltip hasArrow placement={'bottom'} label={organizations[index]} key={index}>
+                        <Text>
+                            {org}{index < organizationsAbreviations.length-1 && (',')}
+                        </Text>
+                        
+                    </Tooltip>
+                ))}
+                {shouldIncludeParentheses ? ')' : ''}
+            </>
+        );
     };
 
     return (
@@ -49,39 +73,64 @@ const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ mem
                     >
                         <Flex
                             width={'100%'}
-                            flexWrap={'wrap'}
+                            flexWrap={'nowrap'}
                             gap={'1rem'}
                         >
-                            <Flex 
-                                width={'100%'}
-                                flexWrap={'wrap'}
+                            <Flex
+                                marginRight={'0.5rem'}
+                                width={'10%'}
                             >
-                                <Flex width={'100%'} fontSize={'xl'} fontWeight={'bold'}>
-                                    {`${member.firstName} ${member.lastName}`}
+                                <Image 
+                                    // src={member.profilePicture ?? './images/avatar/generic-avatar.png'}
+                                    src={member.profilePicture ? `https://drive.google.com/uc?export=view&id=${member.profilePicture}` : './images/avatar/generic-avatar.png'}
+                                    borderRadius='full'
+                                    border={`1px solid ${colors.grey.dark}`}
+                                    boxSize='125px'
+                                />
+                            </Flex>
+                            <Flex
+                                flexWrap={'wrap'}
+                                alignItems={'center'}
+                                gap={'0.5rem'}
+                                width={'90%'}
+                            >
+                                <Flex 
+                                    width={'100%'}
+                                    flexWrap={'wrap'}
+                                    alignItems={'center'}
+                                >
+                                    <Flex width={'100%'} fontSize={'xl'} fontWeight={'bold'} alignItems={'center'}>
+                                        {`${member.firstName} ${member.lastName}`}
+                                    </Flex>
+                                    <Flex maxWidth={'80%'} alignItems={'center'}>
+                                        {getDescription(member)}
+                                    </Flex>
                                 </Flex>
-                                <Flex width={'100%'}>
-                                    {`${member.membershipCategory} - ${member.affiliationOrganization}`}
+                                <Flex
+                                    width={'100%'}
+                                    gap={'0.5rem'}
+                                >
+                                    {member.tags.length > 0 
+                                        && member.tags.split(/,| et /).map((tag, index) => (
+                                            <Flex
+                                                key={`${index}_flex`}
+                                                alignItems={'center'}
+                                            >
+                                                <Tag 
+                                                    colorScheme='orange'
+                                                    borderRadius='full'
+                                                    size={'md'}
+                                                    border={'1px solid'}
+                                                    borderColor={colors.orange.main}
+                                                >
+                                                    {tag.trim().length <= 3 ? tag.trim().toUpperCase() : `${tag.trim().charAt(0).toUpperCase()}${tag.trim().slice(1).toLowerCase()}`}
+                                                </Tag>
+                                            </Flex>
+                                        ))
+                                    }
+
                                 </Flex>
                             </Flex>
-                            {member.skills.length > 0 &&
-                                member.skills.split(',').map((skill, index) => (
-                                    <Flex
-                                        key= {`${index}_flex`}
-                                        alignItems={'center'}
-                                    >
-                                        <Tag 
-                                            colorScheme='orange'
-                                            borderRadius='full'
-                                            size={'md'}
-                                            border={'1px solid'}
-                                            borderColor={colors.orange.main}
-                                        >
-                                            {`${skill}`}
-                                        </Tag>
-                                    </Flex>
-                                ))
-                                
-                            }
                         </Flex>
                         <AccordionIcon 
                             boxSize={16}

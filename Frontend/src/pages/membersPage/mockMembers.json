@@ -1,6 +1,6 @@
 [
     {
-        "affiliationOrganization": "Centre hospitalier de l'Université de Montréal",
+        "affiliationOrganization": "TÉLUQ -  Université TÉLUQ",
         "affiliationOrganizationOther": "",
         "communityInvolvement": "Volunteer at Local Charity",
         "email": "johndoe@email.com",
@@ -14,41 +14,46 @@
         "suggestions": "Improve data visualization tools",
         "userId": 1,
         "yearsExperienceHealthcare": 2,
-        "yearsExperienceIa": 4
+        "yearsExperienceIa": 4,
+        "tags": "Intelligence artifielle, Neurosciences",
+        "profilePicture": "1yPT_e1qQUw7oGxvbFW0Bo3957qB2uAFk"
     },
     {
-        "affiliationOrganization": "Polytechnique Montréal",
+        "affiliationOrganization": "TÉLUQ -  Université TÉLUQ",
         "affiliationOrganizationOther": "Analog Computer Inc",
         "communityInvolvement": "Member of Green Initiative",
         "email": "janesmith@email.com",
         "firstName": "Jane",
         "jobPosition": "Software Engineer",
         "lastName": "Smith",
-        "membershipCategory": "Étudiante PhD",
+        "membershipCategory": "Étudiant",
         "membershipCategoryOther": "",
         "skills": "Développement Web",
         "subscriptionDate": "Sat, 10 Dec 2022 00:00:00 GMT",
         "suggestions": "Enhance user interface",
         "userId": 2,
         "yearsExperienceHealthcare": 0,
-        "yearsExperienceIa": 5
+        "yearsExperienceIa": 5,
+        "tags": "Intelligence artifielle, Neurosciences",
+        "profilePicture": "1yPT_e1qQUw7oGxvbFW0Bo3957qB2uAFk"
     },
     {
-        "affiliationOrganization": "LMN Ltd",
+        "affiliationOrganization": "Polytechnique Montréal",
         "affiliationOrganizationOther": "",
         "communityInvolvement": "Youth Mentor",
         "email": "michael@email.com",
         "firstName": "Michael",
         "jobPosition": "Data Scientist",
         "lastName": "Johnson",
-        "membershipCategory": "Industrialist",
+        "membershipCategory": "Industriel",
         "membershipCategoryOther": "",
         "skills": "Machine Learning",
         "subscriptionDate": "Mon, 20 Feb 2023 00:00:00 GMT",
         "suggestions": "Expand dataset collection",
         "userId": 3,
         "yearsExperienceHealthcare": 3,
-        "yearsExperienceIa": 6
+        "yearsExperienceIa": 6,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "PQR Co",
@@ -65,7 +70,8 @@
         "suggestions": "Launch new feature",
         "userId": 4,
         "yearsExperienceHealthcare": 1,
-        "yearsExperienceIa": 8
+        "yearsExperienceIa": 8,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "UVW Designers",
@@ -82,7 +88,8 @@
         "suggestions": "Improve user testing process",
         "userId": 5,
         "yearsExperienceHealthcare": 0,
-        "yearsExperienceIa": 4
+        "yearsExperienceIa": 4,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "XYZ Corporation",
@@ -99,7 +106,8 @@
         "suggestions": "Optimize code performance",
         "userId": 6,
         "yearsExperienceHealthcare": 2,
-        "yearsExperienceIa": 7
+        "yearsExperienceIa": 7,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "Research Institute",
@@ -116,7 +124,8 @@
         "suggestions": "Conduct more surveys",
         "userId": 7,
         "yearsExperienceHealthcare": 4,
-        "yearsExperienceIa": 5
+        "yearsExperienceIa": 5,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "ABC Inc",
@@ -133,7 +142,8 @@
         "suggestions": "Enhance user feedback system",
         "userId": 8,
         "yearsExperienceHealthcare": 5,
-        "yearsExperienceIa": 9
+        "yearsExperienceIa": 9,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "UVW Designers",
@@ -150,7 +160,8 @@
         "suggestions": "Revamp user interface",
         "userId": 9,
         "yearsExperienceHealthcare": 1,
-        "yearsExperienceIa": 3
+        "yearsExperienceIa": 3,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "LMN Ltd",
@@ -167,7 +178,8 @@
         "suggestions": "Improve data accuracy",
         "userId": 10,
         "yearsExperienceHealthcare": 2,
-        "yearsExperienceIa": 5
+        "yearsExperienceIa": 5,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "Other",
@@ -184,7 +196,8 @@
         "suggestions": "Expand machine learning models",
         "userId": 11,
         "yearsExperienceHealthcare": 3,
-        "yearsExperienceIa": 7
+        "yearsExperienceIa": 7,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "XYZ Corporation",
@@ -201,7 +214,8 @@
         "suggestions": "Automate data entry",
         "userId": 12,
         "yearsExperienceHealthcare": 0,
-        "yearsExperienceIa": 6
+        "yearsExperienceIa": 6,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "ABC Inc",
@@ -218,7 +232,8 @@
         "suggestions": "Enhance user engagement",
         "userId": 13,
         "yearsExperienceHealthcare": 1,
-        "yearsExperienceIa": 4
+        "yearsExperienceIa": 4,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "Research Institute",
@@ -235,7 +250,8 @@
         "suggestions": "Launch new product line",
         "userId": 14,
         "yearsExperienceHealthcare": 2,
-        "yearsExperienceIa": 8
+        "yearsExperienceIa": 8,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "UVW Designers",
@@ -252,7 +268,8 @@
         "suggestions": "Optimize website performance",
         "userId": 15,
         "yearsExperienceHealthcare": 1,
-        "yearsExperienceIa": 7
+        "yearsExperienceIa": 7,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "LMN Ltd",
@@ -269,7 +286,8 @@
         "suggestions": "Analyze survey data",
         "userId": 16,
         "yearsExperienceHealthcare": 4,
-        "yearsExperienceIa": 4
+        "yearsExperienceIa": 4,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "PQR Co",
@@ -286,7 +304,8 @@
         "suggestions": "Improve adoption process",
         "userId": 17,
         "yearsExperienceHealthcare": 5,
-        "yearsExperienceIa": 9
+        "yearsExperienceIa": 9,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "XYZ Corporation",
@@ -303,7 +322,8 @@
         "suggestions": "Enhance app usability",
         "userId": 18,
         "yearsExperienceHealthcare": 2,
-        "yearsExperienceIa": 5
+        "yearsExperienceIa": 5,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "ABC Inc",
@@ -320,7 +340,8 @@
         "suggestions": "Optimize data visualization",
         "userId": 19,
         "yearsExperienceHealthcare": 1,
-        "yearsExperienceIa": 6
+        "yearsExperienceIa": 6,
+        "tags": "Intelligence artifielle, Neurosciences"
     },
     {
         "affiliationOrganization": "Research Institute",
@@ -337,6 +358,7 @@
         "suggestions": "Enhance data modeling",
         "userId": 20,
         "yearsExperienceHealthcare": 3,
-        "yearsExperienceIa": 7
+        "yearsExperienceIa": 7,
+        "tags": "Intelligence artifielle, Neurosciences"
     }
 ]
