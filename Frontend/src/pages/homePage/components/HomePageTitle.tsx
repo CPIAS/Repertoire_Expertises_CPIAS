@@ -16,7 +16,7 @@ const HomePageTitle: React.FC = () => {
                 alignItems={'center'}
             >
                 <Text 
-                    fontSize='6xl'
+                    fontSize={{ base: '2xl', sm: '3xl', md: '5xl', lg: '6xl' }}
                     fontWeight={'bold'}
                     textAlign={'center'}
                 >
@@ -30,7 +30,7 @@ const HomePageTitle: React.FC = () => {
                 alignItems={'flex-start'}
             >
                 <Text
-                    fontSize='2xl'
+                    fontSize={{ base: 'lg', md: 'xl', lg: '2xl' }}
                     textAlign={'center'}
                 >
                     {'Trouvez des collaborateurs pour vos projets en intelligence artificielle et en santé.'}

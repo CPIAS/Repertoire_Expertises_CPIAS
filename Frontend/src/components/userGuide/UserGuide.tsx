@@ -45,7 +45,7 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                 flexWrap={'wrap'}
                 justifyContent={'center'}
                 alignItems={'flex-start'}
-                paddingTop={'1rem'}
+                padding={'1rem'}
                 alignContent={'flex-start'}
                 overflow={'scroll'}
             >
@@ -70,8 +70,8 @@ const UserGuide: React.FC<UserGuideSteps> = ({
             <Flex
                 width={'100%'}
                 flexWrap={'wrap'}
-                alignItems={'flex-start'}
-                alignContent={'flex-start'}
+                alignItems={'center'}
+                alignContent={'center'}
                 gap={'1rem'}
                 overflow={'scroll'}
             >
@@ -99,8 +99,9 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                     width={'100%'}
                     alignItems={'center'}
                     flexWrap={'wrap'}
-                    gap={'1rem'}
-                    paddingY={'1.5rem'}
+                    gap={{ base: '2rem', lg: '1rem' }}
+                    paddingY={'1rem'}
+                    flexDirection={{ base: 'column', lg: 'row' }}
                 >
                     <Text fontWeight={'semibold'}>
                         {'Pour consulter plusieurs exemples de requêtes dans un autre onglet, cliquez sur ce bouton :'}

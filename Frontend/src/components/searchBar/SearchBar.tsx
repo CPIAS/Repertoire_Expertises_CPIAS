@@ -51,14 +51,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 size={'lg'}
             >
                 <AutoResizeTextarea 
-                    placeholder={'Rechercher un nom, un mot-clé, une phrase...'} 
-                    fontSize={'xl'}
+                    placeholder={'Effectuer une recherche...'} 
+                    fontSize={{ base: 'sm', md: 'lg', lg: 'xl' }}
                     backgroundColor={colors.darkAndLight.white}
                     paddingRight={'4.5rem'}
                     paddingY={'1rem'}
                     borderRadius={'1rem'}
                     cursor={isReadOnly ? 'default' : 'auto'}
-                    border={'1px solid darkgrey'}
+                    border={'1px solid darkgrey !important'}
                     onChange={(event) => {
                         setSearchQuery(event.target.value.trim());
                     }}

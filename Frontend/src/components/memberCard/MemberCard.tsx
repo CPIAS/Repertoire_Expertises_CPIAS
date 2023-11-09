@@ -77,15 +77,15 @@ const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ mem
                             gap={'1rem'}
                         >
                             <Flex
-                                marginRight={'0.5rem'}
-                                width={'10%'}
+                                marginRight={{ base: 'none', md:'0.5rem', lg: '0.5rem' }}
+                                width={{ base: '100px', md:'125px', lg: '125px' }}
                             >
                                 <Image 
                                     // src={member.profilePicture ?? './images/avatar/generic-avatar.png'}
                                     src={member.profilePicture ? `https://drive.google.com/uc?export=view&id=${member.profilePicture}` : './images/avatar/generic-avatar.png'}
                                     borderRadius='full'
                                     border={`1px solid ${colors.grey.dark}`}
-                                    boxSize='125px'
+                                    // boxSize='125px'
                                 />
                             </Flex>
                             <Flex
@@ -99,16 +99,21 @@ const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ mem
                                     flexWrap={'wrap'}
                                     alignItems={'center'}
                                 >
-                                    <Flex width={'100%'} fontSize={'xl'} fontWeight={'bold'} alignItems={'center'}>
+                                    <Text width={'100%'} fontSize={'xl'} fontWeight={'bold'} textAlign={'start'} noOfLines={2}>
                                         {`${member.firstName} ${member.lastName}`}
-                                    </Flex>
-                                    <Flex maxWidth={'80%'} alignItems={'center'}>
+                                    </Text>
+                                    <Flex 
+                                        maxWidth={'80%'} 
+                                        alignItems={'center'}
+                                        display={{ base: 'none', md:'flex', lg: 'flex' }}
+                                    >
                                         {getDescription(member)}
                                     </Flex>
                                 </Flex>
                                 <Flex
                                     width={'100%'}
                                     gap={'0.5rem'}
+                                    display={{ base: 'none', md:'flex', lg: 'flex' }}
                                 >
                                     {member.tags.length > 0 
                                         && member.tags.split(/,| et /).map((tag, index) => (
@@ -139,11 +144,39 @@ const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ mem
                         />
                     </AccordionButton>
                     <AccordionPanel 
-                        padding={'1.5rem'}  
+                        padding={{ base: 'none', md:'1.5rem', lg: '1.5rem' }}  
                     >
                         <Flex
                             width={'100%'}
+                            gap={'0.5rem'}
+                            paddingBottom={'1.5rem'}
+                            display={{ base: 'flex', md:'none', lg: 'none' }}
+                            overflowX={'scroll'}
+                        >
+                            {member.tags.length > 0 
+                                        && member.tags.split(/,| et /).map((tag, index) => (
+                                            <Flex
+                                                key={`${index}_flex`}
+                                                alignItems={'center'}
+                                            >
+                                                <Tag 
+                                                    colorScheme='orange'
+                                                    borderRadius='full'
+                                                    size={{ base: 'sm', md:'md', lg: 'md' }}
+                                                    border={'1px solid'}
+                                                    borderColor={colors.orange.main}
+                                                >
+                                                    {tag.trim().length <= 3 ? tag.trim().toUpperCase() : `${tag.trim().charAt(0).toUpperCase()}${tag.trim().slice(1).toLowerCase()}`}
+                                                </Tag>
+                                            </Flex>
+                                        ))
+                            }
+
+                        </Flex>
+                        <Flex
+                            width={'100%'}
                             alignItems={'center'}
+                            paddingBottom={'1.5rem'}
                         >
                             <EmailIcon boxSize={8} paddingRight={'0.5rem'}/> 
                             <Link 
