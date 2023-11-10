@@ -12,6 +12,7 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
     
     const [selectedNode, setSelectedNode] = useState<{ id: number; title: string; label: string } | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [zoomLevel, setZoomLevel] = useState(1);
     
     console.log(members);
     
@@ -116,6 +117,13 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
         nodes: {
             shape: 'box',
         },
+
+        zoom: {
+            level: zoomLevel,
+            enabled: true,
+            max: 2,
+            min: 0.5,
+        },
     };
         
     const events = {
@@ -153,6 +161,9 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
                 // Update the nodes with the new styling
                 mockGraphData.nodes = updatedNodes;
             }
+        },
+        zoom: (event: any) => {
+            setZoomLevel(event.scale);
         },
     };
     
