@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Graph from 'react-graph-vis';
 import { useSearchParams } from 'react-router-dom';
 import { Member } from '../../models/member';
+import MemberDrawer from './components/MemberDrawer';
 
 const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
     const [searchParams] = useSearchParams();
@@ -14,7 +15,7 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
         .slice(0, 15); // Slice to get the first 15 members
         // .filter(member => member.tags && member.tags.trim() !== '');
 
-    const [isDrawerOpen, setDrawerOpen] = useState(false);  
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);  
     const mockGraphData = {
         nodes: [
             ...limitedMembers.map((member, index) => (
@@ -118,7 +119,7 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
                 // };
 
                 setSelectedNode(selectedNodeData || null);
-                setDrawerOpen(true);
+                setIsDrawerOpen(true);
             }
         },
     };
@@ -137,47 +138,13 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
                 options={options}
                 events={events}
             />
-            {selectedNode && (
-                <Drawer
-                    isOpen={isDrawerOpen}
-                    placement="right"
-                    onClose={() => setDrawerOpen(false)}
-                    
-                >
-                    <DrawerOverlay>
-                        <DrawerContent>
-                            <DrawerCloseButton />
-                            <DrawerHeader>{selectedNode.title}</DrawerHeader>
-                            <DrawerBody>
-                                <Text>
-                                    <Text>
-                                        {selectedNode.label}
-                                        {selectedNode.title.includes('Member') && ( // Check if it's a member node
-                                            <>
-                                                <br />
-                                                First Name: {members[selectedNode.id-1].firstName}<br />
-                                                Last Name: {members[selectedNode.id-1].lastName}<br />
-                                                Email: {members[selectedNode.id-1].email}<br />
-                                                Subscription Date: {members[selectedNode.id-1].subscriptionDate}<br />
-                                                Affiliation Organization: {members[selectedNode.id-1].affiliationOrganization}<br />
-                                                Community Involvement: {members[selectedNode.id-1].communityInvolvement}<br />
-                                                Job Position: {members[selectedNode.id-1].jobPosition}<br />
-                                                Membership Category: {members[selectedNode.id-1].membershipCategory}<br />
-                                                Membership Category Other: {members[selectedNode.id-1].membershipCategoryOther}<br />
-                                                Skills: {members[selectedNode.id-1].skills}<br />
-                                                Suggestions: {members[selectedNode.id-1].suggestions}<br />
-                                                Years of Experience in Healthcare: {members[selectedNode.id-1].yearsExperienceHealthcare}<br />
-                                                Years of Experience in IA: {members[selectedNode.id-1].yearsExperienceIa}<br />
-                                                Tags: {members[selectedNode.id-1].tags}<br />
-                                                Profile Picture: {members[selectedNode.id-1].profilePicture}<br />
-                                            </>
-                                        )}
-                                    </Text>
-                                </Text>
-                            </DrawerBody>
-                        </DrawerContent>
-                    </DrawerOverlay>
-                </Drawer>
+            {selectedNode?.title.includes('Member') && (
+                <MemberDrawer 
+                    selectedMember={members[selectedNode.id-1]}
+                    isOpen={isDrawerOpen} 
+                    setDrawerOpen={setIsDrawerOpen}
+                />
+               
             )}
         </Flex>
     );
