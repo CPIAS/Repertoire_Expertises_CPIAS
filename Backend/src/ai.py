@@ -1,3 +1,4 @@
+import csv
 import logging
 import os
 import string
@@ -167,16 +168,22 @@ class LLM:
         return filtered_documents
 
     @staticmethod
-    def __get_user_ids_from_llm_response(response: list[Document]) -> list[int]:
-        user_ids = []
+    def __get_user_emails_from_llm_response(source_documents: list[Document]) -> list[str]:
+        user_emails = []
 
-        for document in response:
-            lines = document.page_content.split('\n')
-            _, value = lines[0].split(': ', 1)
-            if str.isnumeric(value):
-                user_ids.append(int(value))
+        with open(SERVER_SETTINGS['users_csv_file'], 'r') as csv_file:
+            csv_file_reader = csv.reader(csv_file)
+            next(csv_file_reader)  # Skip the header row.
 
-        return user_ids
+            for i, row in enumerate(csv_file_reader):
+                for document in source_documents:
+                    source_row = document.metadata['row']
+
+                    if source_row == i:
+                        user_emails.append(row[3])
+                        break
+
+        return user_emails
 
     def __init_qa_chain(self) -> None:
         self.qa_llm = self.__get_qa_llm(SERVER_SETTINGS['qa_llm_model'])
@@ -208,9 +215,9 @@ class LLM:
             self.is_available = True
             logging.info(msg="The LLM has been successfully initialized.")
 
-    def get_user_recommendations(self, question: str) -> list[int]:
+    def get_user_recommendations(self, question: str) -> list[str]:
         response = self.qa_chain({"query": question})
-        return self.__get_user_ids_from_llm_response(response['source_documents'])
+        return self.__get_user_emails_from_llm_response(response['source_documents'])
 
     def get_keywords(self, text: str) -> list[str]:
         llm_keywords = self.keywords_chain.predict_and_parse(document=text).lstrip().split(', ')

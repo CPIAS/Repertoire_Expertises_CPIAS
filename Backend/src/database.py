@@ -16,20 +16,18 @@ class Database:
     db: SQLAlchemy = SQLAlchemy()
     T = TypeVar('T', int, float)
     user_attributes_to_csv_columns_map = [
-        ("registration_date", 1),
-        ("first_name", 2),
-        ("last_name", 3),
-        ("email", 4),
-        ("membership_category", 5),
-        ("membership_category_other", 6),
-        ("job_position", 7),
-        ("affiliation_organization", 8),
-        ("affiliation_organization_other", 9),
-        ("skills", 10),
-        ("years_experience_ia", 11),
-        ("years_experience_healthcare", 12),
-        ("community_involvement", 13),
-        ("suggestions", 14),
+        ("registration_date", 0),
+        ("first_name", 1),
+        ("last_name", 2),
+        ("email", 3),
+        ("membership_category", 4),
+        ("job_position", 5),
+        ("affiliation_organization", 6),
+        ("skills", 7),
+        ("years_experience_ia", 8),
+        ("years_experience_healthcare", 9),
+        ("community_involvement", 10),
+        ("suggestions", 11),
     ]
 
     def __init__(self, app: Flask, llm: LLM):
@@ -62,7 +60,7 @@ class Database:
     @staticmethod
     def get_date(date_string: str) -> Optional[date]:
         try:
-            formatted_date = datetime.strptime(date_string, "%m-%d-%Y %H:%M:%S").date()
+            formatted_date = datetime.strptime(date_string, "%m/%d/%Y %H:%M:%S").date()
         except ValueError as e:
             logging.error(msg=str(e), exc_info=True)
             return None
@@ -81,22 +79,19 @@ class Database:
 
     def create_user_from_csv_row(self, row: list[str]):
         return User(
-            user_id=self.get_number(row[0], int),
-            registration_date=self.get_date(row[1]),
-            first_name=row[2],
-            last_name=row[3],
-            email=row[4],
-            membership_category=row[5],
-            membership_category_other=row[6],
-            job_position=row[7],
-            affiliation_organization=row[8],
-            affiliation_organization_other=row[9],
-            skills=row[10],
-            years_experience_ia=self.get_number(row[11], float),
-            years_experience_healthcare=self.get_number(row[12], float),
-            community_involvement=row[13],
-            suggestions=row[14],
-            tags=', '.join(self.llm.get_keywords(row[10]))
+            registration_date=self.get_date(row[0]),
+            first_name=row[1],
+            last_name=row[2],
+            email=row[3],
+            membership_category=row[4],
+            job_position=row[5],
+            affiliation_organization=row[6],
+            skills=row[7],
+            years_experience_ia=self.get_number(row[8], float),
+            years_experience_healthcare=self.get_number(row[9], float),
+            community_involvement=row[10],
+            suggestions=row[11],
+            tags=', '.join(self.llm.get_keywords(row[7]))
         )
 
     def is_empty(self) -> bool:
@@ -124,8 +119,7 @@ class Database:
                     next(csv_file_reader)  # Skip the header row.
 
                     for row in csv_file_reader:
-                        user_id = self.get_number(row[0], int)
-                        user = self.session.get(User, user_id)
+                        user = User.query.filter(User.email == row[3])
 
                         if user:
                             for attr, index in self.user_attributes_to_csv_columns_map:
@@ -158,15 +152,13 @@ class User(Database.db.Model):
     __tablename__ = 'users'
 
     user_id: int = Column(Integer, primary_key=True)
-    first_name: str = Column(Text, nullable=True)
-    last_name: str = Column(Text, nullable=True)
+    first_name: str = Column(Text, nullable=False)
+    last_name: str = Column(Text, nullable=False)
     registration_date: datetime.date = Column(Date, nullable=True)
     email: str = Column(Text, unique=True, nullable=False)
     membership_category: str = Column(Text, nullable=True)
-    membership_category_other: str = Column(Text, nullable=True)
     job_position: str = Column(Text, nullable=True)
     affiliation_organization: str = Column(Text, nullable=True)
-    affiliation_organization_other: str = Column(Text, nullable=True)
     skills: str = Column(Text, nullable=True)
     years_experience_ia: float = Column(Float, nullable=True)
     years_experience_healthcare: float = Column(Float, nullable=True)

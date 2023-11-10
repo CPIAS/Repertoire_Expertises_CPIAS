@@ -50,7 +50,7 @@ def init_server() -> None:
             db_future = executor.submit(db.init)
             db_future.result()
 
-            if not llm.is_available:
+            if not db.is_available:
                 raise Exception("Server initialization failed.")
 
     except Exception as e:
