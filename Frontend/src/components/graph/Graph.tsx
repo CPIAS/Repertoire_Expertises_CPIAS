@@ -43,27 +43,8 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
             ))
         ],
 
-        edges: [
-            // { from: 0, to: 3 },
-            // { from: 0, to: 5 },
-            // { from: 0, to: 5 },
-            // { from: 0, to: 6 },
-            // { from: 0, to: 7 },
-            // { from: 1, to: 3 },
-            // { from: 1, to: 6 },
-            // { from: 1, to: 7 },
-            // { from: 2, to: 4 },
-            // { from: 2, to: 5 },
-        ] as { from: number; to: number }[]
+        edges: [] as { from: number; to: number }[]
     };
-    
-    // for (let i = 0; i < members.length; i++) {
-    //     for (let j = i + 1; j < members.length; j++) {
-    //         if (members[i].jobPosition === members[j].jobPosition) {
-    //             mockGraphData.edges.push({ from: i + 1, to: j + 1 });
-    //         }
-    //     }
-    // }
 
     for (let i = 0; i < limitedMembers.length; i++) {
         const tagsA = limitedMembers[i].tags.split(',').map(tag => tag.trim()); // Split tags by commas and trim spaces
