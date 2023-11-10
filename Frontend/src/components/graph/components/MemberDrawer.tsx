@@ -128,8 +128,8 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                 >
                                     {'Organisation(s) d\'affiliation'}
                                 </Text>
-                                {selectedMember.affiliationOrganization.split(',').map(org => (
-                                    <Text width={'100%'}>
+                                {selectedMember.affiliationOrganization.split(',').map((org: string, index: number) => (
+                                    <Text key={index} width={'100%'}>
                                         {org}
                                     </Text>
                                 ))}
