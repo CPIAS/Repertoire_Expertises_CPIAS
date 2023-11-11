@@ -1,8 +1,8 @@
 import csv
 import os
-import logging
 from dataclasses import dataclass
 from datetime import datetime, date
+from logging import Logger
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, Text, Date, Float
@@ -30,10 +30,11 @@ class Database:
         ("suggestions", 11),
     ]
 
-    def __init__(self, app: Flask, llm: LLM):
+    def __init__(self, app: Flask, llm: LLM, app_logger: Logger):
         self.__database_directory: str = os.path.abspath(SERVER_SETTINGS['database_directory'])
         self.app: Flask = app
         self.llm: LLM = llm
+        self.app_logger: Logger = app_logger
         self.session: scoped_session = self.db.session
         self.is_available: bool = False
 
@@ -52,27 +53,25 @@ class Database:
 
             except Exception as e:
                 self.session.rollback()
-                logging.error(msg=str(e), exc_info=True)
+                self.app_logger.error(msg=str(e), exc_info=True)
             else:
                 self.is_available = True
-                logging.info(msg="The database has been successfully initialized.")
+                self.app_logger.info(msg="The database has been successfully initialized.")
 
-    @staticmethod
-    def get_date(date_string: str) -> Optional[date]:
+    def get_date(self, date_string: str) -> Optional[date]:
         try:
             formatted_date = datetime.strptime(date_string, "%m/%d/%Y %H:%M:%S").date()
         except ValueError as e:
-            logging.error(msg=str(e), exc_info=True)
+            self.app_logger.error(msg=str(e), exc_info=True)
             return None
         else:
             return formatted_date
 
-    @staticmethod
-    def get_number(number_string: str, t: Type[T]) -> Optional[T]:
+    def get_number(self, number_string: str, t: Type[T]) -> Optional[T]:
         try:
             number = t(number_string)
         except ValueError as e:
-            logging.error(msg=str(e), exc_info=True)
+            self.app_logger.error(msg=str(e), exc_info=True)
             return None
         else:
             return number
@@ -141,10 +140,10 @@ class Database:
                     self.session.commit()
             except Exception as e:
                 self.session.rollback()
-                logging.error(msg=str(e), exc_info=True)
+                self.app_logger.error(msg=str(e), exc_info=True)
             else:
                 self.is_available = True
-                logging.info(msg="The database has been successfully updated.")
+                self.app_logger.info(msg="The database has been successfully updated.")
 
 
 @dataclass

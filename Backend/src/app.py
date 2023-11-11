@@ -22,20 +22,20 @@ from schedule import every, repeat, run_pending
 #                                             GLOBAL VARIABLES                                                    #
 ###################################################################################################################
 
+app_logger = logging.getLogger('gunicorn.error')
 app = Flask(__name__, template_folder=SERVER_SETTINGS['template_directory'])
-llm = LLM()
-db = Database(app, llm)
+llm = LLM(app_logger)
+db = Database(app, llm, app_logger)
 
 
 ###################################################################################################################
 #                                                 METHODS                                                         #
 ###################################################################################################################
 
-
 def init_server() -> None:
     try:
         CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified in a production environment.
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', filename=SERVER_SETTINGS['server_log_file'])
+        app_logger.setLevel(logging.INFO)
 
         if not os.path.exists(SERVER_SETTINGS["users_csv_file"]):
             download_users_csv_file_from_google_drive()
@@ -54,9 +54,9 @@ def init_server() -> None:
                 raise Exception("Server initialization failed.")
 
     except Exception as e:
-        logging.error(msg=str(e), exc_info=True)
+        app_logger.error(msg=str(e), exc_info=True)
     else:
-        logging.info(msg="The server has been successfully initialized.")
+        app_logger.info(msg="The server has been successfully initialized.")
 
 
 def download_users_csv_file_from_google_drive() -> None:
@@ -70,18 +70,18 @@ def download_users_csv_file_from_google_drive() -> None:
 def check_for_database_updates() -> None:
     try:
         if not db.is_available:
-            logging.warning("Unable to run database updates. Database is not available.")
+            app_logger.warning("Unable to run database updates. Database is not available.")
             return
 
         if not llm.is_available:
-            logging.warning("Unable to run database updates. LLM is not available.")
+            app_logger.warning("Unable to run database updates. LLM is not available.")
             return
 
         download_users_csv_file_from_google_drive()
         db.update(SERVER_SETTINGS["users_csv_file"])
 
     except Exception as e:
-        logging.error(msg=str(e), exc_info=True)
+        app_logger.error(msg=str(e), exc_info=True)
 
 
 def check_scheduled_tasks():
@@ -157,7 +157,7 @@ def search_users():
             return jsonify({"message": "No question provided"}), 400
 
     except Exception as e:
-        logging.error(msg=str(e), exc_info=True)
+        app_logger.error(msg=str(e), exc_info=True)
         return jsonify({"message": "An error occurred while searching for the answer to the question."}), 500
 
 
@@ -209,7 +209,7 @@ def request_profile_correction():
         return jsonify({"message": "Email sent successfully."}), 200
 
     except Exception as e:
-        logging.error(msg=str(e), exc_info=True)
+        app_logger.error(msg=str(e), exc_info=True)
         return jsonify({"message": "An error occurred and email could not be sent."}), 500
 
 
@@ -236,7 +236,7 @@ def filter_users():
         return matching_users, 200
 
     except Exception as e:
-        logging.error(msg=str(e), exc_info=True)
+        app_logger.error(msg=str(e), exc_info=True)
         return jsonify({'message': 'An error occurred when filtering users.'}), 500
 
 
@@ -256,7 +256,7 @@ def get_keywords_from_user_expertise():
             return jsonify({"message": "No user expertise provided"}), 400
 
     except Exception as e:
-        logging.error(msg=str(e), exc_info=True)
+        app_logger.error(msg=str(e), exc_info=True)
         return jsonify({"message": "An error occurred while extracting keywords from user expertise."}), 500
 
 

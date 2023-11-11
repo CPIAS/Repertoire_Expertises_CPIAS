@@ -1,8 +1,8 @@
 import csv
-import logging
 import os
 import string
 import spacy
+from logging import Logger
 import pandas as pd
 import chardet
 import chromadb
@@ -32,13 +32,14 @@ from spacy import Language
 from settings import SERVER_SETTINGS
 
 from Backend.src.ai_models import Experts, User
-from statistics import mean 
+from statistics import mean
 from langchain.prompts.few_shot import FewShotPromptTemplate
 from langchain.prompts.prompt import PromptTemplate
 from chromadb.config import Settings
 
 class LLM:
-    def __init__(self):
+    def __init__(self, app_logger: Logger):
+        self.app_logger = app_logger
         self.qa_llm: Optional[Ollama] = None
         self.user_documents: Optional[list[Document]] = None
         self.qa_embeddings: Optional[OllamaEmbeddings] = None
@@ -210,10 +211,10 @@ class LLM:
             linkldin_data_file_path = str(Path('../resources/out.json'))
             self.init_recommandation_pipeline(persist_directory, user_file_path, linkldin_data_file_path)
         except Exception as e:
-            logging.error(msg=str(e), exc_info=True)
+            self.app_logger.error(msg=str(e), exc_info=True)
         else:
             self.is_available = True
-            logging.info(msg="The LLM has been successfully initialized.")
+            self.app_logger.info(msg="The LLM has been successfully initialized.")
 
     def get_user_recommendations(self, question: str) -> list[str]:
         response = self.qa_chain({"query": question})
@@ -236,7 +237,7 @@ class LLM:
             index = candidate_keywords.index(keybert_keyword)
             keywords.append(llm_keywords[index])
         return keywords
-    
+
 
     def init_recommandation_pipeline(self, DB_persist_directory:str, user_file_path: str, linkdln_data_file_path:str):
         self.chromaDB_client = chromadb.PersistentClient(path=DB_persist_directory)
@@ -264,7 +265,7 @@ class LLM:
             user = User()
             for column, value in row.items():
                 setattr(user, str(column), str(value))
-            
+
             user.user_id = str(count)
             users.append(user)
             count += 1
@@ -275,11 +276,11 @@ class LLM:
             for split in splits:
                 user.linldinSkills.append(split)
         return users
-    
+
 
     def get_generic_profiles_prompt(self):
         parser = PydanticOutputParser(pydantic_object=Experts)
-        
+
         example_prompt = PromptTemplate(input_variables=["question", "answer"], template="Question: {question}\n{answer}")
         examples = [
         {
@@ -458,7 +459,7 @@ class LLM:
         output = llm(input1)
         profiles = parser.parse(output)
         return profiles
-   
+
     def load_json(self, path:str):
             import json
             f = open(path, encoding='utf8')
@@ -475,10 +476,10 @@ class LLM:
                             skill = GoogleTranslator(source='auto', target='en').translate(str(experience['description']))
                             splits = skill.split(".")
                             for split in splits:
-                                user.linldinSkills.append(split)                
+                                user.linldinSkills.append(split)
                     break
         return users
-    
+
     def init_chromaDb_collection(self):
         collection = self.chromaDB_client.get_or_create_collection(name="experts")
         skills = []
@@ -494,11 +495,11 @@ class LLM:
         metadatas=sources,
         ids=ids)
         return collection
-    
+
     def get_experts_recommandation(self, question: str):
-        
+
         skillsNeeded = self.get_generic_profiles(self.get_generic_profiles_prompt(), question, "mistral:instruct", 0.1).profiles
-        
+
         result = self.chomaDB_collection.query(
             query_texts=skillsNeeded,
             n_results=25
@@ -516,14 +517,14 @@ class LLM:
                     tab.append({"first_name":user.first_name,
                                 "last_name":user.last_name,
                                 "skills":user.skills,
-                                "tags":user.tags, 
-                                "years_experience_ia":user.years_experience_ia, 
-                                "years_experience_healthcare":user.years_experience_healthcare, 
+                                "tags":user.tags,
+                                "years_experience_ia":user.years_experience_ia,
+                                "years_experience_healthcare":user.years_experience_healthcare,
                                 "score":similarity_score})
                     idList.add(metadata['user_id'])
-            skillNeeded = GoogleTranslator(source='auto', target='fr').translate(skillsNeeded[i]) 
+            skillNeeded = GoogleTranslator(source='auto', target='fr').translate(skillsNeeded[i])
             experts['experts'].append({"categorie":skillNeeded, "recommendation":tab})
-        
+
         return experts
 
     def find_user(self, users:list[User], id:str):
@@ -531,25 +532,25 @@ class LLM:
             if user.user_id == id:
                 return user
 
-    
+
 # if __name__ == '__main__':
 #     llm = LLM(
 #     qa_llm_model='mistral:instruct',
 #     keywords_llm_model='camembert/camembert-large',
 #     users_csv_file=Path('../resources/cleaned_expertise_extended_renamed.csv')
 #     )
-    
+
 #     persist_directory =  str(Path("../vector_store"))
 #     user_file_path = str(Path('../resources/USERS.csv'))
 #     linkldin_data_file_path = str(Path('../resources/out.json'))
 #     llm.init_recommandation_pipeline(persist_directory, user_file_path, linkldin_data_file_path)
-    
+
 
 
 #     # sentenceTransformer_model = SentenceTransformer('dangvantuan/sentence-camembert-large')
 #     # #query = "I am a cardiologist and researcher at the CHUM. I have a particular interest in cardiac imaging research and lead prospective research studies using echocardiography as a research modality in the adult patient population. I am interested in using cardiac imaging data and developing algorithms to establish diagnoses of cardiac pathologies."
 #     query = "Recherche professionnelle de la santé pour trouver un projet de recherche dans le cadre de ma maîtrise. Je fais du deep learning et je m’intéresse à la robotique"
-    
+
 
 #     print("-----------------------------------------------------\n")
 #     print("querying chroma...\n")
@@ -558,9 +559,9 @@ class LLM:
 #     import pprint
 #     pprint.pprint(res)
 
-   
 
-    
 
-    
+
+
+
 

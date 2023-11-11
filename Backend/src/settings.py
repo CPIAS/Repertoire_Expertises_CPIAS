@@ -6,7 +6,8 @@ SERVER_SETTINGS = {
     "keywords_llm_model": "camembert/camembert-large",
     "spacy_nlp": "fr_core_news_sm",
     "users_csv_file": "../resources/users.csv",
-    "server_log_file": "../server.log",
+    "access_log_file": "../server_access.log",
+    "error_log_file": "../server_error.log",
     "sqlite_db": "users.db",
     "google_drive_csv_file_id": "1GdqBrGbhtBrvnOgeIwJWA-WP0VFzr8d9"
 }
