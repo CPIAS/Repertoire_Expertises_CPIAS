@@ -15,20 +15,20 @@ from ai import LLM
 class Database:
     db: SQLAlchemy = SQLAlchemy()
     T = TypeVar('T', int, float)
-    user_attributes_to_csv_columns_map = [
-        ("registration_date", 0),
-        ("first_name", 1),
-        ("last_name", 2),
-        ("email", 3),
-        ("membership_category", 4),
-        ("job_position", 5),
-        ("affiliation_organization", 6),
-        ("skills", 7),
-        ("years_experience_ia", 8),
-        ("years_experience_healthcare", 9),
-        ("community_involvement", 10),
-        ("suggestions", 11),
-    ]
+    user_attributes_to_csv_columns_map = {
+        "registration_date": 0,
+        "first_name": 1,
+        "last_name": 2,
+        "email": 3,
+        "membership_category": 4,
+        "job_position": 5,
+        "affiliation_organization": 6,
+        "skills": 7,
+        "years_experience_ia": 8,
+        "years_experience_healthcare": 9,
+        "community_involvement": 10,
+        "suggestions": 11,
+    }
 
     def __init__(self, app: Flask, llm: LLM, app_logger: Logger):
         self.__database_directory: str = os.path.abspath(SERVER_SETTINGS['database_directory'])
@@ -78,19 +78,19 @@ class Database:
 
     def create_user_from_csv_row(self, row: list[str]):
         return User(
-            registration_date=self.get_date(row[0]),
-            first_name=row[1],
-            last_name=row[2],
-            email=row[3],
-            membership_category=row[4],
-            job_position=row[5],
-            affiliation_organization=row[6],
-            skills=row[7],
-            years_experience_ia=self.get_number(row[8], float),
-            years_experience_healthcare=self.get_number(row[9], float),
-            community_involvement=row[10],
-            suggestions=row[11],
-            tags=', '.join(self.llm.get_keywords(row[7]))
+            registration_date=self.get_date(row[self.user_attributes_to_csv_columns_map["registration_date"]]),
+            first_name=row[self.user_attributes_to_csv_columns_map["first_name"]],
+            last_name=row[self.user_attributes_to_csv_columns_map["last_name"]],
+            email=row[self.user_attributes_to_csv_columns_map["email"]],
+            membership_category=row[self.user_attributes_to_csv_columns_map["membership_category"]],
+            job_position=row[self.user_attributes_to_csv_columns_map["job_position"]],
+            affiliation_organization=row[self.user_attributes_to_csv_columns_map["affiliation_organization"]],
+            skills=row[self.user_attributes_to_csv_columns_map["skills"]],
+            years_experience_ia=self.get_number(row[self.user_attributes_to_csv_columns_map["years_experience_ia"]], float),
+            years_experience_healthcare=self.get_number(row[self.user_attributes_to_csv_columns_map["years_experience_healthcare"]], float),
+            community_involvement=row[self.user_attributes_to_csv_columns_map["community_involvement"]],
+            suggestions=row[self.user_attributes_to_csv_columns_map["suggestions"]],
+            tags=', '.join(self.llm.get_keywords(row[self.user_attributes_to_csv_columns_map["skills"]]))
         )
 
     def is_empty(self) -> bool:
@@ -99,51 +99,94 @@ class Database:
 
     def populate(self, users_csv_file: str) -> None:
         with self.app.app_context():
-            with open(users_csv_file, 'r') as csv_file:
-                csv_file_reader = csv.reader(csv_file)
-                next(csv_file_reader)  # Skip the header row.
+            data = self.read_csv(users_csv_file)
 
-                for row in csv_file_reader:
-                    user = self.create_user_from_csv_row(row)
-                    self.session.add(user)
+            for row in data[1:]:  # Skip the header row.
+                user = self.create_user_from_csv_row(row)
+                self.session.add(user)
 
-                self.session.commit()
+            self.session.commit()
 
     def update(self, users_csv_file: str) -> None:
         with self.app.app_context():
             try:
                 self.is_available = False
-                with open(users_csv_file, 'r') as csv_file:
-                    csv_file_reader = csv.reader(csv_file)
-                    next(csv_file_reader)  # Skip the header row.
+                data = self.read_csv(users_csv_file)
 
-                    for row in csv_file_reader:
-                        user = User.query.filter(User.email == row[3])
+                for row in data[1:]:  # Skip the header row.
+                    user = User.query.filter(User.email == row[3]).first()
 
-                        if user:
-                            for attr, index in self.user_attributes_to_csv_columns_map:
-                                if attr == "registration_date":
-                                    new_value = self.get_date(row[index])
-                                elif attr in ["years_experience_ia", "years_experience_healthcare"]:
-                                    new_value = self.get_number(row[index], float)
-                                else:
-                                    new_value = row[index]
+                    if user:
+                        for attr, index in self.user_attributes_to_csv_columns_map.items():
+                            if attr == "registration_date":
+                                new_value = self.get_date(row[index])
+                            elif attr in ["years_experience_ia", "years_experience_healthcare"]:
+                                new_value = self.get_number(row[index], float)
+                            else:
+                                new_value = row[index]
 
-                                if getattr(user, attr) != new_value:
-                                    setattr(user, attr, new_value)
-                                    if attr == "skills":
-                                        setattr(user, "tags", ', '.join(self.llm.get_keywords(new_value)))
-                        else:
-                            new_user = self.create_user_from_csv_row(row)
-                            self.session.add(new_user)
+                            if getattr(user, attr) != new_value:
+                                setattr(user, attr, new_value)
+                                if attr == "skills":
+                                    setattr(user, "tags", ', '.join(self.llm.get_keywords(new_value)))
+                    else:
+                        new_user = self.create_user_from_csv_row(row)
+                        self.session.add(new_user)
 
-                    self.session.commit()
+                self.session.commit()
             except Exception as e:
                 self.session.rollback()
                 self.app_logger.error(msg=str(e), exc_info=True)
             else:
                 self.is_available = True
                 self.app_logger.info(msg="The database has been successfully updated.")
+
+    @staticmethod
+    def read_csv(file_path: str) -> list[list[str]]:
+        data = []
+
+        with open(file_path, 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                data.append(row)
+
+        return data
+
+    @staticmethod
+    def write_csv(file_path: str, data: list[list[str]]) -> None:
+        with open(file_path, 'w') as file:
+            writer = csv.writer(file)
+            writer.writerows(data)
+
+    def delete_user_from_csv(self, user_email: str) -> None:
+        data = self.read_csv(SERVER_SETTINGS["users_csv_file"])
+        updated_data = []
+
+        for row in data:
+            if row[self.user_attributes_to_csv_columns_map["email"]] == user_email:
+                continue
+            updated_data.append(row)
+
+        if len(data) == len(updated_data):
+            raise Exception("User not found in the csv file. There is probably an inconsistency between the sqlite database and the csv file.")
+
+        self.write_csv(SERVER_SETTINGS["users_csv_file"], updated_data)
+
+    def update_user_in_csv(self, user_email: str, user_information_to_be_updated: dict) -> None:
+        data = self.read_csv(SERVER_SETTINGS["users_csv_file"])
+        user = []
+
+        for row in data:
+            if row[self.user_attributes_to_csv_columns_map["email"]] == user_email:
+                user = row
+
+        if not user:
+            raise Exception("User not found in the csv file. There is probably an inconsistency between the sqlite database and the csv file.")
+
+        for key, value in user_information_to_be_updated.items():
+            user[self.user_attributes_to_csv_columns_map[key]] = value
+
+        self.write_csv(SERVER_SETTINGS["users_csv_file"], data)
 
 
 @dataclass
