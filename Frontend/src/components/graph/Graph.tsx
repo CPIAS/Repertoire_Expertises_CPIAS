@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Flex} from '@chakra-ui/react';
 import React, { useState } from 'react';
 import Graph from 'react-graph-vis';
