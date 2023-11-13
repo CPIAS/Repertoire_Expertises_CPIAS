@@ -165,11 +165,10 @@ def search_users():
         question = request.get_data(as_text=True)
 
         if question:
-            user_ids: list[int] = llm.get_user_recommendations(question)
-            users = User.query.filter(User.user_id.in_(user_ids)).all()
+            experts = llm.get_experts_recommandation(question)
 
-            if users:
-                return users, 200
+            if experts:
+                return experts, 200
             else:
                 return jsonify({"message": "No users were found matching your query"}), 404
         else:
