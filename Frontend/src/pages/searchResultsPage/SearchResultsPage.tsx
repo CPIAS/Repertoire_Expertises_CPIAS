@@ -8,7 +8,7 @@ import Header from '../../components/header/Header';
 import SearchBar from '../../components/searchBar/SearchBar';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
-import mockMembers from '../membersPage/mockMembers.json';
+// import mockMembers from '../membersPage/mockMembers.json';
 import ResultsTabs from './components/ResultsTabs';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
@@ -19,40 +19,40 @@ const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [members, setMembers] = useState<Member[]>([]);
-    const [noResultsText] = useState<string>('Aucun résultat');
+    const [noResultsText, setNoResultsText] = useState<string>('Aucun résultat');
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
-
-    // useEffect(() => {
-    //     const fetchMembers = async () => {
-    //         try {
-    //             const response = await axios.post(`${API_HOST}/search`, query);
-    //             setMembers(humps.camelizeKeys(response.data) as Member[]);
-    //             setIsLoading(false);
-    //         } catch (error) {
-    //             console.error('Error while fetching members: ', error);
-    //             setNoResultsText('Une erreur est survenue.');
-    //             setIsLoading(false);
-    //         }
-    //     };
-
-    //     fetchMembers();
-    // }, [query]);
 
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await axios.get(`${API_HOST}/users`);
+                const response = await axios.post(`${API_HOST}/search`, query);
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error while fetching members: ', error);
+                setNoResultsText('Une erreur est survenue.');
                 setIsLoading(false);
             }
         };
 
         fetchMembers();
-    }, []);
+    }, [query]);
+
+    // useEffect(() => {
+    //     const fetchMembers = async () => {
+    //         try {
+    //             const response = await axios.get(`${API_HOST}/users`);
+    //             setMembers(humps.camelizeKeys(response.data) as Member[]);
+    //             setIsLoading(false);
+    //         } catch (error) {
+    //             console.error('Error while fetching members: ', error);
+    //             setIsLoading(false);
+    //         }
+    //     };
+
+    //     fetchMembers();
+    // }, []);
 
     return (
         <Flex 
@@ -111,7 +111,7 @@ const SearchResultsPage: React.FC = () => {
                         />
                         <Flex
                             marginLeft={'2rem'}
-                            width={'50%'}
+                            width={'100%'}
                         >
                             <SearchBar defaultValue={query}/>
                         </Flex>

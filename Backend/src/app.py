@@ -1,23 +1,33 @@
 import concurrent.futures
 import csv
 import os
+import smtplib
 from concurrent.futures import Future
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from pathlib import Path
-from flask import Flask, jsonify, request, render_template
+
 from ai import LLM
 from decorators import require_api_key
-from models import db, User
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
+from models import User, db
+from werkzeug.utils import secure_filename
 
 ###################################################################################################################
 #                                             GLOBAL VARIABLES                                                    #
 ###################################################################################################################
 
 app = Flask(__name__, template_folder='../templates')
-CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified for a production environment.
+CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified in a production environment.
 database_path = os.path.abspath('../database')
-llm = LLM(Path("../resources/expertise_extended_english_renamed.csv"))
+llm = LLM(
+    qa_llm_model='mistral:instruct',
+    keywords_llm_model='camembert/camembert-large',
+    users_csv_file=Path('../resources/cleaned_expertise_extended_renamed.csv')
+)
 llm_is_ready = False
 
 
@@ -96,8 +106,7 @@ def upload_csv_file():
                 for row in csv_file_reader:
                     user = User(
                         user_id=int(row[0]) if str.isnumeric(row[0]) else None,
-                        subscription_date=datetime.strptime(row[1], "%m-%d-%Y %H:%M:%S") if is_valid_date_format(row[1],
-                                                                                                                 "%m-%d-%Y %H:%M:%S") else None,
+                        registration_date=datetime.strptime(row[1], "%m-%d-%Y %H:%M:%S") if is_valid_date_format(row[1], "%m-%d-%Y %H:%M:%S") else None,
                         first_name=row[2],
                         last_name=row[3],
                         email=row[4],
@@ -110,7 +119,8 @@ def upload_csv_file():
                         years_experience_ia=float(row[11]) if str.isnumeric(row[11]) else None,
                         years_experience_healthcare=float(row[12]) if str.isnumeric(row[12]) else None,
                         community_involvement=row[13],
-                        suggestions=row[14]
+                        suggestions=row[14],
+                        tags=', '.join(llm.get_keywords(row[10]))
                     )
                     db.session.add(user)
 
@@ -142,9 +152,9 @@ def get_user(user_id):
         return jsonify({"message": "User not found"}), 404
 
 
-@app.route('/search', methods=['POST'], endpoint='search')
+@app.route('/search', methods=['POST'], endpoint='search_users')
 @require_api_key
-def search():
+def search_users():
     try:
         global llm
         global llm_is_ready
@@ -155,7 +165,7 @@ def search():
         question = request.get_data(as_text=True)
 
         if question:
-            user_ids: list[int] = llm.query(question)
+            user_ids: list[int] = llm.get_user_recommendations(question)
             users = User.query.filter(User.user_id.in_(user_ids)).all()
 
             if users:
@@ -167,6 +177,100 @@ def search():
 
     except:
         return jsonify({"message": "An error occurred while searching for the answer to the question."}), 500
+
+
+@app.route('/request_profile_correction', methods=['POST'], endpoint='request_profile_correction')
+@require_api_key
+def request_profile_correction():
+    try:
+        member_id = request.form.get('id')
+        member_last_name = request.form.get('memberLastName')
+        member_first_name = request.form.get('memberFirstName')
+        requester_email = request.form.get('requesterEmail')
+        requester_first_name = request.form.get('requesterFirstName')
+        requester_last_name = request.form.get('requesterLastName')
+        message = request.form.get('message')
+        uploaded_file = request.files.get('profilePicture')
+        
+        subject = 'Répertoire des expertises de la CPIAS - Demande de modification du profil de {}'.format(f"{member_first_name} {member_last_name}")
+        message = '''
+            Bonjour,
+            {} ({}) a réclamé une modification des informations de {} (ID={}) sur le répertoire des expertises de la CPIAS.
+                
+            Contenu du message :
+            "{}"
+        '''.format(f"{requester_first_name} {requester_last_name}", requester_email, f"{member_first_name} {member_last_name}", member_id, message)
+
+        sender = os.environ.get('EMAIL_SENDER')
+        recipients = os.environ.get('EMAIL_RECIPIENT')
+        password = os.environ.get('EMAIL_SENDER_PASSWORD')
+
+        msg = MIMEMultipart()
+        msg['Subject'] = subject
+        msg['From'] = sender
+        msg['To'] = recipients
+
+        body = MIMEText(message, 'plain')
+        msg.attach(body)
+
+        if uploaded_file:
+            # Create attachment and adds it to the message.
+            attachment_data = uploaded_file.read()
+            part = MIMEApplication(attachment_data)
+            part.add_header('content-disposition', 'attachment', filename=secure_filename(uploaded_file.filename))
+            msg.attach(part)
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+            smtp_server.login(sender, password)
+            smtp_server.sendmail(sender, recipients, msg.as_string())
+        return jsonify({"message": "Email sent successfully."}), 200
+    except:
+        return jsonify({"message": "An error occurred and email could not be sent."}), 500
+
+
+@app.route('/filter', methods=['POST'], endpoint='filter_users')
+@require_api_key
+def filter_users():
+    try:
+        criteria = request.json
+        query = User.query
+
+        for attr in dir(User):
+            if attr in criteria:
+                if attr == 'years_experience_ia' or attr == 'years_experience_healthcare':
+                    query = query.filter(getattr(User, attr) >= criteria[attr])
+                elif attr == 'affiliation_organization' or attr == 'community_involvement' or attr == 'suggestions' or attr == 'skills':
+                    query = query.filter(getattr(User, attr).like(f"%{criteria[attr]}%"))
+                else:
+                    query = query.filter(getattr(User, attr) == criteria[attr])
+
+        matching_users = query.all()
+        return matching_users, 200
+
+    except:
+        return jsonify({'message': 'An error occurred when filtering users.'}), 500
+
+
+@app.route('/keywords', methods=['POST'], endpoint='get_keywords_from_user_expertise')
+@require_api_key
+def get_keywords_from_user_expertise():
+    try:
+        global llm
+        global llm_is_ready
+
+        if not llm_is_ready:
+            return jsonify({"message": "LLM not available"}), 503
+
+        user_expertise = request.get_data(as_text=True)
+
+        if user_expertise:
+            keywords = llm.get_keywords(user_expertise)
+            return keywords, 200
+        else:
+            return jsonify({"message": "No user expertise provided"}), 400
+
+    except:
+        return jsonify({"message": "An error occurred while extracting keywords from user expertise."}), 500
 
 
 ###################################################################################################################
