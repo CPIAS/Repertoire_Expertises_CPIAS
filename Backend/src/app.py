@@ -135,9 +135,9 @@ def get_user(user_id):
         return jsonify({"message": "User not found"}), 404
 
 
-@app.route('/search', methods=['POST'], endpoint='search_users')
+@app.route('/search', methods=['POST'], endpoint='search_experts')
 @require_api_key
-def search_users():
+def search_experts():
     try:
         if not llm.is_available:
             return jsonify({"message": "LLM not available"}), 503
@@ -148,7 +148,7 @@ def search_users():
         question = request.get_data(as_text=True)
 
         if question:
-            experts = llm.get_experts_recommandation(question)
+            experts = llm.get_experts_recommendation(question)
 
             if experts:
                 return experts, 200

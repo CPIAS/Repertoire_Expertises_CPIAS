@@ -2,40 +2,28 @@ import csv
 import os
 import string
 import spacy
-from logging import Logger
-import pandas as pd
 import chardet
 import chromadb
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.output_parsers import PydanticOutputParser
-from langchain.pydantic_v1 import BaseModel, Field
-from typing import List
-from langchain.prompts import PromptTemplate
-from langchain.llms import Ollama
-from langchain.llms import Ollama
-from langchain.prompts import PromptTemplate
-from deep_translator import GoogleTranslator
-from sentence_transformers import SentenceTransformer, util
-from pathlib import Path
+import pandas as pd
+from logging import Logger
 from typing import Optional
+from ai_models import Experts, User
+from deep_translator import GoogleTranslator
 from flair.embeddings import TransformerDocumentEmbeddings
 from keybert import KeyBERT
-from langchain.llms import Ollama
-from langchain.document_loaders import CSVLoader
-from langchain.output_parsers import CommaSeparatedListOutputParser
-from langchain.prompts import PromptTemplate
-from langchain.embeddings import OllamaEmbeddings
-from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA, LLMChain
+from langchain.document_loaders import CSVLoader
+from langchain.embeddings import OllamaEmbeddings
+from langchain.llms import Ollama
+from langchain.output_parsers import CommaSeparatedListOutputParser
+from langchain.output_parsers import PydanticOutputParser
+from langchain.prompts.few_shot import FewShotPromptTemplate
+from langchain.prompts.prompt import PromptTemplate
 from langchain.schema import Document
+from langchain.vectorstores import Chroma
 from spacy import Language
 from settings import SERVER_SETTINGS
 
-from Backend.src.ai_models import Experts, User
-from statistics import mean
-from langchain.prompts.few_shot import FewShotPromptTemplate
-from langchain.prompts.prompt import PromptTemplate
-from chromadb.config import Settings
 
 class LLM:
     def __init__(self, app_logger: Logger):
@@ -53,11 +41,10 @@ class LLM:
         self.nlp: Optional[Language] = None
         self.stop_words: Optional[list[str]] = None
         self.is_available: bool = False
-        self.chromaDB_client = None
+        self.chroma_db_client = None
+        self.linkedin_data = None
         self.users = None
-        self.linkdln_data = None
-        self.users = None
-        self.chomaDB_collection = None
+        self.chroma_db_collection = None
 
     @staticmethod
     def __get_qa_llm(qa_llm_model: str, temperature: float = 0.0) -> Ollama:
@@ -73,7 +60,7 @@ class LLM:
         return OllamaEmbeddings(base_url="http://localhost:11434", model=qa_llm_model, temperature=temperature)
 
     @staticmethod
-    def __create_qa_vector_database(qa_embeddings: OllamaEmbeddings, user_documents: list[Document], persist_directory: str = "../vector_store") -> Chroma:
+    def __create_qa_vector_database(qa_embeddings: OllamaEmbeddings, user_documents: list[Document], persist_directory: str = SERVER_SETTINGS["../vector_directory"]) -> Chroma:
         if os.path.exists(persist_directory):
             vector_store = Chroma(embedding_function=qa_embeddings, persist_directory=persist_directory)
         else:
@@ -206,10 +193,7 @@ class LLM:
         try:
             self.__init_qa_chain()
             self.__init_keywords_chain()
-            persist_directory = str(Path("../vector_store"))
-            user_file_path = str(Path('../resources/USERS.csv'))
-            linkldin_data_file_path = str(Path('../resources/out.json'))
-            self.init_recommandation_pipeline(persist_directory, user_file_path, linkldin_data_file_path)
+            self.init_recommendation_pipeline(SERVER_SETTINGS["vector_directory"], SERVER_SETTINGS["users_csv_file"], SERVER_SETTINGS['linkedin_data_file'])
         except Exception as e:
             self.app_logger.error(msg=str(e), exc_info=True)
         else:
@@ -238,30 +222,30 @@ class LLM:
             keywords.append(llm_keywords[index])
         return keywords
 
-
-    def init_recommandation_pipeline(self, DB_persist_directory:str, user_file_path: str, linkdln_data_file_path:str):
-        self.chromaDB_client = chromadb.PersistentClient(path=DB_persist_directory)
+    def init_recommendation_pipeline(self, db_persist_directory: str, user_file_path: str, linkedin_data_file_path: str):
+        self.chroma_db_client = chromadb.PersistentClient(path=db_persist_directory)
         self.users = self.init_users(user_file_path)
-        self.linkdln_data = self.load_json(linkdln_data_file_path)
-        self.users = self.update_users(self.users, self.linkdln_data)
-        self.chomaDB_collection = self.init_chromaDb_collection()
+        self.linkedin_data = self.load_json(linkedin_data_file_path)
+        self.users = self.update_users(self.users, self.linkedin_data)
+        self.chroma_db_collection = self.init_chroma_db_collection()
 
-    def init_users(self, filename:str):
+    @staticmethod
+    def init_users(filename: str):
         with open(filename, 'rb') as f:
             result = chardet.detect(f.read())
 
-        csv = pd.read_csv(filename, usecols =
-        [
+        csv_reader = pd.read_csv(filename, usecols=[
             "Prénom",
             "Nom",
             "Compétences ou Expertise",
             "Nombre d'années d'expérience en IA",
             "Nombre d'années d'expérience en santé",
-        ], encoding=result['encoding'] )
-        csv.rename(columns={"Prénom": "first_name", "Nom": "last_name" , "Compétences ou Expertise": "skills", "Nombre d'années d'expérience en IA": "years_experience_ia", "Nombre d'années d'expérience en santé": "years_experience_healthcare"}, inplace=True)
-        users:list[User] = []
+        ], encoding=result['encoding'])
+        csv_reader.rename(columns={"Prénom": "first_name", "Nom": "last_name", "Compétences ou Expertise": "skills", "Nombre d'années d'expérience en IA": "years_experience_ia",
+                                   "Nombre d'années d'expérience en santé": "years_experience_healthcare"}, inplace=True)
+        users: list[User] = []
         count = 0
-        for index, row in csv.iterrows():
+        for index, row in csv_reader.iterrows():
             user = User()
             for column, value in row.items():
                 setattr(user, str(column), str(value))
@@ -277,182 +261,183 @@ class LLM:
                 user.linldinSkills.append(split)
         return users
 
-
-    def get_generic_profiles_prompt(self):
+    @staticmethod
+    def get_generic_profiles_prompt():
         parser = PydanticOutputParser(pydantic_object=Experts)
 
         example_prompt = PromptTemplate(input_variables=["question", "answer"], template="Question: {question}\n{answer}")
         examples = [
-        {
-            "question": "I want to develop a tool to predict the occupancy rate of emergency beds?",
-            "answer":
-        """
-        Are follow up questions needed here: Yes.
-        Follow up: Is a Researcher in operational mathematics important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Specialist in Modeling and Machine Learning important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Process and optimization engineer important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Artificial Intelligence (AI) and Natural Language Processing (NLP) Specialist important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Project Manager and Clinical Needs Analysis important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Data Security and Privacy Expert important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Software Developer and System Integration important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Implementation and Clinical Validation Specialist important for the project?
-        Intermediate answer: Yes.
-        So the final answer is: Researcher in operational mathematics, Specialist in Modeling and Machine Learning, Process and optimization engineer, Artificial Intelligence (AI) and Natural Language Processing (NLP) Specialist, Project Manager and Clinical Needs Analysis, Data Security and Privacy Expert, Software Developer and System Integration, Implementation and Clinical Validation Specialist
-        """
-        },
-        {
-            "question": "I want to optimize the care of individuals born prematurely: better screening, better intervention?",
-            "answer":
-        """
-        Are follow up questions needed here: Yes.
-        Follow up: Is a Researcher in Obstetric Medicine important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Epidemiology Researcher important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Screening Algorithms Developer important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a researcher in Neonatal Medicine and Pediatrics important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Specialist in Artificial Intelligence (AI) and Data Analysis important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Researcher in Public Health and Health Policies important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Communication and Awareness Researcher important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Expert in Clinical Validation and Long-Term Monitoring important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Specialist in Medical Ethics and Data Confidentiality imp for the project?
-        Intermediate answer: Yes.
-        So the final answer is: Researcher in Obstetric Medicine, Epidemiology Researcher, Screening Algorithms Developer, researcher in Neonatal Medicine and Pediatrics, Specialist in Artificial Intelligence (AI) and Data Analysis, Researcher in Public Health and Health Policies, Communication and Awareness Researcher, Expert in Clinical Validation and Long-Term Monitoring, Specialist in Medical Ethics and Data Confidentiality
-        """
-        },
-        {
-            "question": "I am looking for an AI expert to work on the personalization of radiopeptide therapy for patients with neuroendocrine tumors?",
-            "answer":
-        """
-        Are follow up questions needed here: Yes.
-        Follow up: Is a Oncologist specializing in neuroendocrine tumors important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Expert in artificial intelligence (AI) applied to medicine important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Medical physicist or radiophysicist important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Expert in medical image processing important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Health Data Scientist important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Software developer specializing in health important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Data security and privacy expert important for the project?
-        Intermediate answer: Yes.
-        So the final answer is: Oncologist specializing in neuroendocrine tumors, Expert in artificial intelligence (AI) applied to medicine, Medical physicist or radiophysicist, Expert in medical image processing, Health Data Scientist, Software developer specializing in health, Data security and privacy expert
-        """
-        },
-        {
-            "question": "I am in the health field, more specifically in rehabilitation, and I am looking for a developer who could add a chatbot to one of my software tools available online.",
-            "answer":
-        """
-        Are follow up questions needed here: Yes.
-        Follow up: Is a Software developer specializing in health important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Artificial Intelligence (AI) and Natural Language Processing (NLP) important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Data Security and Compliance Specialist important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Systems Integration Specialist important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Chatbot developer specializing in user experience (UX) important for the project?
-        Intermediate answer: Yes.
-        So the final answer is: Software developer specializing in health, Artificial Intelligence (AI) and Natural Language Processing (NLP), Data Security and Compliance Specialist, Systems Integration Specialist, Chatbot developer specializing in user experience (UX)
-        """
-        },
-        {
-            "question": "I am a cardiologist and I am looking to collaborate to develop an ML/AI algorithm to help me quantify cardiac fibrosis in MRI imaging.",
-            "answer":
-        """
-        Are follow up questions needed here: Yes.
-        Follow up: Is a Cardiologist specializing in cardiac imaging important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Medical image processing engineer important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Expert in machine learning (ML) and artificial intelligence (AI) important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Health Data Scientist important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Software developer specializing in health important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Data security and privacy expert important for the project?
-        Intermediate answer: Yes.
-        So the final answer is: Cardiologist specializing in cardiac imaging, Medical image processing engineer, Expert in machine learning (ML) and artificial intelligence (AI), Health Data Scientist, Software developer specializing in health, Data security and privacy expert
-        """
-        },
-        {
-            "question": "I work on the classification of knee pathologies using knee ultrasound data. I have developed deep learning algorithms using recurrent neural networks and I am looking for a data expert who works on the interpretability and explainability of models.",
-            "answer":
-        """
-        Are follow up questions needed here: Yes.
-        Follow up: Is a Specialist in medical imaging important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Expert in deep learning and recurrent neural networks (RNN) important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Health Data Scientist important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Expert in interpretability and explainability of AI models important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Software developer specializing in health important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Data security and privacy expert important for the project?
-        Intermediate answer: Yes.
-        So the final answer is: Specialist in medical imaging, Expert in deep learning and recurrent neural networks (RNN), Health Data Scientist, Expert in interpretability and explainability of AI models, Software developer specializing in health, Data security and privacy expert
-        """
-        },
-        {
-            "question": "I am a cardiologist and researcher at the CHUM. I have a particular interest in cardiac imaging research and lead prospective research studies using echocardiography as a research modality in the adult patient population. I am interested in using cardiac imaging data and developing algorithms to establish diagnoses of cardiac pathologies.",
-            "answer":
-        """
-        Are follow up questions needed here: Yes.
-        Follow up: Is a Cardiologist specializing in cardiac imaging important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Medical imaging researcher important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Health Data Scientist important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Expert in machine learning (ML) and artificial intelligence (AI) important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Software developer specializing in health important for the project?
-        Intermediate answer: Yes.
-        Follow up: Is a Data security and privacy expert important for the project?
-        Intermediate answer: Yes.
-        So the final answer is: Cardiologist specializing in cardiac imaging, Medical imaging researcher, Health Data Scientist, Expert in machine learning (ML) and artificial intelligence (AI), Software developer specializing in health, Data security and privacy expert
-        """
-        },
+            {
+                "question": "I want to develop a tool to predict the occupancy rate of emergency beds?",
+                "answer":
+                    """
+                    Are follow up questions needed here: Yes.
+                    Follow up: Is a Researcher in operational mathematics important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Specialist in Modeling and Machine Learning important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Process and optimization engineer important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Artificial Intelligence (AI) and Natural Language Processing (NLP) Specialist important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Project Manager and Clinical Needs Analysis important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Data Security and Privacy Expert important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Software Developer and System Integration important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Implementation and Clinical Validation Specialist important for the project?
+                    Intermediate answer: Yes.
+                    So the final answer is: Researcher in operational mathematics, Specialist in Modeling and Machine Learning, Process and optimization engineer, Artificial Intelligence (AI) and Natural Language Processing (NLP) Specialist, Project Manager and Clinical Needs Analysis, Data Security and Privacy Expert, Software Developer and System Integration, Implementation and Clinical Validation Specialist
+                    """
+            },
+            {
+                "question": "I want to optimize the care of individuals born prematurely: better screening, better intervention?",
+                "answer":
+                    """
+                    Are follow up questions needed here: Yes.
+                    Follow up: Is a Researcher in Obstetric Medicine important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Epidemiology Researcher important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Screening Algorithms Developer important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a researcher in Neonatal Medicine and Pediatrics important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Specialist in Artificial Intelligence (AI) and Data Analysis important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Researcher in Public Health and Health Policies important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Communication and Awareness Researcher important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Expert in Clinical Validation and Long-Term Monitoring important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Specialist in Medical Ethics and Data Confidentiality imp for the project?
+                    Intermediate answer: Yes.
+                    So the final answer is: Researcher in Obstetric Medicine, Epidemiology Researcher, Screening Algorithms Developer, researcher in Neonatal Medicine and Pediatrics, Specialist in Artificial Intelligence (AI) and Data Analysis, Researcher in Public Health and Health Policies, Communication and Awareness Researcher, Expert in Clinical Validation and Long-Term Monitoring, Specialist in Medical Ethics and Data Confidentiality
+                    """
+            },
+            {
+                "question": "I am looking for an AI expert to work on the personalization of radiopeptide therapy for patients with neuroendocrine tumors?",
+                "answer":
+                    """
+                    Are follow up questions needed here: Yes.
+                    Follow up: Is a Oncologist specializing in neuroendocrine tumors important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Expert in artificial intelligence (AI) applied to medicine important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Medical physicist or radiophysicist important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Expert in medical image processing important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Health Data Scientist important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Software developer specializing in health important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Data security and privacy expert important for the project?
+                    Intermediate answer: Yes.
+                    So the final answer is: Oncologist specializing in neuroendocrine tumors, Expert in artificial intelligence (AI) applied to medicine, Medical physicist or radiophysicist, Expert in medical image processing, Health Data Scientist, Software developer specializing in health, Data security and privacy expert
+                    """
+            },
+            {
+                "question": "I am in the health field, more specifically in rehabilitation, and I am looking for a developer who could add a chatbot to one of my software tools available online.",
+                "answer":
+                    """
+                    Are follow up questions needed here: Yes.
+                    Follow up: Is a Software developer specializing in health important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Artificial Intelligence (AI) and Natural Language Processing (NLP) important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Data Security and Compliance Specialist important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Systems Integration Specialist important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Chatbot developer specializing in user experience (UX) important for the project?
+                    Intermediate answer: Yes.
+                    So the final answer is: Software developer specializing in health, Artificial Intelligence (AI) and Natural Language Processing (NLP), Data Security and Compliance Specialist, Systems Integration Specialist, Chatbot developer specializing in user experience (UX)
+                    """
+            },
+            {
+                "question": "I am a cardiologist and I am looking to collaborate to develop an ML/AI algorithm to help me quantify cardiac fibrosis in MRI imaging.",
+                "answer":
+                    """
+                    Are follow up questions needed here: Yes.
+                    Follow up: Is a Cardiologist specializing in cardiac imaging important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Medical image processing engineer important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Expert in machine learning (ML) and artificial intelligence (AI) important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Health Data Scientist important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Software developer specializing in health important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Data security and privacy expert important for the project?
+                    Intermediate answer: Yes.
+                    So the final answer is: Cardiologist specializing in cardiac imaging, Medical image processing engineer, Expert in machine learning (ML) and artificial intelligence (AI), Health Data Scientist, Software developer specializing in health, Data security and privacy expert
+                    """
+            },
+            {
+                "question": "I work on the classification of knee pathologies using knee ultrasound data. I have developed deep learning algorithms using recurrent neural networks and I am looking for a data expert who works on the interpretability and explainability of models.",
+                "answer":
+                    """
+                    Are follow up questions needed here: Yes.
+                    Follow up: Is a Specialist in medical imaging important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Expert in deep learning and recurrent neural networks (RNN) important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Health Data Scientist important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Expert in interpretability and explainability of AI models important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Software developer specializing in health important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Data security and privacy expert important for the project?
+                    Intermediate answer: Yes.
+                    So the final answer is: Specialist in medical imaging, Expert in deep learning and recurrent neural networks (RNN), Health Data Scientist, Expert in interpretability and explainability of AI models, Software developer specializing in health, Data security and privacy expert
+                    """
+            },
+            {
+                "question": "I am a cardiologist and researcher at the CHUM. I have a particular interest in cardiac imaging research and lead prospective research studies using echocardiography as a research modality in the adult patient population. I am interested in using cardiac imaging data and developing algorithms to establish diagnoses of cardiac pathologies.",
+                "answer":
+                    """
+                    Are follow up questions needed here: Yes.
+                    Follow up: Is a Cardiologist specializing in cardiac imaging important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Medical imaging researcher important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Health Data Scientist important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Expert in machine learning (ML) and artificial intelligence (AI) important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Software developer specializing in health important for the project?
+                    Intermediate answer: Yes.
+                    Follow up: Is a Data security and privacy expert important for the project?
+                    Intermediate answer: Yes.
+                    So the final answer is: Cardiologist specializing in cardiac imaging, Medical imaging researcher, Health Data Scientist, Expert in machine learning (ML) and artificial intelligence (AI), Software developer specializing in health, Data security and privacy expert
+                    """
+            },
         ]
         prompt = FewShotPromptTemplate(
-        examples=examples,
-        example_prompt=example_prompt,
-        suffix=
-        """"
-            The examples above show you how you should procede to respond to any question. For each question try to think of the needs and suggest key experts to fulfill those needs.
-            Make sure that each experts that you suggest is important and relevant to the question.
-            Always emphasizes artificial intelligence, data security, confidentiality, health when it is necessary.
-            Just return the final answer with nothing else for example don't say: the final answer is ...
-            Only return the list of experts profiles separated by a comma
-            {format_instructions}
-            Question: {input}""",
-        input_variables=["input"],
-        partial_variables={"format_instructions": parser.get_format_instructions()},
+            examples=examples,
+            example_prompt=example_prompt,
+            suffix=
+            """"
+                The examples above show you how you should procede to respond to any question. For each question try to think of the needs and suggest key experts to fulfill those needs.
+                Make sure that each experts that you suggest is important and relevant to the question.
+                Always emphasizes artificial intelligence, data security, confidentiality, health when it is necessary.
+                Just return the final answer with nothing else for example don't say: the final answer is ...
+                Only return the list of experts profiles separated by a comma
+                {format_instructions}
+                Question: {input}""",
+            input_variables=["input"],
+            partial_variables={"format_instructions": parser.get_format_instructions()},
         )
         return prompt
 
-    def get_generic_profiles(self, prompt:PromptTemplate, query:str, llm_name:str, llm_temperature:float):
-        llm=Ollama(base_url="http://localhost:11434", model=llm_name, temperature=llm_temperature)
+    @staticmethod
+    def get_generic_profiles(prompt: PromptTemplate, query: str, llm_name: str, llm_temperature: float):
+        llm = Ollama(base_url="http://localhost:11434", model=llm_name, temperature=llm_temperature)
         parser = PydanticOutputParser(pydantic_object=Experts)
         query = GoogleTranslator(source='auto', target='en').translate(query)
         input1 = prompt.format(input=query)
@@ -460,13 +445,15 @@ class LLM:
         profiles = parser.parse(output)
         return profiles
 
-    def load_json(self, path:str):
-            import json
-            f = open(path, encoding='utf8')
-            data = json.load(f)
-            return data
+    @staticmethod
+    def load_json(path: str):
+        import json
+        f = open(path, encoding='utf8')
+        data = json.load(f)
+        return data
 
-    def update_users(self, users: list[User], linkdin_data):
+    @staticmethod
+    def update_users(users: list[User], linkdin_data):
         for profile in linkdin_data['profiles']:
             user_profile = linkdin_data['profiles'][profile]
             for user in users:
@@ -480,8 +467,8 @@ class LLM:
                     break
         return users
 
-    def init_chromaDb_collection(self):
-        collection = self.chromaDB_client.get_or_create_collection(name="experts")
+    def init_chroma_db_collection(self):
+        collection = self.chroma_db_client.get_or_create_collection(name="experts")
         skills = []
         sources = []
         for user in self.users:
@@ -491,77 +478,44 @@ class LLM:
 
         ids = [str(i) for i in range(len(skills))]
         collection.add(
-        documents=skills,
-        metadatas=sources,
-        ids=ids)
+            documents=skills,
+            metadatas=sources,
+            ids=ids)
         return collection
 
-    def get_experts_recommandation(self, question: str):
+    def get_experts_recommendation(self, question: str):
 
-        skillsNeeded = self.get_generic_profiles(self.get_generic_profiles_prompt(), question, "mistral:instruct", 0.1).profiles
+        skills_needed = self.get_generic_profiles(self.get_generic_profiles_prompt(), question, "mistral:instruct", 0.1).profiles
 
-        result = self.chomaDB_collection.query(
-            query_texts=skillsNeeded,
+        result = self.chroma_db_collection.query(
+            query_texts=skills_needed,
             n_results=25
-            )
-        experts = {"experts":[]}
+        )
+        experts = {"experts": []}
         metadatas = result['metadatas']
         distances = result['distances']
         for i, metadata_list in enumerate(metadatas):
             tab = []
-            idList = set()
+            id_list = set()
             for j, metadata in enumerate(metadata_list):
                 similarity_score = distances[i][j]
-                if similarity_score <= 1 and metadata['user_id'] not in idList:
+                if similarity_score <= 1 and metadata['user_id'] not in id_list:
                     user = self.find_user(self.users, metadata['user_id'])
-                    tab.append({"first_name":user.first_name,
-                                "last_name":user.last_name,
-                                "skills":user.skills,
-                                "tags":user.tags,
-                                "years_experience_ia":user.years_experience_ia,
-                                "years_experience_healthcare":user.years_experience_healthcare,
-                                "score":similarity_score})
-                    idList.add(metadata['user_id'])
-            skillNeeded = GoogleTranslator(source='auto', target='fr').translate(skillsNeeded[i])
-            experts['experts'].append({"categorie":skillNeeded, "recommendation":tab})
+                    tab.append({"first_name": user.first_name,
+                                "last_name": user.last_name,
+                                "skills": user.skills,
+                                "tags": user.tags,
+                                "years_experience_ia": user.years_experience_ia,
+                                "years_experience_healthcare": user.years_experience_healthcare,
+                                "score": similarity_score})
+                    id_list.add(metadata['user_id'])
+            skill_needed = GoogleTranslator(source='auto', target='fr').translate(skills_needed[i])
+            experts['experts'].append({"categorie": skill_needed, "recommendation": tab})
 
         return experts
 
-    def find_user(self, users:list[User], id:str):
+    @staticmethod
+    def find_user(users: list[User], user_id: str):
         for user in users:
-            if user.user_id == id:
+            if user.user_id == user_id:
                 return user
-
-
-# if __name__ == '__main__':
-#     llm = LLM(
-#     qa_llm_model='mistral:instruct',
-#     keywords_llm_model='camembert/camembert-large',
-#     users_csv_file=Path('../resources/cleaned_expertise_extended_renamed.csv')
-#     )
-
-#     persist_directory =  str(Path("../vector_store"))
-#     user_file_path = str(Path('../resources/USERS.csv'))
-#     linkldin_data_file_path = str(Path('../resources/out.json'))
-#     llm.init_recommandation_pipeline(persist_directory, user_file_path, linkldin_data_file_path)
-
-
-
-#     # sentenceTransformer_model = SentenceTransformer('dangvantuan/sentence-camembert-large')
-#     # #query = "I am a cardiologist and researcher at the CHUM. I have a particular interest in cardiac imaging research and lead prospective research studies using echocardiography as a research modality in the adult patient population. I am interested in using cardiac imaging data and developing algorithms to establish diagnoses of cardiac pathologies."
-#     query = "Recherche professionnelle de la santé pour trouver un projet de recherche dans le cadre de ma maîtrise. Je fais du deep learning et je m’intéresse à la robotique"
-
-
-#     print("-----------------------------------------------------\n")
-#     print("querying chroma...\n")
-#     res = llm.get_experts_recommandation(query)
-#     print("-----------------------------------------------------\n")
-#     import pprint
-#     pprint.pprint(res)
-
-
-
-
-
-
-
