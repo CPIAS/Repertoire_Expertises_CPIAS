@@ -247,29 +247,16 @@ const Filters: React.FC<FiltersProps> = ({
                         </Flex>
                     </Flex>
                 </DrawerBody>
-                <Flex 
-                    padding={'1rem'}
-                >
-                    <Button
-                        size={'md'}
-                        backgroundColor={colors.darkAndLight.white}
-                        color={colors.blue.main}
-                        border={`1px solid ${colors.grey.lighter}`}
-                        _hover={{
-                            backgroundColor: colors.blue.lighter,
-                        }}
-                        _active={{
-                            backgroundColor: colors.blue.lighter,
-                        }}
-                        onClick={()=>resetFilters()}
-                    >
-                        {'Réinitialiser les filtres'}
-                    </Button>
-                </Flex>
+                
                 <DrawerFooter borderTopWidth='1px'>
-                    <Flex gap={'1rem'}>
-                        <Button 
-                            size={'lg'}
+                    <Flex 
+                        width={'100%'}
+                        justifyContent={{base:'center', md: 'space-between'}}
+                        alignItems={'center'}
+                        flexWrap={'wrap'}
+                    >                        
+                        <Button
+                            size={'md'}
                             backgroundColor={colors.darkAndLight.white}
                             color={colors.blue.main}
                             border={`1px solid ${colors.grey.lighter}`}
@@ -279,29 +266,48 @@ const Filters: React.FC<FiltersProps> = ({
                             _active={{
                                 backgroundColor: colors.blue.lighter,
                             }}
-                            onClick={()=> {
-                                setIsFilterSectionShown(false);
-                            }}
+                            onClick={()=>resetFilters()}
+                            marginBottom={{base: '1rem', md: '0'}}
                         >
-                            {'Annuler'}
+                            {'Réinitialiser les filtres'}
                         </Button>
-                        <Button 
-                            size={'lg'}
-                            backgroundColor={colors.blue.main}
-                            color={colors.darkAndLight.white}
-                            _hover={{
-                                backgroundColor: colors.blue.light,
-                            }}
-                            _active={{
-                                backgroundColor: colors.blue.light,
-                            }} 
-                            onClick={()=> {
-                                applyFilters();
-                            }}
-                        >
-                            {'Appliquer'}
-                        </Button>
+                        <Flex gap={'1rem'}>
+                            <Button 
+                                size={'lg'}
+                                backgroundColor={colors.darkAndLight.white}
+                                color={colors.blue.main}
+                                border={`1px solid ${colors.grey.lighter}`}
+                                _hover={{
+                                    backgroundColor: colors.blue.lighter,
+                                }}
+                                _active={{
+                                    backgroundColor: colors.blue.lighter,
+                                }}
+                                onClick={()=> {
+                                    setIsFilterSectionShown(false);
+                                }}
+                            >
+                                {'Annuler'}
+                            </Button>
+                            <Button 
+                                size={'lg'}
+                                backgroundColor={colors.blue.main}
+                                color={colors.darkAndLight.white}
+                                _hover={{
+                                    backgroundColor: colors.blue.light,
+                                }}
+                                _active={{
+                                    backgroundColor: colors.blue.light,
+                                }} 
+                                onClick={()=> {
+                                    applyFilters();
+                                }}
+                            >
+                                {'Appliquer'}
+                            </Button>
+                        </Flex>
                     </Flex>
+                    
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>

@@ -153,29 +153,41 @@ const MembersPage: React.FC = () => {
                         <Flex 
                             width={'100%'}
                             alignItems={'center'}
-                            justifyContent={'space-between'}
+                            justifyContent={{ base: 'flex-start', md: 'space-between' }}
+                            flexDirection = {{ base: 'column', md: 'row' }}
                         >
-                            <Text fontSize={'3xl'} fontWeight={'bold'}>
-                                {'Membres de la CPIAS'}
-                            </Text>
-                            <Button
-                                size={'lg'}
-                                backgroundColor={colors.blue.main}
-                                color={colors.darkAndLight.white}
-                                leftIcon={<FaFilter/>}
-                                fontWeight={'normal'}
-                                _hover={{
-                                    backgroundColor: colors.blue.light,
-                                }}
-                                _active={{
-                                    backgroundColor: colors.blue.light,
-                                }}
-                                onClick={()=>{
-                                    setIsFilterSectionShown(!isFilterSectionShown);
-                                }}
+                            <Flex
+                                width={{ base: '100%', md: '50%' }}
+                                justifyContent={'flex-start'}
                             >
-                                {'Appliquer des filtres'}
-                            </Button>
+                                <Text fontSize={'3xl'} fontWeight={'bold'}>
+                                    {'Membres de la CPIAS'}
+                                </Text>
+                            </Flex>
+                            <Flex
+                                width={{ base: '100%', md: '50%' }}
+                                justifyContent={'flex-end'}
+                            >
+                                <Button
+                                    size={'lg'}
+                                    backgroundColor={colors.blue.main}
+                                    color={colors.darkAndLight.white}
+                                    leftIcon={<FaFilter/>}
+                                    fontWeight={'normal'}
+                                    marginTop={{ base: '1rem', md: '0' }}
+                                    _hover={{
+                                        backgroundColor: colors.blue.light,
+                                    }}
+                                    _active={{
+                                        backgroundColor: colors.blue.light,
+                                    }}
+                                    onClick={()=>{
+                                        setIsFilterSectionShown(!isFilterSectionShown);
+                                    }}
+                                >
+                                    {'Appliquer des filtres'}
+                                </Button>
+                            </Flex>
                         </Flex>
                         <Filters 
                             isOpen={isFilterSectionShown} 
@@ -190,25 +202,16 @@ const MembersPage: React.FC = () => {
                             gap={'0.5rem'}
                             alignItems={'flex-start'}
                         >
-                            {appliedFilters && 
-                                <Flex
-                                    alignItems={'center'}
-                                    alignContent={'center'}
-                                    paddingTop={'0.1rem'}
-                                >
-                                    {'Filtre appliqués :'}
-                                </Flex>
-                            }
                             <Flex
                                 gap={'0.5rem'}
-                                maxWidth={'90%'}
+                                maxWidth={'100%'}
                                 flexWrap={'wrap'}
                             >
 
                                 {appliedFilters?.organization?.map((filter, index) => (
                                     <Tag
                                         key={`organization-${filter}-${index}`}
-                                        size={'lg'}
+                                        size={{base: 'sm', md: 'lg'}}
                                         colorScheme='orange'
                                         borderRadius='full'
                                         border={'1px solid'}
@@ -221,7 +224,7 @@ const MembersPage: React.FC = () => {
                                 {appliedFilters?.expertise?.map((filter, index) => (
                                     <Tag
                                         key={`expertise-${filter}-${index}`}
-                                        size={'lg'}
+                                        size={{base: 'sm', md: 'lg'}}
                                         colorScheme='orange'
                                         borderRadius='full'
                                         border={'1px solid'}
@@ -234,7 +237,7 @@ const MembersPage: React.FC = () => {
                                 {appliedFilters?.memberType?.map((filter, index) => (
                                     <Tag
                                         key={`memberType-${filter}-${index}`}
-                                        size={'lg'}
+                                        size={{base: 'sm', md: 'lg'}}
                                         colorScheme='orange'
                                         borderRadius='full'
                                         border={'1px solid'}
@@ -246,7 +249,7 @@ const MembersPage: React.FC = () => {
                                 ))}
                                 {appliedFilters?.aiExperience && appliedFilters?.aiExperience.length > 0 && (
                                     <Tag
-                                        size={'lg'}
+                                        size={{base: 'sm', md: 'lg'}}
                                         colorScheme='orange'
                                         borderRadius='full'
                                         border={'1px solid'}
@@ -258,7 +261,7 @@ const MembersPage: React.FC = () => {
                                 )}
                                 {appliedFilters?.healthExperience && appliedFilters?.healthExperience.length > 0 && (
                                     <Tag
-                                        size={'lg'}
+                                        size={{base: 'sm', md: 'lg'}}
                                         colorScheme='orange'
                                         borderRadius='full'
                                         border={'1px solid'}

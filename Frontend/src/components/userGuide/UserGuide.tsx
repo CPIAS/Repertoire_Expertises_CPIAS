@@ -171,7 +171,10 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                     height={'100%'}
                     justifyContent={'center'}
                     alignItems={'center'}
+                    alignContent={'center'}
                     gap={'2rem'}
+                    flexDirection = {{ base: 'row', md: 'column' }}
+                    flexWrap={{ base: 'wrap', md: 'nowrap' }}
                 >
 
                     <CheckCircleIcon 
@@ -182,6 +185,7 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                     <Text 
                         fontSize={'3xl'} 
                         fontWeight={'bold'} 
+                        textAlign={'center'}
                     >
                         {'Tutoriel complété avec succès !'}
                         

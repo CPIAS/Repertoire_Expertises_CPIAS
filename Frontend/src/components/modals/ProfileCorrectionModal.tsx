@@ -126,13 +126,13 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
         <Modal 
             isOpen={isOpen} 
             onClose={onClose}
-            size='4xl'
+            size={{ base: 'full', lg: '4xl' }}
             isCentered
             
         >
             <ModalOverlay/>
             
-            <ModalContent paddingX={'1rem'} height={'75vh'} minHeight={'75vh'}>
+            <ModalContent paddingX={{ base: 'none', md:'1rem', lg: '1rem' }} height={'75vh'} minHeight={'75vh'}>
                 <ModalHeader 
                     textAlign={'center'}
                     fontSize={'xl'}
@@ -169,7 +169,6 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                                 alignContent={'center'}
                                 alignItems={'center'}
                                 flexWrap={'wrap'}
-                                gap={'1rem'}
                             >
                                 <Flex
                                     width={'100%'}
@@ -178,16 +177,17 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                                     <Flex
                                         width={'100%'}
                                         alignItems={'center'}
+                                        flexWrap={'wrap'}
                                     >
                                         <Flex
-                                            width={'10%'}
+                                            width={'100%'}
                                         >
                                             <Text>
-                                                {'Prénom : '}
+                                                {'Prénom'}
                                             </Text>
                                         </Flex>
                                         <Flex
-                                            width={'90%'}
+                                            width={'100%'}
                                         >
                                             <Input
                                                 border={isFirstNameFieldDirty && firstName.trim().length === 0 ? `1px solid ${colors.red.main}` : `1px solid ${colors.grey.light}`}
@@ -233,16 +233,17 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                                     <Flex
                                         width={'100%'}
                                         alignItems={'center'}
+                                        flexWrap={'wrap'}
                                     >
                                         <Flex
-                                            width={'10%'}
+                                            width={'100%'}
                                         >
                                             <Text>
-                                                {'Nom : '}
+                                                {'Nom'}
                                             </Text>
                                         </Flex>
                                         <Flex
-                                            width={'90%'}
+                                            width={'100%'}
                                         >
                                             <Input
                                                 border={isLastNameFieldDirty && lastName.trim().length === 0 ? `1px solid ${colors.red.main}` : `1px solid ${colors.grey.light}`}
@@ -288,16 +289,17 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
                                     <Flex
                                         width={'100%'}
                                         alignItems={'center'}
+                                        flexWrap={'wrap'}
                                     >
                                         <Flex
-                                            width={'10%'}
+                                            width={'100%'}
                                         >
                                             <Text>
-                                                {'Courriel : '}
+                                                {'Courriel'}
                                             </Text>
                                         </Flex>
                                         <Flex
-                                            width={'90%'}
+                                            width={'100%'}
                                         >
                                             <Input
                                                 border={isEmailFieldDirty && email.trim().length === 0 ? `1px solid ${colors.red.main}` : `1px solid ${colors.grey.light}`}

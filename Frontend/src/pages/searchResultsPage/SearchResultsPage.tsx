@@ -23,21 +23,38 @@ const SearchResultsPage: React.FC = () => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
 
+    // useEffect(() => {
+    //     const fetchMembers = async () => {
+    //         try {
+    //             const response = await axios.post(`${API_HOST}/search`, query);
+    //             setMembers(humps.camelizeKeys(response.data) as Member[]);
+    //             setIsLoading(false);
+    //         } catch (error) {
+    //             console.error('Error while fetching members: ', error);
+    //             setNoResultsText('Une erreur est survenue.');
+    //             setIsLoading(false);
+    //         }
+    //     };
+
+    //     fetchMembers();
+    // }, [query]);
+
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await axios.post(`${API_HOST}/search`, query);
+                const response = await axios.get(`${API_HOST}/users`);
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
+                // setFilteredMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error while fetching members: ', error);
-                setNoResultsText('Une erreur est survenue.');
+                // setNoMemberText('Une erreur est survenue.');
                 setIsLoading(false);
             }
         };
 
         fetchMembers();
-    }, [query]);
+    }, []);
 
     return (
         <Flex 
