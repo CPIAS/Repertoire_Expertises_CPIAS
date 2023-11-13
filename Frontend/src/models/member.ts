@@ -3,7 +3,7 @@ export interface Member {
     lastName: string;
     firstName: string;
     email: string;
-    subscriptionDate: string;
+    registrationDate: string;
     affiliationOrganization: string;
     affiliationOrganizationOther: string;
     communityInvolvement: string;
