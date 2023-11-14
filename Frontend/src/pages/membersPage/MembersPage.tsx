@@ -66,10 +66,10 @@ const MembersPage: React.FC = () => {
         if (appliedFilters) {
             filtered = members.filter((member) => {
                 let includeMember = true;
-                if (appliedFilters.organisation && appliedFilters.organisation.length > 0) {
+                if (appliedFilters.organization && appliedFilters.organization.length > 0) {
                     if (!member.affiliationOrganization.split(',').some(org => {
                         const lowerCaseOrg = org.toLowerCase().trim();
-                        const lowerCaseAppliedFilters = appliedFilters?.organisation?.map(filter => filter.toLowerCase().trim());
+                        const lowerCaseAppliedFilters = appliedFilters?.organization?.map(filter => filter.toLowerCase().trim());
                         return lowerCaseAppliedFilters?.includes(lowerCaseOrg);
                     })) {
                         includeMember = false;

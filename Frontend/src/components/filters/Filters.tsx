@@ -23,7 +23,7 @@ const Filters: React.FC<FiltersProps> = ({
     setAppliedFilters
 }) => {
     const { onClose } = useDisclosure();
-    const [selectedOrganisation, setSelectedOrganisation] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
+    const [selectedOrganization, setSelectedOrganization] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
     const [organizationDropdownOptions, setOrganizationDropdownOptions] = useState<DropdownOptions[]>([]);
     const [memberCategoryDropdownOptions, setMemberCategoryDropdownOptions] = useState<DropdownOptions[]>([]);
     const [tagsDropdownOptions, setTagsDropdownOptions] = useState<DropdownOptions[]>([]);
@@ -149,8 +149,8 @@ const Filters: React.FC<FiltersProps> = ({
                             <MultiSelectDropdown 
                                 options={organizationDropdownOptions}
                                 unit={'organisations'}
-                                selectedOptions={selectedOrganisation}
-                                setSelectedOptions={setSelectedOrganisation}
+                                selectedOptions={selectedOrganization}
+                                setSelectedOptions={setSelectedOrganization}
                             />
                         </Flex>
                         <Flex
