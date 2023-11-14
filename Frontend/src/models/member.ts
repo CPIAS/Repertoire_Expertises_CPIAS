@@ -17,3 +17,13 @@ export interface Member {
     tags: string;
     profilePicture?: string;
 }
+
+export interface ResultsMembers {
+    category: string;
+    recommendation: Recommendation[];
+}
+
+export interface Recommendation {
+    expert: Member;
+    score: number;
+}

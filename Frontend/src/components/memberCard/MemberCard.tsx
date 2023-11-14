@@ -5,22 +5,21 @@ import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
 import ProfileCorrectionModal from '../modals/ProfileCorrectionModal';
 
-const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ members, isReadOnly = false }) => {
-    const [profileCorrectionModalStates, setProfileCorrectionModalStates] = useState(
-        members.map(() => false)
-    );
+interface MemberCardProps {
+    member: Member;
+    isReadOnly?: boolean;
+}
 
-    const openProfileCorrectionModal = (member: Member, index: number) => {
+const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) => {
+    const [profileCorrectionModalState, setProfileCorrectionModalState] = useState(false);
+
+    const openProfileCorrectionModal = () => {
         if (isReadOnly) return;
-        const updatedStates = [...profileCorrectionModalStates];
-        updatedStates[index] = true;
-        setProfileCorrectionModalStates(updatedStates);
+        setProfileCorrectionModalState(true);
     };
 
-    const closeProfileCorrectionModal = (index: number) => {
-        const updatedStates = [...profileCorrectionModalStates];
-        updatedStates[index] = false;
-        setProfileCorrectionModalStates(updatedStates);
+    const closeProfileCorrectionModal = () => {
+        setProfileCorrectionModalState(false);
     };
 
     const getDescription = (member: Member) => {
@@ -53,64 +52,58 @@ const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ mem
             allowToggle
             border={'none'}
             borderRadius={'0.5rem'}
-            
         >
-            {members.map((member, index) => (
-                <AccordionItem
-                    key={member.userId}
+            <AccordionItem
+                width={'100%'}
+                marginY={'0.5rem'}
+                backgroundColor={colors.darkAndLight.white}
+                border={`1px solid ${colors.grey.dark}`}
+                borderRadius={'inherit'}
+                boxShadow={`0px 0px 2.5px 0px ${colors.grey.dark}`}
+            >
+                <AccordionButton
                     width={'100%'}
-                    marginY={'1rem'}
-                    backgroundColor={colors.darkAndLight.white}
-                    border={`1px solid ${colors.grey.dark}`}
-                    borderRadius={'inherit'}
-                    boxShadow={`0px 0px 2.5px 0px ${colors.grey.dark}`}
-
+                    padding={'1.5rem'}    
+                    _hover={{backgroundColor:'none'}}
                 >
-                    <AccordionButton
+                    <Flex
                         width={'100%'}
-                        padding={'1.5rem'}    
-                        _hover={{backgroundColor:'none'}}
+                        flexWrap={'nowrap'}
                     >
                         <Flex
-                            width={'100%'}
-                            flexWrap={'nowrap'}
-                            gap={'1rem'}
+                            marginRight={'0.5rem'}
+                            width={'10%'}
                         >
-                            <Flex
-                                marginRight={'0.5rem'}
-                                width={'10%'}
-                            >
-                                <Image 
-                                    // src={member.profilePicture ?? './images/avatar/generic-avatar.png'}
-                                    src={member.profilePicture ? `https://drive.google.com/uc?export=view&id=${member.profilePicture}` : './images/avatar/generic-avatar.png'}
-                                    borderRadius='full'
-                                    border={`1px solid ${colors.grey.dark}`}
-                                    boxSize='125px'
-                                />
-                            </Flex>
-                            <Flex
+                            <Image 
+                                src={member.profilePicture ? `https://drive.google.com/uc?export=view&id=${member.profilePicture}` : './images/avatar/generic-avatar.png'}
+                                borderRadius='full'
+                                border={`1px solid ${colors.grey.dark}`}
+                                boxSize='125px'
+                            />
+                        </Flex>
+                        <Flex
+                            flexWrap={'wrap'}
+                            alignItems={'center'}
+                            gap={'0.5rem'}
+                            width={'90%'}
+                        >
+                            <Flex 
+                                width={'100%'}
                                 flexWrap={'wrap'}
                                 alignItems={'center'}
-                                gap={'0.5rem'}
-                                width={'90%'}
                             >
-                                <Flex 
-                                    width={'100%'}
-                                    flexWrap={'wrap'}
-                                    alignItems={'center'}
-                                >
-                                    <Flex width={'100%'} fontSize={'xl'} fontWeight={'bold'} alignItems={'center'}>
-                                        {`${member.firstName} ${member.lastName}`}
-                                    </Flex>
-                                    <Flex maxWidth={'80%'} alignItems={'center'}>
-                                        {getDescription(member)}
-                                    </Flex>
+                                <Flex width={'100%'} fontSize={'xl'} fontWeight={'bold'} alignItems={'center'}>
+                                    {`${member.firstName} ${member.lastName}`}
                                 </Flex>
-                                <Flex
-                                    width={'100%'}
-                                    gap={'0.5rem'}
-                                >
-                                    {member.tags.length > 0 
+                                <Flex maxWidth={'80%'} alignItems={'center'}>
+                                    {getDescription(member)}
+                                </Flex>
+                            </Flex>
+                            <Flex
+                                width={'100%'}
+                                gap={'0.5rem'}
+                            >
+                                {member.tags.length > 0 
                                         && member.tags.split(/,| et /).map((tag, index) => (
                                             <Flex
                                                 key={`${index}_flex`}
@@ -127,57 +120,56 @@ const MemberCard: React.FC<{ members: Member[], isReadOnly?: boolean }> = ({ mem
                                                 </Tag>
                                             </Flex>
                                         ))
-                                    }
+                                }
 
-                                </Flex>
                             </Flex>
                         </Flex>
-                        <AccordionIcon 
-                            boxSize={16}
-                            color={colors.grey.dark}
-                            _hover={{color: colors.orange.main}}
-                        />
-                    </AccordionButton>
-                    <AccordionPanel 
-                        padding={'1.5rem'}  
+                    </Flex>
+                    <AccordionIcon 
+                        boxSize={16}
+                        color={colors.grey.dark}
+                        _hover={{color: colors.orange.main}}
+                    />
+                </AccordionButton>
+                <AccordionPanel 
+                    padding={'1.5rem'}  
+                >
+                    <Flex
+                        width={'100%'}
+                        alignItems={'center'}
                     >
-                        <Flex
-                            width={'100%'}
-                            alignItems={'center'}
+                        <EmailIcon boxSize={8} paddingRight={'0.5rem'}/> 
+                        <Link 
+                            href={`mailto:${member.email}`} 
+                            isExternal 
+                            color="blue.500" 
+                            textDecoration="underline"
                         >
-                            <EmailIcon boxSize={8} paddingRight={'0.5rem'}/> 
-                            <Link 
-                                href={`mailto:${member.email}`} 
-                                isExternal 
-                                color="blue.500" 
-                                textDecoration="underline"
-                            >
-                                {member.email}
-                            </Link>
-                        </Flex>
-                        <Flex
-                            width={'100%'}
-                            justifyContent={'flex-end'}
+                            {member.email}
+                        </Link>
+                    </Flex>
+                    <Flex
+                        width={'100%'}
+                        justifyContent={'flex-end'}
+                    >
+                        <Link 
+                            fontWeight={'medium'}
+                            color={colors.grey.dark}
+                            onClick={()=>openProfileCorrectionModal()}
                         >
-                            <Link 
-                                fontWeight={'medium'}
-                                color={colors.grey.dark}
-                                onClick={()=>openProfileCorrectionModal(member, index)}
-                            >
-                                {'Corriger les informations'}
-                                {profileCorrectionModalStates[index] && (
-                                    <ProfileCorrectionModal 
-                                        member={member}
-                                        isOpen={profileCorrectionModalStates[index]}
-                                        onClose={() => closeProfileCorrectionModal(index)} 
-                                    />
-                                )}
-                            </Link>
-                        </Flex>
+                            {'Corriger les informations'}
+                            {profileCorrectionModalState && (
+                                <ProfileCorrectionModal 
+                                    member={member}
+                                    isOpen={profileCorrectionModalState}
+                                    onClose={() => closeProfileCorrectionModal()} 
+                                />
+                            )}
+                        </Link>
+                    </Flex>
                         
-                    </AccordionPanel>
-                </AccordionItem>
-            ))}
+                </AccordionPanel>
+            </AccordionItem>
         </Accordion>
     );
 };
