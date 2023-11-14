@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { EditIcon } from '@chakra-ui/icons';
-import { Flex, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { DownloadIcon, EditIcon } from '@chakra-ui/icons';
+import { Button, Flex, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr } from '@chakra-ui/react';
 import axios from 'axios';
 import humps from 'humps';
 import React, { useEffect, useState } from 'react';
+import { FiRefreshCw } from 'react-icons/fi';
 import EditMemberProfileModal from '../../../components/modals/EditMemberProfileModal';
 import { Member } from '../../../models/member';
+import colors from '../../../utils/theme/colors';
+import mockMembers from '../../membersPage/mockMembers.json';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 // const API_KEY = process.env.REACT_APP_API_KEY;
@@ -14,7 +17,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const EditMembers: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [noMemberText, setNoMemberText] = useState<string>('Aucun résultat');
-    const [members, setMembers] = useState<Member[]>([]);
+    const [members, setMembers] = useState<Member[]>(mockMembers);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
@@ -41,7 +44,7 @@ const EditMembers: React.FC = () => {
     const generateRows = () => {
         return members.map((member) => (
             <Tr key={member.userId} width={'100%'}>
-                <Td isNumeric>{member.userId}</Td>
+                <Td>{member.userId}</Td>
                 <Td>{member.lastName}</Td>
                 <Td>{member.firstName}</Td>
                 <Td>{new Date(member.registrationDate).toLocaleDateString()}</Td>
@@ -70,7 +73,7 @@ const EditMembers: React.FC = () => {
                 setIsModalOpen={setIsModalOpen}
             /> 
             <Flex
-                width={'100%'}
+                width={'60%'}
                 flexWrap={'wrap'}
                 justifyContent={'center'}
             >
@@ -82,22 +85,72 @@ const EditMembers: React.FC = () => {
                 >
                     <Flex
                         width={'100%'}
-                        fontWeight={'bold'}
-                        fontSize={'xl'}
+                        justifyContent={'space-between'}
                         paddingBottom={'2rem'}
                     >
-                        {'Gérer les membres'}
+                        <Text
+                            fontWeight={'bold'}
+                            fontSize={'xl'}
+                        >
+                            {'Gérer les membres'}
+                        </Text>
+                        <Button
+                            backgroundColor={colors.blue.main}
+                            color={colors.darkAndLight.white}
+                            _hover={{
+                                backgroundColor: colors.blue.light,
+                            }}
+                            _active={{
+                                backgroundColor: colors.blue.light,
+                            }}
+                        >
+                            {'Déconnexion'}
+                        </Button>
                     </Flex>
-                
+                    <Flex 
+                        width={'100%'}
+                        justifyContent={'flex-end'}
+                        gap={'1rem'}
+                        paddingBottom={'1rem'}
+                    >
+                        <Button
+                            backgroundColor={colors.darkAndLight.white}
+                            color={colors.blue.main}
+                            border={`2px solid ${colors.blue.light}`}
+                            _hover={{
+                                backgroundColor: colors.blue.lighter,
+                            }}
+                            _active={{
+                                backgroundColor: colors.blue.lighter,
+                            }}
+                            leftIcon={<DownloadIcon />}
+                        >
+                            {'Exporter au format CSV'}
+                        </Button>
+                        <Button
+                            backgroundColor={colors.darkAndLight.white}
+                            color={colors.blue.main}
+                            border={`2px solid ${colors.blue.light}`}
+                            _hover={{
+                                backgroundColor: colors.blue.lighter,
+                            }}
+                            _active={{
+                                backgroundColor: colors.blue.lighter,
+                            }}
+                            leftIcon={<FiRefreshCw />}
+                        >
+                            {'Mettre à jour la base de données'}
+                        </Button>
+                    </Flex>
                     <Flex
                         backgroundColor={'white'}
-                        // width={'65%'}
+                        width={'100%'}
                     >
                         <TableContainer width={'100%'}>
                             <Table>
                                 <Thead>
                                     <Tr>
-                                        <Th isNumeric>{'ID'}</Th>
+                                        <Th>{'ID'}</Th>
                                         <Th>{'Nom'}</Th>
                                         <Th>{'Prénom'}</Th>
                                         <Th>{'Membre depuis'}</Th>
