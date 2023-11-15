@@ -3,94 +3,94 @@ import { Flex} from '@chakra-ui/react';
 import React, { useState } from 'react';
 import Graph from 'react-graph-vis';
 import { useSearchParams } from 'react-router-dom';
-import { Member } from '../../models/member';
-import MemberDrawer from './components/MemberDrawer';
+import { ResultsMembers } from '../../models/member';
+import * as d3 from 'd3';
+// import MemberDrawer from './components/MemberDrawer';
 
-const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
-    const [searchParams] = useSearchParams();
-    const query = searchParams.get('q') || '';
-    const tagsMap = new Map();
-    
+const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
+  
     const [selectedNode, setSelectedNode] = useState<{ id: number; title: string; label: string } | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(1);
-    
-    console.log(members);
-    
-    const limitedMembers = members.slice(0, 15);
+    const userIdToNodeIdMap: Record<number, number> = {};
+    const redScale = d3.scaleLinear<string, number>().domain([0, 0.5]).range(['#ff0000', '#ff0000']);
+    const greenScale = d3.scaleLinear<string, number>().domain([0.8, 1]).range(['#ff0000', '#00ff00']);
+
+    const GraphData = {
+        nodes: [] as Node[],
+        edges: [] as Edge[],
+    };
+
     type Node = {
         id: number;
         label: string;
         title: string;
         color: string | { border: string; background: string };
         shape: string;
-        tags?: string[];
         borderRadius?: number;
-      };
-    
-    const createMemberNode = (member: Member, index: number): Node => ({
-        id: index + 1,
-        label: member.userId === 0 ? query : `${member.firstName} ${member.lastName}`,
-        title: `Member id ${index + 1}`,
-        color: '#17b978',
-        shape: 'ellipse',
-        tags: member.tags.split(',').map((tag) => tag.trim()),
-    });
-        
-    const createTagNode = ([tag, nodeId]: [string, number]): Node => ({
-        id: nodeId,
-        label: tag,
-        title: `Tag id ${nodeId}`,
-        color: {
-            border: '#F2810C',
-            background: '#CCCBFF',
-        },
-        shape: '',
-        
-    });
-        
-    const mockGraphData = {
-        nodes: [
-            ...limitedMembers.map(createMemberNode),
-            ...Array.from(tagsMap.entries()).map(createTagNode),
-        ],
-        edges: [] as { from: number; to: number }[],
+        width?: number; // Add the width property for edge thickness
+        margin?: number;
     };
+
+    type Edge = { 
+        from: number;
+        to: number; 
+        width: number,
+        color: number
+    };
+
+    results.forEach((result, categoryIndex) => {
+        const categoryId = categoryIndex + 1;
+      
+        // Create a node for the category
+        GraphData.nodes.push({
+            id: categoryId,
+            label: result.category,
+            title: `Category id ${categoryId}`,
+            color: '#FFFFFF',
+            shape: 'box',
+            // margin: 6
+        });
         
-    for (let i = 0; i < limitedMembers.length; i++) {
-        const tagsA = limitedMembers[i].tags.split(',').map((tag) => tag.trim());
+        result.recommendation.forEach((recommendation, expertIndex) => {
+            const  userId  = recommendation.expert.userId;
         
-        for (let j = 0; j < tagsA.length; j++) {
-            const tagA = tagsA[j];
+            // Check if the expert with the same userId already has a node
+            let expertNodeId = userIdToNodeIdMap[userId];
         
-            if (!tagA) {
-                continue;
+            if (!expertNodeId) {
+                // If not, create a new node
+                expertNodeId = categoryId * 100 + expertIndex + 1;
+                userIdToNodeIdMap[userId] = expertNodeId;
+            
+                const fullName = `${recommendation.expert.firstName} ${recommendation.expert.lastName}`;
+            
+                GraphData.nodes.push({
+                    id: expertNodeId,
+                    label: fullName,
+                    title: `Expert id ${expertNodeId}`,
+                    color: {
+                        border: '#F2810C',
+                        background: '#FEEBC8',
+                    },
+                    shape: 'box',
+                    borderRadius: 100,
+                });
             }
-        
-            const splitTags = tagA.split('et').map((tag) => tag.trim());
-        
-            splitTags.forEach((tagB) => {
-                if (!tagsMap.has(tagB)) {
-                    const newNodeId = mockGraphData.nodes.length + 1;
-                    mockGraphData.nodes.push({
-                        id: newNodeId,
-                        label: tagB,
-                        title: `Tag id ${newNodeId}`,
-                        color: {
-                            border: '#F2810C',
-                            background: '#FEEBC8',
-                        },
-                        shape: 'box',
-                        borderRadius: 100,
-                    });
-                    tagsMap.set(tagB, newNodeId);
-                }
-        
-                mockGraphData.edges.push({ from: i + 1, to: tagsMap.get(tagB) });
+            const edgeColor =
+        recommendation.score && recommendation.score < 0.5
+            ? redScale(recommendation.score)
+            : greenScale(recommendation.score || 0.5);
+
+            GraphData.edges.push({
+                from: categoryId,
+                to: expertNodeId,
+                width: 2,
+                color: edgeColor
             });
-        }
-    }
-        
+        });
+    });
+      
     const options = {
         layout: {
             hierarchical: false,
@@ -118,49 +118,54 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
         nodes: {
             shape: 'box',
         },
-
-        zoom: {
-            level: zoomLevel,
-            enabled: true,
-            max: 2,
-            min: 0.5,
-        },
     };
         
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const events = {
+        // select: (event: any) => {
+        //     if (event.nodes.length) {
+        //         const nodeId = event.nodes[0];
+        //         const selectedNodeData = GraphData.nodes.find((node) => node.id === nodeId);
+        
+        //         setSelectedNode(selectedNodeData || null);
+        //         setIsDrawerOpen(true);
+        //     }
+        // },
         select: (event: any) => {
             if (event.nodes.length) {
                 const nodeId = event.nodes[0];
-                const selectedNodeData = mockGraphData.nodes.find((node) => node.id === nodeId);
-        
+                const selectedNodeData = GraphData.nodes.find((node) => node.id === nodeId);
+    
+                // Find the correct index in the results array based on the selected node's ID
+                const index = GraphData.nodes.findIndex((node) => node.id === nodeId);
+    
+                setSelectedIndex(index);
                 setSelectedNode(selectedNodeData || null);
                 setIsDrawerOpen(true);
             }
         },
         hoverNode: (event: any) => {
             const nodeId = event.node;
-            const selectedNodeData = mockGraphData.nodes.find((node) => node.id === nodeId);
+            const selectedNodeData = GraphData.nodes.find((node) => node.id === nodeId);
             if (selectedNodeData) {
-                const updatedNodes = mockGraphData.nodes.map((node) =>
+                const updatedNodes = GraphData.nodes.map((node) =>
                     node.id === nodeId
                         ? { ...node, font: { bold: true } }
                         : { ...node, font: { bold: false } }
                 );
         
-                // Update the nodes with the new styling
-                mockGraphData.nodes = updatedNodes;
+                GraphData.nodes = updatedNodes;
             }
         },
         blurNode: (event: any) => {
             const nodeId = event.node;
-            const selectedNodeData = mockGraphData.nodes.find((node) => node.id === nodeId);
+            const selectedNodeData = GraphData.nodes.find((node) => node.id === nodeId);
             if (selectedNodeData) {
-                const updatedNodes = mockGraphData.nodes.map((node) =>
+                const updatedNodes = GraphData.nodes.map((node) =>
                     node.id === nodeId ? { ...node, font: { bold: false } } : node
                 );
-        
-                // Update the nodes with the new styling
-                mockGraphData.nodes = updatedNodes;
+
+                GraphData.nodes = updatedNodes;
             }
         },
         zoom: (event: any) => {
@@ -178,18 +183,18 @@ const NetworkGraph: React.FC<{ members: Member[]}> = ({members}) => {
             border={'1px solid grey'}
         >
             <Graph
-                graph={mockGraphData}
+                graph={GraphData}
                 options={options}
                 events={events}
             />
-            {selectedNode?.title.includes('Member') && (
+            {/* {selectedNode?.title.includes('Member') && (
                 <MemberDrawer 
-                    selectedMember={members[selectedNode.id-1]}
+                    selectedMember={results[selectedIndex] || undefined}
                     isOpen={isDrawerOpen} 
                     setDrawerOpen={setIsDrawerOpen}
                 />
                
-            )}
+            )} */}
         </Flex>
     );
 };

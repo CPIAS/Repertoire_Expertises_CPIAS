@@ -4,6 +4,7 @@ import Loader from '../../../components/loader/Loader';
 import MemberCard from '../../../components/memberCard/MemberCard';
 import { ResultsMembers } from '../../../models/member';
 import colors from '../../../utils/theme/colors';
+import NetworkGraph from '../../../components/graph/Graph';
 
 interface SearchResultsProps {
     results: ResultsMembers[];
@@ -120,7 +121,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                             alignContent={'center'}
                                             alignItems={'center'}
                                         >
-                                            {/* <NetworkGraph members={members}/> */}
+                                            { <NetworkGraph results={results}/> }
                                         </TabPanel>
                                         <TabPanel width={'100%'}>
                                             <Text
