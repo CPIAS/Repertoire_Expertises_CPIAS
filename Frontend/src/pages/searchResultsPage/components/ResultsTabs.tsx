@@ -1,19 +1,18 @@
-import { Flex, Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react';
 import React from 'react';
-import NetworkGraph from '../../../components/graph/Graph';
 import Loader from '../../../components/loader/Loader';
 import MemberCard from '../../../components/memberCard/MemberCard';
-import { Member } from '../../../models/member';
+import { ResultsMembers } from '../../../models/member';
 import colors from '../../../utils/theme/colors';
 
 interface SearchResultsProps {
-    members: Member[];
+    results: ResultsMembers[];
     isLoading: boolean;
     noResultsText: string;
 }
 
 const ResultsTabs: React.FC<SearchResultsProps> = ({ 
-    members,
+    results,
     isLoading,
     noResultsText,
 }) => {
@@ -38,16 +37,25 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                     
                         <Flex
                             width={'100%'}
-                            fontSize={'3xl'}
-                            fontWeight={'bold'}
+                            flexWrap={'wrap'}
                         >
-                            {members.length > 0 ? 
-                                members.length > 1 ? `${members.length} experts identifiés` : `${members.length} expert identifié`
+                            {results.length > 0 ? 
+
+                                (
+                                    <Flex
+                                        width={'100%'}
+                                        fontSize={'3xl'}
+                                        fontWeight={'bold'}
+                                        flexWrap={'wrap'}
+                                    >
+                                        
+                                    </Flex>
+                                )
                                 : noResultsText
                             }
                         </Flex>
-                    
-                        {members.length > 0 &&
+                        
+                        {results.length > 0 &&
                             <Flex
                                 width={'100%'}
                                 borderRadius={'0.5rem'}
@@ -112,10 +120,69 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                             alignContent={'center'}
                                             alignItems={'center'}
                                         >
-                                            <NetworkGraph members={members}/>
+                                            {/* <NetworkGraph members={members}/> */}
                                         </TabPanel>
                                         <TabPanel width={'100%'}>
-                                            <MemberCard members={members} />
+                                            <Text
+                                                width={'100%'}
+                                                fontWeight={'bold'}
+                                                fontSize={'2xl'}
+                                                paddingBottom={'1rem'}
+                                            >
+                                                {'Pour réaliser de type de projet, vous avez besoin de...'}
+                                            </Text>
+                                            {results.map((res) => (
+                                                <Flex width={'100%'}>
+                                                    <Accordion
+                                                        width={'100%'}
+                                                        allowToggle
+                                                    >
+                                                        <AccordionItem
+                                                            border={`1px solid ${colors.grey.dark}`}
+                                                            backgroundColor={colors.grey.main}
+                                                            borderRadius={'0.25rem'}
+                                                            marginY={'0.25rem'}
+                                                          
+                                                        >
+                                                            <AccordionButton
+                                                                _hover={{backgroundColor:'none'}}
+                                                            >
+                                                                <Flex
+                                                                    width={'100%'}
+                                                                    justifyContent={'space-between'}
+                                                                    alignItems={'center'}
+                                                                >
+                                                                    <Flex
+                                                                        fontSize={'xl'}
+
+                                                                    >
+                                                                        {`Expert(s) en ${res.category.toLowerCase()}`}
+                                                                    </Flex>
+                                                                    <AccordionIcon 
+                                                                        boxSize={16}
+                                                                        color={colors.grey.dark}
+                                                                        _hover={{color: colors.orange.main}}
+                                                                    />
+                                                                </Flex>
+                                                               
+                                                            </AccordionButton>
+                                                            <AccordionPanel>
+                                                                <Flex
+                                                                    width={'100%'}
+                                                                    flexWrap={'wrap'}
+                                                                    paddingX={'3rem'}
+                                                                    paddingBottom={'1rem'}
+                                                                >
+                                                                    {res.recommendation.map((expert) => (
+                                                                        <MemberCard member={expert.expert} />
+                                                                    ))}
+                                                                </Flex>
+                                                            </AccordionPanel>
+
+                                                        </AccordionItem>
+                                                    </Accordion>
+                                                </Flex>
+                                            ))}
                                         </TabPanel>
                                     </TabPanels>
                                 </Tabs>

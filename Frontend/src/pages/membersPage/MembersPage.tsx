@@ -274,7 +274,9 @@ const MembersPage: React.FC = () => {
                             width={'100%'} 
                         >
                             {filteredMembers.length > 0 ?
-                                <MemberCard members={filteredMembers} />
+                                filteredMembers.map((member) => (
+                                    <MemberCard member={member} />
+                                ))
                                 :
                                 <Flex
                                     width={'100%'}

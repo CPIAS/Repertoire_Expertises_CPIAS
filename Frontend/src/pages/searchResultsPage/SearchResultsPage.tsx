@@ -1,15 +1,15 @@
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { Flex } from '@chakra-ui/react';
-import axios from 'axios';
-import humps from 'humps';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../../components/header/Header';
 import SearchBar from '../../components/searchBar/SearchBar';
-import { Member } from '../../models/member';
+import { ResultsMembers } from '../../models/member';
 import colors from '../../utils/theme/colors';
 // import mockMembers from '../membersPage/mockMembers.json';
+import axios from 'axios';
 import ResultsTabs from './components/ResultsTabs';
+import mockResults from './mockResults.json';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 // const API_KEY = process.env.REACT_APP_API_KEY;
@@ -18,7 +18,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [members, setMembers] = useState<Member[]>([]);
+    const [results, setResults] = useState<ResultsMembers[]>([]);
     const [noResultsText, setNoResultsText] = useState<string>('Aucun résultat');
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
@@ -27,7 +27,11 @@ const SearchResultsPage: React.FC = () => {
         const fetchMembers = async () => {
             try {
                 const response = await axios.post(`${API_HOST}/search`, query);
-                setMembers(humps.camelizeKeys(response.data) as Member[]);
+                const resultsTemp: ResultsMembers[] = [];
+                response.data.experts.map((res: ResultsMembers) => {
+                    resultsTemp.push({category: res.category, recommendation: res.recommendation});
+                });
+                setResults(resultsTemp);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error while fetching members: ', error);
@@ -39,20 +43,16 @@ const SearchResultsPage: React.FC = () => {
         fetchMembers();
     }, [query]);
 
-    // useEffect(() => {
-    //     const fetchMembers = async () => {
-    //         try {
-    //             const response = await axios.get(`${API_HOST}/users`);
-    //             setMembers(humps.camelizeKeys(response.data) as Member[]);
-    //             setIsLoading(false);
-    //         } catch (error) {
-    //             console.error('Error while fetching members: ', error);
-    //             setIsLoading(false);
-    //         }
-    //     };
+    //TODO: REMOVE BEFORE DEPLOYMENT
+    useEffect(() => {
+        const resultsTemp: ResultsMembers[] = [];
+        mockResults.experts.map((res) => {
+            resultsTemp.push({category: res.category, recommendation: res.recommendation});
+        });
 
-    //     fetchMembers();
-    // }, []);
+        setResults(resultsTemp);
+        setIsLoading(false); //TODO: Remove
+    }, []);
 
     return (
         <Flex 
@@ -123,7 +123,7 @@ const SearchResultsPage: React.FC = () => {
                         justifyContent={'center'}
                         alignItems={'flex-start'}
                     >
-                        <ResultsTabs members={members} isLoading={isLoading} noResultsText={noResultsText}/>
+                        <ResultsTabs results={results} isLoading={isLoading} noResultsText={noResultsText}/>
                     </Flex>                    
                 </Flex>
             </Flex>

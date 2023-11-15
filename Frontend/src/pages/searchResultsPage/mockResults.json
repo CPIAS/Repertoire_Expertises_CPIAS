@@ -1,0 +1,280 @@
+{
+    "experts": [
+        {
+            "category": "Traduction",
+            "recommendation": [
+                {"expert": 
+                    {
+                        "user_id": 1,
+                        "name": "John Doe",
+                        "affiliationOrganization": "TÉLUQ - Université TÉLUQ",
+                        "affiliationOrganizationOther": "",
+                        "communityInvolvement": "Volunteer at Local Charity",
+                        "email": "johndoe@email.com",
+                        "firstName": "John",
+                        "jobPosition": "Data Analyst",
+                        "lastName": "Doe",
+                        "membershipCategory": "Chercheur",
+                        "membershipCategoryOther": "",
+                        "skills": "Intelligence artificielle, Imagerie cérébrale, Maladie de Parkinson",
+                        "registrationDate": "Sun, 15 Jan 2023 00:00:00 GMT",
+                        "suggestions": "Improve data visualization tools",
+                        "userId": 1,
+                        "yearsExperienceHealthcare": 2,
+                        "yearsExperienceIa": 4,
+                        "tags": "Traduction, Langage",
+                        "profilePicture": "1yPT_e1qQUw7oGxvbFW0Bo3957qB2uAFk"
+                    },
+                    "score": 0.95
+                },
+                {"expert": 
+                    {
+                        "affiliationOrganization": "TÉLUQ -  Université TÉLUQ",
+                        "affiliationOrganizationOther": "Analog Computer Inc",
+                        "communityInvolvement": "Member of Green Initiative",
+                        "email": "janesmith@email.com",
+                        "firstName": "Jane",
+                        "jobPosition": "Software Engineer",
+                        "lastName": "Smith",
+                        "membershipCategory": "Étudiant",
+                        "membershipCategoryOther": "",
+                        "skills": "Développement Web",
+                        "registrationDate": "Sat, 10 Dec 2022 00:00:00 GMT",
+                        "suggestions": "Enhance user interface",
+                        "userId": 2,
+                        "yearsExperienceHealthcare": 0,
+                        "yearsExperienceIa": 5,
+                        "tags": "Traduction",
+                        "profilePicture": "1yPT_e1qQUw7oGxvbFW0Bo3957qB2uAFk"
+                    },
+                    "score": 0.89
+                },
+                {"expert": 
+                    {
+                        "affiliationOrganization": "Polytechnique Montréal",
+                        "affiliationOrganizationOther": "",
+                        "communityInvolvement": "Youth Mentor",
+                        "email": "michael@email.com",
+                        "firstName": "Michael",
+                        "jobPosition": "Data Scientist",
+                        "lastName": "Johnson",
+                        "membershipCategory": "Industriel",
+                        "membershipCategoryOther": "",
+                        "skills": "Machine Learning",
+                        "registrationDate": "Mon, 20 Feb 2023 00:00:00 GMT",
+                        "suggestions": "Expand dataset collection",
+                        "userId": 3,
+                        "yearsExperienceHealthcare": 3,
+                        "yearsExperienceIa": 6,
+                        "tags": "Anglais, Français"
+                    },
+                    "score": 0.91
+                }
+            ]
+        },
+        {
+            "category": "Analyse de données",
+            "recommendation": [
+                {"expert":   
+                    {
+                        "affiliationOrganization": "PQR Co",
+                        "affiliationOrganizationOther": "",
+                        "communityInvolvement": "Environmental Cleanup Crew",
+                        "email": "emily@email.com",
+                        "firstName": "Emily",
+                        "jobPosition": "Product Manager",
+                        "lastName": "Williams",
+                        "membershipCategory": "Research professional",
+                        "membershipCategoryOther": "",
+                        "skills": "Product Development",
+                        "registrationDate": "Sun, 05 Mar 2023 00:00:00 GMT",
+                        "suggestions": "Launch new feature",
+                        "userId": 4,
+                        "yearsExperienceHealthcare": 1,
+                        "yearsExperienceIa": 8,
+                        "tags": "Intelligence artificielle, Sciences des données"
+                    },
+                    "score": 0.92
+                },
+                {"expert": 
+                    {
+                        "affiliationOrganization": "UVW Designers",
+                        "affiliationOrganizationOther": "",
+                        "communityInvolvement": "Animal Shelter Volunteer",
+                        "email": "sarah@email.com",
+                        "firstName": "Sarah",
+                        "jobPosition": "UX Designer",
+                        "lastName": "Brown",
+                        "membershipCategory": "Student",
+                        "membershipCategoryOther": "",
+                        "skills": "User Experience",
+                        "registrationDate": "Fri, 25 Nov 2022 00:00:00 GMT",
+                        "suggestions": "Improve user testing process",
+                        "userId": 5,
+                        "yearsExperienceHealthcare": 0,
+                        "yearsExperienceIa": 4,
+                        "tags": "Statistiques"
+                    },
+                    "score": 0.88
+                },
+                {"expert": 
+                    {
+                        "affiliationOrganization": "XYZ Corporation",
+                        "affiliationOrganizationOther": "",
+                        "communityInvolvement": "Youth Sports Coach",
+                        "email": "david@email.com",
+                        "firstName": "David",
+                        "jobPosition": "Software Developer",
+                        "lastName": "Anderson",
+                        "membershipCategory": "Researcher",
+                        "membershipCategoryOther": "",
+                        "skills": "Web Development",
+                        "registrationDate": "Thu, 05 Jan 2023 00:00:00 GMT",
+                        "suggestions": "Optimize code performance",
+                        "userId": 6,
+                        "yearsExperienceHealthcare": 2,
+                        "yearsExperienceIa": 7,
+                        "tags": "Sciences des données"
+                    }, 
+                    "score": 0.94
+                }
+            ]
+        },
+        {
+            "category": "Conception graphique",
+            "recommendation": [
+                {"expert": 
+                    {
+                        "affiliationOrganization": "Research Institute",
+                        "affiliationOrganizationOther": "",
+                        "communityInvolvement": "Community Garden Organizer",
+                        "email": "laura@email.com",
+                        "firstName": "Laura",
+                        "jobPosition": "Researcher",
+                        "lastName": "Clark",
+                        "membershipCategory": "Research professional",
+                        "membershipCategoryOther": "",
+                        "skills": "Data Collection",
+                        "registrationDate": "Thu, 15 Dec 2022 00:00:00 GMT",
+                        "suggestions": "Conduct more surveys",
+                        "userId": 7,
+                        "yearsExperienceHealthcare": 4,
+                        "yearsExperienceIa": 5,
+                        "tags": "Design de UI"
+                    },
+                    "score": 0.85
+                },
+                {"expert": 
+                    {
+                        "affiliationOrganization": "ABC Inc",
+                        "affiliationOrganizationOther": "",
+                        "communityInvolvement": "Youth Mentor",
+                        "email": "matthew@email.com",
+                        "firstName": "Matthew",
+                        "jobPosition": "Product Owner",
+                        "lastName": "Miller",
+                        "membershipCategory": "Industrialist",
+                        "membershipCategoryOther": "",
+                        "skills": "Product Management",
+                        "registrationDate": "Thu, 10 Nov 2022 00:00:00 GMT",
+                        "suggestions": "Enhance user feedback system",
+                        "userId": 8,
+                        "yearsExperienceHealthcare": 5,
+                        "yearsExperienceIa": 9,
+                        "tags": "Conception d'interace utilisateurs"
+                    }, 
+                    "score": 0.90
+                },
+                {"expert": 
+                    {
+                        "affiliationOrganization": "UVW Designers",
+                        "affiliationOrganizationOther": "",
+                        "communityInvolvement": "Environmental Cleanup Crew",
+                        "email": "olivia@email.com",
+                        "firstName": "Olivia",
+                        "jobPosition": "UI Designer",
+                        "lastName": "Davis",
+                        "membershipCategory": "Other",
+                        "membershipCategoryOther": "Innovation consultant",
+                        "skills": "User Interface Design",
+                        "registrationDate": "Fri, 10 Mar 2023 00:00:00 GMT",
+                        "suggestions": "Revamp user interface",
+                        "userId": 9,
+                        "yearsExperienceHealthcare": 1,
+                        "yearsExperienceIa": 3,
+                        "tags": "Designer de UI"
+                    }, 
+                    "score": 0.87
+                }
+            ]
+        },
+        {
+            "category": "Développement web",
+            "recommendation": [
+                {"expert": 
+                    {
+                        "affiliationOrganization": "LMN Ltd",
+                        "affiliationOrganizationOther": "",
+                        "communityInvolvement": "Animal Shelter Volunteer",
+                        "email": "william@email.com",
+                        "firstName": "William",
+                        "jobPosition": "Data Analyst",
+                        "lastName": "White",
+                        "membershipCategory": "Researcher",
+                        "membershipCategoryOther": "",
+                        "skills": "Data Analysis",
+                        "registrationDate": "Sun, 05 Feb 2023 00:00:00 GMT",
+                        "suggestions": "Improve data accuracy",
+                        "userId": 10,
+                        "yearsExperienceHealthcare": 2,
+                        "yearsExperienceIa": 5,
+                        "tags": "Développement d'application web"
+                    },
+                    "score": 0.93
+                },
+                {"expert": 
+                    {
+                        "affiliationOrganization": "Other",
+                        "affiliationOrganizationOther": "Qbit Corporation",
+                        "communityInvolvement": "Youth Mentor",
+                        "email": "elizabeth@email.com",
+                        "firstName": "Elizabeth",
+                        "jobPosition": "Data Scientist",
+                        "lastName": "Martin",
+                        "membershipCategory": "Industrialist",
+                        "membershipCategoryOther": "",
+                        "skills": "Machine Learning",
+                        "registrationDate": "Wed, 30 Nov 2022 00:00:00 GMT",
+                        "suggestions": "Expand machine learning models",
+                        "userId": 11,
+                        "yearsExperienceHealthcare": 3,
+                        "yearsExperienceIa": 7,
+                        "tags": "Développement d'application web"
+                    }, 
+                    "score": 0.86
+                },
+                {"expert": 
+                    {
+                        "affiliationOrganization": "XYZ Corporation",
+                        "affiliationOrganizationOther": "",
+                        "communityInvolvement": "Community Garden Organizer",
+                        "email": "james@email.com",
+                        "firstName": "James",
+                        "jobPosition": "Software Engineer",
+                        "lastName": "Moore",
+                        "membershipCategory": "Research professional",
+                        "membershipCategoryOther": "",
+                        "skills": "Programming",
+                        "registrationDate": "Fri, 20 Jan 2023 00:00:00 GMT",
+                        "suggestions": "Automate data entry",
+                        "userId": 12,
+                        "yearsExperienceHealthcare": 0,
+                        "yearsExperienceIa": 6,
+                        "tags": "Développement d'application web"
+                    }, 
+                    "score": 0.91
+                }
+            ]
+        }
+    ]
+}
