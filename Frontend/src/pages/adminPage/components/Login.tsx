@@ -17,6 +17,8 @@ const Login: React.FC<LoginProps> = ({
     const [typedPassword, setTypedPassword] = useState<string>('');
     const toast = useToast();
 
+    console.log(ADMIN_PASSWORD);
+    
     const handleEnterKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === ENTER_KEY && typedPassword.length !== 0) {
             login();
