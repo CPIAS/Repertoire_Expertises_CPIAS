@@ -1,6 +1,10 @@
-import { Button, Flex, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
+import { Button, Flex, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useToast } from '@chakra-ui/react';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Member } from '../../models/member';
+import colors from '../../utils/theme/colors';
+
+const API_HOST = process.env.REACT_APP_SERVER_URL;
 
 type ModalProps = {
     selectedMember: Member;
@@ -14,6 +18,9 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
     setIsModalOpen
 }) => {
     const [editedMember, setEditedMember] = useState<Member | null>(selectedMember);
+    const [isWaitingForDeletion, setIsWaitingForDeletion] = useState<boolean>(false);
+    const [isWaitingForSave, setIsWaitingForSave] = useState<boolean>(false);
+    const toast = useToast();
     
     useEffect(()=>{
         setEditedMember(selectedMember);
@@ -24,14 +31,59 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
             setEditedMember({ ...editedMember, [fieldName]: value });
         }
     };
+    
+    const handleDeleteUser = async () => {
+        try {
+            if (editedMember && editedMember.userId) {
+                setIsWaitingForDeletion(true);
+                await axios.delete(`${API_HOST}/delete_user/${editedMember.userId}`);
+                toast({
+                    title: 'Succès!',
+                    description: 'Le membre a été supprimé avec succès.',
+                    status: 'success',
+                    duration: 3000,
+                    isClosable: true,
+                });
+                setIsModalOpen(false);
+                setIsWaitingForDeletion(false);
+            }
+        } catch (error) {
+            toast({
+                title: 'Une erreur est survenue',
+                description: 'Veuillez réessayer plus tard.',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+            setIsWaitingForDeletion(false);
+        }
+    };
 
-    const handleSaveChanges = () => {
-        if (editedMember) {
-            // Envoyez les données mises à jour au serveur (par exemple, via une requête axios).
-            // Une fois que les modifications sont enregistrées, fermez la modale.
-            // Vous pouvez également gérer la logique de mise à jour de l'objet Member sur le serveur ici.
-            console.log(editedMember);
-            setIsModalOpen(false);
+    const handleSaveChanges = async () => {
+        try {
+            if (editedMember && editedMember.userId) {
+                setIsWaitingForSave(true);
+                await axios.put(`${API_HOST}/update_user/${editedMember.userId}`, editedMember);
+                toast({
+                    title: 'Succès!',
+                    description: 'Les changements ont été sauvegardés avec succès.',
+                    status: 'success',
+                    duration: 3000,
+                    isClosable: true,
+                });
+                setIsModalOpen(false);
+                setIsWaitingForSave(false);
+            }
+        } catch (error) {
+            console.error('Error while updating user:', error);
+            toast({
+                title: 'Une erreur est survenue',
+                description: 'Veuillez réessayer plus tard.',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+            setIsWaitingForSave(false);
         }
     };
 
@@ -47,14 +99,6 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                 >
                     {editedMember && (
                         <>
-                            <FormLabel htmlFor="userId" paddingTop={'1rem'}>ID</FormLabel>
-                            <Input
-                                id="userId"
-                                value={editedMember.userId}
-                                onChange={(e) => handleFieldChange('userId', e.target.value)}
-                                
-                            />
-
                             <FormLabel htmlFor="lastName" paddingTop={'1rem'}>Nom</FormLabel>
                             <Input
                                 id="lastName"
@@ -107,16 +151,55 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                         justifyContent={'space-between'}
                     >
                     
-                        <Button colorScheme="red" onClick={() => setIsModalOpen(false)}>
+                        <Button size={'md'}
+                            backgroundColor={colors.red.light}
+                            color={colors.darkAndLight.white}
+                            fontWeight={'normal'}
+                            _hover={{
+                                backgroundColor: colors.red.dark,
+                            }}
+                            _active={{
+                                backgroundColor: colors.red.dark,
+                            }} onClick={() => handleDeleteUser()}
+                            isLoading={isWaitingForDeletion}
+                            isDisabled={isWaitingForSave}
+                        >
                             {'Supprimer le membre'}
                         </Button>
                         <Flex
                             gap={'1rem'}
                         >
-                            <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
-                                {'Fermer'}
+                            <Button 
+                                size={'md'}
+                                backgroundColor={colors.darkAndLight.white}
+                                color={colors.blue.main}
+                                border={`2px solid ${colors.blue.light}`}
+                                _hover={{
+                                    backgroundColor: colors.blue.lighter,
+                                }}
+                                _active={{
+                                    backgroundColor: colors.blue.lighter,
+                                }}
+                                onClick={() => setIsModalOpen(false)}
+                                isDisabled={isWaitingForSave || isWaitingForDeletion}
+                            >
+                                {'Annuler'}
                             </Button>
-                            <Button colorScheme="green" onClick={handleSaveChanges}>
+                            <Button 
+                                size={'md'}
+                                backgroundColor={colors.blue.main}
+                                color={colors.darkAndLight.white}
+                                fontWeight={'normal'}
+                                _hover={{
+                                    backgroundColor: colors.blue.light,
+                                }}
+                                _active={{
+                                    backgroundColor: colors.blue.light,
+                                }}
+                                onClick={handleSaveChanges}
+                                isLoading={isWaitingForSave}
+                                isDisabled={isWaitingForDeletion}
+                            >
                                 {'Enregistrer'}
                             </Button>
                         </Flex>

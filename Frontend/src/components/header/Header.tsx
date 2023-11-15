@@ -46,6 +46,7 @@ const NavItem: React.FC<NavProps> = ({ path, label }) => {
 
 const Header: React.FC = () => {
     const navigate = useNavigate();
+    
     return (
         <Flex 
             width={'100%'}
