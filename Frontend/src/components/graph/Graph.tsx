@@ -12,7 +12,6 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedExpert, setSelectedExpert] = useState<Member | undefined>(undefined);
 
-    const [zoomLevel, setZoomLevel] = useState(1);
     const userIdToNodeIdMap: Record<number, number> = {};
     const scores: number[] = results.flatMap(result =>
         result.recommendation.map(recommendation => recommendation.score || 0)
@@ -124,7 +123,11 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         physics: {
             stabilization: {
                 enabled: true,
-                iterations: 5000,
+                iterations: 1000,
+            },
+            barnesHut: {
+                centralGravity:0.7,
+                avoidOverlap: 0.5,
             },
         },
         autoResize: true,
@@ -136,25 +139,13 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         },
     };
         
-    const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const events = {
-        // select: (event: any) => {
-        //     if (event.nodes.length) {
-        //         const nodeId = event.nodes[0];
-        //         const selectedNodeData = GraphData.nodes.find((node) => node.id === nodeId);
-        
-        //         setSelectedNode(selectedNodeData || null);
-        //         setIsDrawerOpen(true);
-        //     }
-        // },
         select: (event: any) => {
             if (event.nodes.length) {
                 const nodeId = event.nodes[0];
         
-                // Find the selected node in the nodes array
                 const selectedNodeData = GraphData.nodes.find((node) => node.id === nodeId);
         
-                // Find the corresponding expert in the results array based on the selected node's ID
                 const expertIndex = results.findIndex((result) =>
                     result.recommendation.some((rec) => userIdToNodeIdMap[rec.expert.userId] === nodeId)
                 );
@@ -165,7 +156,6 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
                     )?.expert;
         
                     setSelectedNode(selectedNodeData || null);
-                    setSelectedIndex(expertIndex);
                     setIsDrawerOpen(true);
                     setSelectedExpert(selectedExpert);
                 }
@@ -194,9 +184,6 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
 
                 GraphData.nodes = updatedNodes;
             }
-        },
-        zoom: (event: any) => {
-            setZoomLevel(event.scale);
         },
     };
     
