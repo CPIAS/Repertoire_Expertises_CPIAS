@@ -11,7 +11,7 @@ import EditMemberProfileModal from '../../../components/modals/EditMemberProfile
 import { Member } from '../../../models/member';
 import { formatDate } from '../../../utils/formatDate';
 import colors from '../../../utils/theme/colors';
-// import mockMembers from '../../membersPage/mockMembers.json';
+import mockMembers from '../../membersPage/mockMembers.json';
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 // const API_KEY = process.env.REACT_APP_API_KEY;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -22,7 +22,7 @@ const EditMembers: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isWaitingForFile, setIsWaitingForFile] = useState<boolean>(false);
     const [noMemberText, setNoMemberText] = useState<string>('Aucun résultat');
-    const [members, setMembers] = useState<Member[]>([]);
+    const [members, setMembers] = useState<Member[]>(mockMembers); //TODO: Change to '[]' for deployment
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<Member | null>(null);
     const toast = useToast();
