@@ -1,20 +1,26 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Flex} from '@chakra-ui/react';
 import React, { useState } from 'react';
 import Graph from 'react-graph-vis';
 import { useSearchParams } from 'react-router-dom';
-import { ResultsMembers } from '../../models/member';
+import { Member, Recommendation, ResultsMembers } from '../../models/member';
 import * as d3 from 'd3';
-// import MemberDrawer from './components/MemberDrawer';
+import MemberDrawer from './components/MemberDrawer';
 
 const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
   
     const [selectedNode, setSelectedNode] = useState<{ id: number; title: string; label: string } | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [selectedExpert, setSelectedExpert] = useState<Member | undefined>(undefined);
+
     const [zoomLevel, setZoomLevel] = useState(1);
     const userIdToNodeIdMap: Record<number, number> = {};
-    const redScale = d3.scaleLinear<string, number>().domain([0, 0.5]).range(['#ff0000', '#ff0000']);
-    const greenScale = d3.scaleLinear<string, number>().domain([0.8, 1]).range(['#ff0000', '#00ff00']);
+    const scores: number[] = results.flatMap(result =>
+        result.recommendation.map(recommendation => recommendation.score || 0)
+    );
+    const colorScale = d3
+        .scaleLinear<string>()
+        .domain(d3.extent(scores) as [number, number]  || [0, 1])
+        .range(['#00ff00', '#FFA500']);
 
     const GraphData = {
         nodes: [] as Node[],
@@ -33,10 +39,16 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
     };
 
     type Edge = { 
+        label: string;
         from: number;
         to: number; 
-        width: number,
-        color: number
+        width: number;
+        color: string;
+        font?: {
+            align?: 'top' | 'middle' | 'bottom';
+            color?: string;
+            size?: number;
+        };
     };
 
     results.forEach((result, categoryIndex) => {
@@ -49,18 +61,19 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
             title: `Category id ${categoryId}`,
             color: '#FFFFFF',
             shape: 'box',
-            // margin: 6
+            margin: 6
         });
         
-        result.recommendation.forEach((recommendation, expertIndex) => {
-            const  userId  = recommendation.expert.userId;
+        result.recommendation.forEach((recommendation) => {
+            const userId = recommendation.expert.userId;
         
             // Check if the expert with the same userId already has a node
             let expertNodeId = userIdToNodeIdMap[userId];
         
             if (!expertNodeId) {
                 // If not, create a new node
-                expertNodeId = categoryId * 100 + expertIndex + 1;
+                expertNodeId = parseInt(`${categoryId}${recommendation.expert.userId}`);
+                console.log(expertNodeId);
                 userIdToNodeIdMap[userId] = expertNodeId;
             
                 const fullName = `${recommendation.expert.firstName} ${recommendation.expert.lastName}`;
@@ -77,16 +90,19 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
                     borderRadius: 100,
                 });
             }
-            const edgeColor =
-        recommendation.score && recommendation.score < 0.5
-            ? redScale(recommendation.score)
-            : greenScale(recommendation.score || 0.5);
-
+            const edgeLabel = recommendation.score
+                ? `${Math.min(100, Math.round((1 - recommendation.score) * 100))}%`
+                : '';
+            const edgeColor = colorScale(recommendation.score || 0);
             GraphData.edges.push({
+                label: edgeLabel,
                 from: categoryId,
                 to: expertNodeId,
                 width: 2,
-                color: edgeColor
+                color: edgeColor,
+                font: {
+                    align: 'middle',
+                },
             });
         });
     });
@@ -134,14 +150,25 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         select: (event: any) => {
             if (event.nodes.length) {
                 const nodeId = event.nodes[0];
+        
+                // Find the selected node in the nodes array
                 const selectedNodeData = GraphData.nodes.find((node) => node.id === nodeId);
-    
-                // Find the correct index in the results array based on the selected node's ID
-                const index = GraphData.nodes.findIndex((node) => node.id === nodeId);
-    
-                setSelectedIndex(index);
-                setSelectedNode(selectedNodeData || null);
-                setIsDrawerOpen(true);
+        
+                // Find the corresponding expert in the results array based on the selected node's ID
+                const expertIndex = results.findIndex((result) =>
+                    result.recommendation.some((rec) => userIdToNodeIdMap[rec.expert.userId] === nodeId)
+                );
+        
+                if (selectedNodeData && expertIndex !== -1) {
+                    const selectedExpert = results[expertIndex].recommendation.find(
+                        (rec) => userIdToNodeIdMap[rec.expert.userId] === nodeId
+                    )?.expert;
+        
+                    setSelectedNode(selectedNodeData || null);
+                    setSelectedIndex(expertIndex);
+                    setIsDrawerOpen(true);
+                    setSelectedExpert(selectedExpert);
+                }
             }
         },
         hoverNode: (event: any) => {
@@ -187,14 +214,13 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
                 options={options}
                 events={events}
             />
-            {/* {selectedNode?.title.includes('Member') && (
-                <MemberDrawer 
-                    selectedMember={results[selectedIndex] || undefined}
-                    isOpen={isDrawerOpen} 
+            {selectedNode?.title.includes('Expert') && selectedExpert && (
+                <MemberDrawer
+                    isOpen={isDrawerOpen}
                     setDrawerOpen={setIsDrawerOpen}
+                    selectedMember={selectedExpert}
                 />
-               
-            )} */}
+            )}
         </Flex>
     );
 };
