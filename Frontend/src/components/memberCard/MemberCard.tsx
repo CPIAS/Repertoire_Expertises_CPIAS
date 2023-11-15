@@ -72,7 +72,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                     >
                         <Flex
                             marginRight={'0.5rem'}
-                            width={'10%'}
+                            width={isReadOnly ? '15%' : '10%'}
                         >
                             <Image 
                                 src={member.profilePicture ? `https://drive.google.com/uc?export=view&id=${member.profilePicture}` : './images/avatar/generic-avatar.png'}
@@ -85,7 +85,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                             flexWrap={'wrap'}
                             alignItems={'center'}
                             gap={'0.5rem'}
-                            width={'90%'}
+                            width={isReadOnly ? '85%' : '90%'}
                         >
                             <Flex 
                                 width={'100%'}
@@ -151,6 +151,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                     <Flex
                         width={'100%'}
                         justifyContent={'flex-end'}
+                        display={isReadOnly ? 'none':'flex'}
                     >
                         <Link 
                             fontWeight={'medium'}
