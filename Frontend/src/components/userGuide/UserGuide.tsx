@@ -148,7 +148,7 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                     justifyContent={'center'}
                     flexWrap={'wrap'}
                 >
-                    <MemberCard members={[mockMembers[0]]} isReadOnly={true}/>
+                    <MemberCard member={mockMembers[0]} isReadOnly={true}/>
                 </Flex>
             </Flex>
         );
