@@ -60,7 +60,7 @@ class LLM:
         return OllamaEmbeddings(base_url="http://localhost:11434", model=qa_llm_model, temperature=temperature)
 
     @staticmethod
-    def __create_qa_vector_database(qa_embeddings: OllamaEmbeddings, user_documents: list[Document], persist_directory: str = SERVER_SETTINGS["../vector_directory"]) -> Chroma:
+    def __create_qa_vector_database(qa_embeddings: OllamaEmbeddings, user_documents: list[Document], persist_directory: str = SERVER_SETTINGS["vector_directory"]) -> Chroma:
         if os.path.exists(persist_directory):
             vector_store = Chroma(embedding_function=qa_embeddings, persist_directory=persist_directory)
         else:
