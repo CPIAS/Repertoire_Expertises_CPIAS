@@ -354,9 +354,9 @@ def download_csv():
         return jsonify({"message": "An error occurred while downloading the csv file."}), 500
 
 
-@app.route('/upload_csv', methods=['POST'], endpoint='upload_csv_file')
+@app.route('/upload_csv', methods=['POST'], endpoint='upload_csv')
 @require_api_key
-def upload_csv_file():
+def upload_csv():
     try:
         if 'csv_file' not in request.files:
             return jsonify({"message": "No file part"}), 400
@@ -415,6 +415,52 @@ def download_user_photo(user_id):
     except Exception as e:
         app_logger.error(msg=str(e), exc_info=True)
         return jsonify({"message": "An error occurred while downloading the user photo profile."}), 500
+
+
+@app.route('/upload_user_photo/<int:user_id>', methods=['POST'], endpoint='upload_user_photo')
+@require_api_key
+def upload_user_photo(user_id):
+    try:
+        if not db.is_available:
+            return jsonify({"message": "Database not available"}), 503
+
+        user = db.session.get(User, user_id)
+
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        if 'user_photo' not in request.files:
+            return jsonify({"message": "No file part"}), 400
+
+        file = request.files['user_photo']
+
+        if file.filename == '':
+            return jsonify({"message": "No selected file"}), 400
+
+        file_extension = os.path.splitext(file.filename)[1].lower()
+
+        if file_extension != '.png':
+            return jsonify({"message": "Only PNG format photos are allowed."}), 400
+
+        if file:
+            user_photos_directory = os.path.abspath(SERVER_SETTINGS['user_photos_directory'])
+
+            if not os.path.exists(user_photos_directory):
+                os.makedirs(user_photos_directory)
+
+            photo_name = f'user_{user_id}.png'
+            photo_path = os.path.join(user_photos_directory, photo_name)
+            file.save(photo_path)
+
+            user.profile_photo = photo_name
+            db.session.commit()
+
+            return jsonify({"message": "User profile photo uploaded and database updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(msg=str(e), exc_info=True)
+        return jsonify({"message": "File upload failed. An error occurred while uploading the user profile photo or updating the database."}), 500
 
 
 if __name__ == '__main__':
