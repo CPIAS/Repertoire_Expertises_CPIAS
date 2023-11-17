@@ -27,9 +27,7 @@ const UserGuide: React.FC<UserGuideSteps> = ({
         }
         default: {
             return getDescriptionPage();
-        }
-
-        }
+        }}
     };
 
     const openSearchExamplesDocument = () => {

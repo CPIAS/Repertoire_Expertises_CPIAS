@@ -174,8 +174,8 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                                     paddingX={'3rem'}
                                                                     paddingBottom={'1rem'}
                                                                 >
-                                                                    {res.recommendation.map((expert) => (
-                                                                        <MemberCard member={expert.expert} />
+                                                                    {res.recommendation.map((expert, index) => (
+                                                                        <MemberCard member={expert.expert} key={`${index}_${expert.expert.userId}`}/>
                                                                     ))}
                                                                 </Flex>
                                                             </AccordionPanel>

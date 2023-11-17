@@ -23,6 +23,8 @@ const colors = {
     },
     red: {
         main: '#FF2400',
+        dark: '#D12104',
+        light: '#FF4747'
     },
 
 };

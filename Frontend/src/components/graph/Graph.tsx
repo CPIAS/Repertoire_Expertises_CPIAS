@@ -74,7 +74,6 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         
             if (!expertNodeId) {
                 expertNodeId = parseInt(`${categoryId}${recommendation.expert.userId}`);
-                console.log(expertNodeId);
                 userIdToNodeIdMap[userId] = expertNodeId;
             
                 const fullName = `${recommendation.expert.firstName} ${recommendation.expert.lastName}`;

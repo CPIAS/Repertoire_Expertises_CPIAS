@@ -41,12 +41,12 @@ const Filters: React.FC<FiltersProps> = ({
     };
 
     useEffect(() => {
-        const organizationDropdown: DropdownOptions[] = [];
+        const organisationDropdown: DropdownOptions[] = [];
         for (const organization of organizationsOptions) {
-            organizationDropdown.push({value: organization, label: organization});
+            organisationDropdown.push({value: organization, label: organization});
         }
-        organizationDropdown.unshift({value: 'Tous', label: 'Tous'});
-        setOrganizationDropdownOptions(organizationDropdown);
+        organisationDropdown.unshift({value: 'Tous', label: 'Tous'});
+        setOrganizationDropdownOptions(organisationDropdown);
     }, [organizationsOptions]);
 
     useEffect(() => {
@@ -174,6 +174,29 @@ const Filters: React.FC<FiltersProps> = ({
                                 unit={'types'}
                                 selectedOptions={selectedMemberType}
                                 setSelectedOptions={setSelectedMemberType}
+                            />
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            paddingTop={'1.5rem'}
+                            justifyContent={'flex-start'}
+                            flexWrap={'wrap'}
+                            gap={'1rem'}
+                        >
+                            <Flex 
+                                width={'100%'} 
+                                paddingBottom={'0.25rem'}
+                                borderBottomWidth='1px'
+                                fontSize={'md'}
+                                fontWeight={'bold'}
+                            >
+                                {'Type d\'expertise'}
+                            </Flex>
+                            <MultiSelectDropdown 
+                                options={tagsDropdownOptions}
+                                unit={'types'}
+                                selectedOptions={selectedExpertise}
+                                setSelectedOptions={setSelectedExpertise}
                             />
                         </Flex>
                         <Flex

@@ -1,6 +1,7 @@
 {
   "name": "cpias",
   "version": "1.0.0",
+  "homepage": "https://polytechnique-montr-al.gitlab.io/log89xx/23-3/equipe-15/project_4/",
   "private": true,
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
@@ -15,7 +16,6 @@
     "@types/react-dom": "^18.2.7",
     "axios": "^1.5.0",
     "d3": "^7.8.5",
-    "eslint": "^8.49.0",
     "framer-motion": "^6.5.1",
     "humps": "^2.0.1",
     "neo4jd3": "^0.0.5",
@@ -41,9 +41,6 @@
     "lint": "eslint src",
     "start:proxy": "node setupProxy.js"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -60,7 +57,8 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/d3": "^7.4.2",
     "@types/humps": "^2.0.4",
-    "@types/node": "^20.9.1",
-    "eslint-plugin-react": "^7.33.2"
+    "eslint": "^8.53.0",
+    "eslint-plugin-react": "^7.27.1",
+    "@types/node": "^20.9.1"
   }
 }

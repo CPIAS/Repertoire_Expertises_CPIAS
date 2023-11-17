@@ -18,17 +18,15 @@ import React, { ChangeEvent, useState } from 'react';
 import colors from '../../utils/theme/colors';
 
 type ModalProps = {
-    // member: Member;
     isOpen: boolean;
     onClose: () => void;
 };
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
-// const API_KEY = process.env.REACT_APP_API_KEY;
+const API_KEY = process.env.REACT_APP_API_KEY;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const ContactModal: React.FC<ModalProps> = ({ 
-    // member,
     isOpen, 
     onClose 
 }) => {
@@ -61,6 +59,7 @@ const ContactModal: React.FC<ModalProps> = ({
         axios
             .post(`${API_HOST}/request_profile_correction`, formData, {
                 headers: {
+                    'Authorization': `${API_KEY}`,
                     'Content-Type': 'multipart/form-data'
                 }
             })
@@ -102,7 +101,7 @@ const ContactModal: React.FC<ModalProps> = ({
         >
             <ModalOverlay/>
             
-            <ModalContent paddingX={'1rem'} height={'75vh'} minHeight={'75vh'}>
+            <ModalContent paddingX={'1rem'} height={'70vh'} minHeight={'70vh'}>
                 <ModalHeader 
                     textAlign={'center'}
                     fontSize={'xl'}
@@ -118,16 +117,14 @@ const ContactModal: React.FC<ModalProps> = ({
                         width={'100%'}
                         height={'100%'}
                         justifyContent={'center'}
-                        alignItems={'center'}
-                        alignContent={'center'}
+                        alignContent={'flex-start'}
                         flexWrap={'wrap'}
                         gap={'1.25rem'}
                         overflowY={'scroll'}
-                        
+                        paddingTop={'1rem'}
                     >
                         <Flex
                             width={'100%'}
-                            height={'80%'}
                             justifyContent={'center'}
                             flexWrap={'wrap'}
                             paddingX={'0.5rem'}
@@ -293,7 +290,7 @@ const ContactModal: React.FC<ModalProps> = ({
                                 >
                                     <Textarea 
                                         width={'100%'}
-                                        height={'100%'}
+                                        height={'120px'}
                                         resize={'none'}
                                         placeholder={'Votre message...'}
                                         border={isMessageFieldDirty && message.trim().length === 0 ? `1px solid ${colors.red.main}` : `1px solid ${colors.grey.light}`}

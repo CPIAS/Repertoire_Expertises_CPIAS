@@ -5,6 +5,7 @@ import HomePage from './pages/homePage/HomePage';
 import MembersPage from './pages/membersPage/MembersPage';
 import NotFoundPage from './pages/notFoundPage/NotFoundPage';
 import SearchResultsPage from './pages/searchResultsPage/SearchResultsPage';
+import AdminPage from './pages/adminPage/AdminPage';
 
 const Router: React.FC = () => {
     return (
@@ -14,6 +15,8 @@ const Router: React.FC = () => {
                 <Route path="/accueil" element={<HomePage />} />
                 <Route path="/recherche" element={<SearchResultsPage />} />
                 <Route path="/membres" element={<MembersPage />} />
+                {/* <Route path="/inscription" element={<RegisterPage />} /> */}
+                <Route path="/admin" element={<AdminPage />} />
                 <Route path="/apropos" element={<AboutPage />} />
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>

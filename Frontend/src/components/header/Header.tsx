@@ -1,6 +1,7 @@
 import { Flex, Image, Link, Text } from '@chakra-ui/react';
 import React from 'react';
-import { Link as ReactRouterLink, useLocation } from 'react-router-dom';
+import { FaUserCircle } from 'react-icons/fa';
+import { Link as ReactRouterLink, useLocation, useNavigate } from 'react-router-dom';
 import colors from '../../utils/theme/colors';
 
 interface NavProps {
@@ -44,33 +45,56 @@ const NavItem: React.FC<NavProps> = ({ path, label }) => {
 };
 
 const Header: React.FC = () => {
+    const navigate = useNavigate();
+    
     return (
         <Flex 
             width={'100%'}
             height={'100%'}
             alignItems={'center'}
-            justifyContent={'flex-start'}
+            justifyContent={'space-between'}
             backgroundColor={colors.blue.main}
             flexWrap={'wrap'}
             boxShadow={`0px 0px 10px 2px ${colors.grey.dark}`}
-            gap={'2.5rem'}
-        >
+        >  
             <Flex
-                paddingLeft={'1rem'}
-                alignItems={'center'}
-                backgroundColor={colors.blue.main}
-            >
-                <Image src='./images/cpias-logo.png' alt='cpias' alignSelf="center" height={'10vh'}/>
-            </Flex>
-            <Flex
-                width={'auto%'}
+                width={'95%'}
                 height={'100%'}
                 alignItems={'center'}
-                
+                justifyContent={'flex-start'} 
+                gap={'2.5rem'}
             >
-                <NavItem path="/accueil" label="Accueil" />
-                <NavItem path="/membres" label="Membres" />
-                <NavItem path="/apropos" label="À propos" />
+           
+                <Flex
+                    paddingLeft={'1rem'}
+                    alignItems={'center'}
+                    backgroundColor={colors.blue.main}
+                >
+                    <Image src='./images/cpias-logo.png' alt='cpias' alignSelf="center" height={'10vh'}/>
+                </Flex>
+                <Flex
+                    width={'auto%'}
+                    height={'100%'}
+                    alignItems={'center'}
+                
+                >
+                    <NavItem path="/accueil" label="Accueil" />
+                    <NavItem path="/membres" label="Membres" />
+                    <NavItem path="/apropos" label="À propos" />
+                </Flex>
+            </Flex>
+            <Flex
+                width={'5%'}
+                height={'100%'}
+                justifyContent={'center'}
+                alignItems={'center'}
+            >
+                <FaUserCircle 
+                    color={'white'} 
+                    size={'32px'} 
+                    cursor={'pointer'}
+                    onClick={()=>navigate('/admin')}
+                />
             </Flex>
         </Flex>
     );
