@@ -282,13 +282,17 @@ def delete_user(user_id):
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
 
-        # Get the user based on the provided ID
         user = db.session.get(User, user_id)
 
         if user:
+            user_photo_path = os.path.join(SERVER_SETTINGS['user_photos_directory'], user.profile_photo)
             db.delete_user_from_csv(user.email)
             db.session.delete(user)
             db.session.commit()
+
+            if user.profile_photo and os.path.exists(user_photo_path):
+                os.remove(user_photo_path)
+
             return jsonify({'message': 'User deleted successfully'}), 200
         else:
             return jsonify({'message': 'User not found'}), 404
@@ -306,7 +310,6 @@ def update_user(user_id):
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
 
-        # Get the user based on the provided ID
         user = db.session.get(User, user_id)
 
         if user:
