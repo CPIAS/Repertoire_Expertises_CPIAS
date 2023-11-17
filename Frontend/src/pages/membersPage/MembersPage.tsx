@@ -10,7 +10,6 @@ import MemberCard from '../../components/memberCard/MemberCard';
 import { IFilters } from '../../models/filters';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
-import mockMembers from './mockMembers.json';
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 const API_KEY = process.env.REACT_APP_API_KEY;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
