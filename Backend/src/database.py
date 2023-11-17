@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 from dataclasses import dataclass
 from datetime import datetime, date
@@ -28,6 +29,8 @@ class Database:
         "years_experience_healthcare": 9,
         "community_involvement": 10,
         "suggestions": 11,
+        "consent": 12,
+        "profile_photo": 13
     }
 
     def __init__(self, app: Flask, llm: LLM, app_logger: Logger):
@@ -86,11 +89,17 @@ class Database:
             job_position=row[self.user_attributes_to_csv_columns_map["job_position"]],
             affiliation_organization=row[self.user_attributes_to_csv_columns_map["affiliation_organization"]],
             skills=row[self.user_attributes_to_csv_columns_map["skills"]],
+            skills_linkedin=self.__get_expert_skills_from_json(SERVER_SETTINGS['users_json_file'], row[self.user_attributes_to_csv_columns_map["email"]]),
             years_experience_ia=self.get_number(row[self.user_attributes_to_csv_columns_map["years_experience_ia"]], float),
             years_experience_healthcare=self.get_number(row[self.user_attributes_to_csv_columns_map["years_experience_healthcare"]], float),
             community_involvement=row[self.user_attributes_to_csv_columns_map["community_involvement"]],
             suggestions=row[self.user_attributes_to_csv_columns_map["suggestions"]],
-            tags=', '.join(self.llm.get_keywords(row[self.user_attributes_to_csv_columns_map["skills"]]))
+            tags=', '.join(self.llm.get_keywords(
+                row[self.user_attributes_to_csv_columns_map["skills"]] + '\n' +
+                self.__get_expert_skills_from_json(SERVER_SETTINGS['users_json_file'], row[self.user_attributes_to_csv_columns_map["email"]]))
+            ),
+            consent=row[self.user_attributes_to_csv_columns_map["consent"]],
+            profile_photo=row[self.user_attributes_to_csv_columns_map["profile_photo"]]
         )
 
     def is_empty(self) -> bool:
@@ -128,7 +137,11 @@ class Database:
                             if getattr(user, attr) != new_value:
                                 setattr(user, attr, new_value)
                                 if attr == "skills":
-                                    setattr(user, "tags", ', '.join(self.llm.get_keywords(new_value)))
+                                    setattr(user, "skills_linkedin", self.__get_expert_skills_from_json(SERVER_SETTINGS['users_json_file'], getattr(user, 'email')))
+                                    setattr(user, "tags", ', '.join(self.llm.get_keywords(
+                                        new_value + '\n' +
+                                        self.__get_expert_skills_from_json(SERVER_SETTINGS['users_json_file'], getattr(user, 'email')))
+                                    ))
                     else:
                         new_user = self.create_user_from_csv_row(row)
                         self.session.add(new_user)
@@ -188,6 +201,22 @@ class Database:
 
         self.write_csv(SERVER_SETTINGS["users_csv_file"], data)
 
+    @staticmethod
+    def __get_expert_skills_from_json(json_file_path: str, expert_email: str) -> str:
+        expert_skills = ''
+
+        with open(json_file_path, 'r') as json_file:
+            data = json.load(json_file)
+
+            for user in data['profiles']:
+                if expert_email == data['profiles'][user]['email']:
+                    for experience in data['profiles'][user]['experiences']:
+                        if experience['description']:
+                            expert_skills += experience['description'] + '\n'
+                    break
+
+        return expert_skills
+
 
 @dataclass
 class User(Database.db.Model):
@@ -202,8 +231,11 @@ class User(Database.db.Model):
     job_position: str = Column(Text, nullable=True)
     affiliation_organization: str = Column(Text, nullable=True)
     skills: str = Column(Text, nullable=True)
+    skills_linkedin: str = Column(Text, nullable=True)
     years_experience_ia: float = Column(Float, nullable=True)
     years_experience_healthcare: float = Column(Float, nullable=True)
     community_involvement: str = Column(Text, nullable=True)
     suggestions: str = Column(Text, nullable=True)
     tags: str = Column(Text, nullable=True)
+    consent: str = Column(Text, nullable=True)
+    profile_photo: str = Column(Text, nullable=True)
