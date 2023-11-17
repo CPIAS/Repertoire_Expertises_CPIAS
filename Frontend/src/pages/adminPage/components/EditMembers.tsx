@@ -26,7 +26,6 @@ const EditMembers: React.FC = () => {
     const [members, setMembers] = useState<Member[]>(mockMembers); //TODO: Change to '[]' for deployment
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<Member | null>(null);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const toast = useToast();
 
     const handleButtonClick = () => {
@@ -100,29 +99,6 @@ const EditMembers: React.FC = () => {
                 isClosable: true,
             });
             setIsWaitingForFile(false);
-        }
-    };
-
-    const uploadDatabaseFile = async () => {
-        if (selectedFile) {
-            const formData = new FormData();
-            formData.append('csvFile', selectedFile);
-    
-            try {
-            // Perform your upload logic here, for example using fetch or axios
-            // Example using fetch:
-                // const response = await fetch('/upload-endpoint', {
-                //     method: 'POST',
-                //     body: formData,
-                // });
-    
-                // Handle the response as needed
-                console.log(formData);
-            } catch (error) {
-                console.error('Error uploading file:', error);
-            }
-        } else {
-            console.error('No file selected');
         }
     };
 
