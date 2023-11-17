@@ -130,7 +130,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                 fontSize={'2xl'}
                                                 paddingBottom={'1rem'}
                                             >
-                                                {'Pour réaliser de type de projet, vous avez besoin de...'}
+                                                {'Pour réaliser ce type de projet, vous avez besoin de...'}
                                             </Text>
                                             {results.map((res) => (
                                                 <Flex width={'100%'}>
