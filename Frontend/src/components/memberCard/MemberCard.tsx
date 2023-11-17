@@ -1,5 +1,5 @@
 import { EmailIcon } from '@chakra-ui/icons';
-import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Image, Link, Tag, Text, Tooltip } from '@chakra-ui/react';
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Image, Link, Tag, Text } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
@@ -23,27 +23,35 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
     };
 
     const getDescription = (member: Member) => {
-        const filteredCategory = member.membershipCategory.trim() === 'Autre' ? '' : member.membershipCategory;
-        const filteredOrganization = member.affiliationOrganization.split(',').filter(organization => organization.trim() !== 'Autre');
-        const organizationsAbreviations = filteredOrganization.map((org) => org.split('- ')[0]);
-        const organizations = filteredOrganization.map((org) => org.split('- ')[1]);
-        const shouldIncludeParentheses = (filteredCategory && filteredOrganization.length > 0);
-      
+        const filteredOrganization = member.affiliationOrganization.split(',').map((organization) => organization.trim());
         return (
             <>
-                {filteredCategory}
-                {shouldIncludeParentheses ? ' (' : ''}
-                {organizationsAbreviations.map((org, index) => (
-                    <Tooltip hasArrow placement={'bottom'} label={organizations[index]} key={index}>
+                {filteredOrganization.map((org, index) => (
+                    <React.Fragment key={index}>
                         <Text>
-                            {org}{index < organizationsAbreviations.length-1 && (',')}
+                            {org.split('-')[0]}
                         </Text>
-                        
-                    </Tooltip>
+                        {index < filteredOrganization.length - 1 && ','}
+                    </React.Fragment>
                 ))}
-                {shouldIncludeParentheses ? ')' : ''}
             </>
         );
+    };
+
+    const formatName = (name: string) => {
+        return name
+            .split(/\s+/)
+            .map((word) => {
+                const hyphenIndex = word.indexOf('-');
+                if (hyphenIndex !== -1) {
+                    const firstPart = word.slice(0, hyphenIndex + 1);
+                    const restOfWord = word.slice(hyphenIndex + 1).charAt(0).toUpperCase() + word.slice(hyphenIndex + 2).toLowerCase();
+                    return `${firstPart}${restOfWord}`;
+                } else {
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }
+            })
+            .join(' ');
     };
 
     return (
@@ -67,12 +75,12 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                     _hover={{backgroundColor:'none'}}
                 >
                     <Flex
-                        width={'100%'}
+                        width={'95%'}
                         flexWrap={'nowrap'}
                     >
                         <Flex
                             marginRight={'0.5rem'}
-                            width={isReadOnly ? '15%' : '10%'}
+                            width={'10%'}
                         >
                             <Image 
                                 src={member.profilePicture ? `https://drive.google.com/uc?export=view&id=${member.profilePicture}` : './images/avatar/generic-avatar.png'}
@@ -82,10 +90,10 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                             />
                         </Flex>
                         <Flex
+                            width={'90%'}
                             flexWrap={'wrap'}
                             alignItems={'center'}
                             gap={'0.5rem'}
-                            width={isReadOnly ? '85%' : '90%'}
                         >
                             <Flex 
                                 width={'100%'}
@@ -93,21 +101,25 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                                 alignItems={'center'}
                             >
                                 <Flex width={'100%'} fontSize={'xl'} fontWeight={'bold'} alignItems={'center'}>
-                                    {`${member.firstName} ${member.lastName}`}
+                                    {formatName(`${member.firstName} ${member.lastName}`)}
                                 </Flex>
-                                <Flex maxWidth={'80%'} alignItems={'center'}>
+                                <Flex maxWidth={'100%'} alignItems={'center'} overflowX={'auto'}>
                                     {getDescription(member)}
                                 </Flex>
                             </Flex>
                             <Flex
-                                width={'100%'}
+                                maxWidth={'95%'}
                                 gap={'0.5rem'}
+                                paddingY={'0.25rem'}
+                                overflowX={'auto'}
                             >
                                 {member.tags.length > 0 
-                                        && member.tags.split(/,| et /).map((tag, index) => (
+                                        && member.tags.split(/,| et /).slice(0, 5).map((tag, index) => (
                                             <Flex
                                                 key={`${index}_flex`}
                                                 alignItems={'center'}
+                                                textOverflow={'ellipsis'}
+                                                whiteSpace={'nowrap'}
                                             >
                                                 <Tag 
                                                     colorScheme='orange'
@@ -125,11 +137,16 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                             </Flex>
                         </Flex>
                     </Flex>
-                    <AccordionIcon 
-                        boxSize={16}
-                        color={colors.grey.dark}
-                        _hover={{color: colors.orange.main}}
-                    />
+                    <Flex
+                        width={'5%'}
+                    >
+                        <AccordionIcon 
+                            boxSize={16}
+                            color={colors.grey.dark}
+                            _hover={{color: colors.orange.main}}
+                        />
+                    </Flex>
+                    
                 </AccordionButton>
                 <AccordionPanel 
                     padding={'1.5rem'}  

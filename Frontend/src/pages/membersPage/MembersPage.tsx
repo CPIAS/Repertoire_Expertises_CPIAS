@@ -1,4 +1,5 @@
-import { Button, Flex, Tag, TagLabel, Text } from '@chakra-ui/react';
+import { SearchIcon } from '@chakra-ui/icons';
+import { Button, Flex, Input, InputGroup, InputRightElement, Tag, TagLabel, Text } from '@chakra-ui/react';
 import axios from 'axios';
 import humps from 'humps';
 import React, { useEffect, useState } from 'react';
@@ -52,7 +53,8 @@ const MembersPage: React.FC = () => {
         const uniqueTags = new Set<string>();
         for (const member of members) {
             for (const org of member.affiliationOrganization.split(',')) {
-                uniqueOrganizations.add(org.trim());
+                if (org.trim().length > 0)
+                    uniqueOrganizations.add(org.trim());
             }
             for (const tags of member.tags.split(/,| et /)) {
                 uniqueTags.add(tags.trim());
@@ -113,6 +115,14 @@ const MembersPage: React.FC = () => {
         
         setFilteredMembers(filtered);
     }, [appliedFilters]);
+    
+    const filterMembers = (searchValue: string) => {
+        const searchValueCleaned = searchValue.trim().toLowerCase();
+        const filtered = members.filter((member) =>
+            member.firstName.toLowerCase().includes(searchValueCleaned) || member.lastName.toLowerCase().includes(searchValueCleaned)
+        );
+        setFilteredMembers(filtered);
+    };
 
     return (
         <Flex
@@ -161,6 +171,60 @@ const MembersPage: React.FC = () => {
                             <Text fontSize={'3xl'} fontWeight={'bold'}>
                                 {'Membres de la CPIAS'}
                             </Text>
+                        </Flex>
+                        <Flex 
+                            width={'100%'}
+                            alignItems={'center'}
+                            height={'60px'}
+                            justifyContent={'space-between'}
+                        >
+                            <Flex
+                                width={'50%'}
+                                height={'100%'}
+                            >
+                                <InputGroup 
+                                    width={'100%'}
+                                    height={'100%'}
+                                    size={'lg'}
+                                >
+                                    <Input 
+                                        placeholder={'Rechercher un membre...'} 
+                                        fontSize={'xl'}
+                                        backgroundColor={colors.darkAndLight.white}
+                                        paddingRight={'4.5rem'}
+                                        paddingY={'1rem'}
+                                        borderRadius={'1rem'}
+                                        height={'100%'}
+                                        border={'1px solid darkgrey'}
+                                        onChange={(event) => {
+                                            filterMembers(event.target.value);
+                                        }}
+                                        boxShadow={`0px 0px 7.5px 0px ${colors.grey.dark}`}
+                                        verticalAlign={'center'}
+                                        resize={'none'}
+                                        overflowY={'scroll'}
+                                        _hover={{ boxShadow: `0px 0px 7.5px 0px ${colors.grey.light}` }}
+                                        _active={{ border: '1px solid darkblue' }}
+                                    />
+                                    <InputRightElement 
+                                        className="input-right-element"
+                                        width={'4rem'}
+                                        height={'100%'}
+                                        maxHeight={'153px'}
+                                        backgroundColor={colors.blue.main}
+                                        borderRightRadius={'1rem'}
+                                        border={'1px solid transparent'}
+                                        borderLeft={'none'}
+                                        cursor={'pointer'}
+                                        _hover={{ backgroundColor: colors.orange.main }}
+                                    >
+                                        <SearchIcon 
+                                            color={colors.darkAndLight.white}
+                                            boxSize={'8'}
+                                        />
+                                    </InputRightElement>
+                                </InputGroup>
+                            </Flex>
                             <Button
                                 size={'lg'}
                                 backgroundColor={colors.blue.main}
@@ -279,7 +343,7 @@ const MembersPage: React.FC = () => {
                         >
                             {filteredMembers.length > 0 ?
                                 filteredMembers.map((member) => (
-                                    <MemberCard member={member} />
+                                    <MemberCard member={member} key={member.userId}/>
                                 ))
                                 :
                                 <Flex
