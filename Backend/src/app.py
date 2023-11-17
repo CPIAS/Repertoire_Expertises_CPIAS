@@ -148,18 +148,32 @@ def search_experts():
         question = request.get_data(as_text=True)
 
         if question:
-            experts = llm.get_experts_recommendation(question)
+            experts_recommendation = llm.get_experts_recommendation(question)
+            response = {"experts": []}
 
-            if experts:
-                return experts, 200
+            for generic_profile in experts_recommendation:
+                response["experts"].append(
+                    {
+                        "category": generic_profile,
+                        "recommendation": [
+                            {
+                                "expert": User.query.filter(User.email == expert_email).first(),
+                                "score": experts_recommendation[generic_profile]['scores'][i]
+                            } for i, expert_email in enumerate(experts_recommendation[generic_profile]['expert_emails'])
+                        ]
+                    }
+                )
+
+            if response:
+                return response, 200
             else:
-                return jsonify({"message": "No users were found matching your query"}), 404
+                return jsonify({"message": "No experts were found matching your query"}), 404
         else:
             return jsonify({"message": "No question provided"}), 400
 
     except Exception as e:
         app_logger.error(msg=str(e), exc_info=True)
-        return jsonify({"message": "An error occurred while searching for the answer to the question."}), 500
+        return jsonify({"message": "An error occurred while searching for experts related to your request."}), 500
 
 
 @app.route('/request_profile_correction', methods=['POST'], endpoint='request_profile_correction')
