@@ -175,7 +175,7 @@ class Database:
         data = self.read_csv(SERVER_SETTINGS["users_csv_file"])
         updated_data = []
 
-        for row in data:
+        for row in data[1:]:  # Skip the header row.
             if row[self.user_attributes_to_csv_columns_map["email"]] == user_email:
                 continue
             updated_data.append(row)
@@ -189,9 +189,10 @@ class Database:
         data = self.read_csv(SERVER_SETTINGS["users_csv_file"])
         user = []
 
-        for row in data:
+        for row in data[1:]:  # Skip the header row.
             if row[self.user_attributes_to_csv_columns_map["email"]] == user_email:
                 user = row
+                break
 
         if not user:
             raise Exception("User not found in the csv file. There is probably an inconsistency between the sqlite database and the csv file.")
