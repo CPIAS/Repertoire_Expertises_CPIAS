@@ -39,20 +39,20 @@ def init_server() -> None:
         app_logger.setLevel(logging.INFO)
 
         if not os.path.exists(SERVER_SETTINGS["users_csv_file"]):
-            download_users_csv_file_from_google_drive()
+            raise Exception(f"Server initialization failed. {SERVER_SETTINGS['users_csv_file']} does not exist.")
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             llm_future = executor.submit(llm.init)
             llm_future.result()
 
             if not llm.is_available:
-                raise Exception("Server initialization failed.")
+                raise Exception("Server initialization failed. LLM is not available.")
 
             db_future = executor.submit(db.init)
             db_future.result()
 
             if not db.is_available:
-                raise Exception("Server initialization failed.")
+                raise Exception("Server initialization failed. Database is not available.")
 
     except Exception as e:
         app_logger.error(msg=str(e), exc_info=True)
@@ -60,7 +60,7 @@ def init_server() -> None:
         app_logger.info(msg="The server has been successfully initialized.")
 
 
-def download_users_csv_file_from_google_drive() -> None:
+def download_users_csv_file_from_google_drive() -> None:  # Only works if the file is public on Google Drive
     if not os.path.exists(SERVER_SETTINGS["resources_directory"]):
         os.makedirs(SERVER_SETTINGS["resources_directory"])
 
@@ -279,10 +279,6 @@ def get_keywords_from_user_expertise():
 @require_api_key
 def delete_user(user_id):
     try:
-        # Update the database before deleting the requested user.
-        download_users_csv_file_from_google_drive()
-        db.update(SERVER_SETTINGS["users_csv_file"])
-
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
 
@@ -306,10 +302,6 @@ def delete_user(user_id):
 @app.route('/update_user/<int:user_id>', methods=['PUT'], endpoint='update_user')
 def update_user(user_id):
     try:
-        # Update the database before updating the requested user.
-        download_users_csv_file_from_google_drive()
-        db.update(SERVER_SETTINGS["users_csv_file"])
-
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
 
@@ -362,7 +354,6 @@ def download_csv():
 
 if __name__ == '__main__':
     init_server()
-    start_scheduled_tasks_thread()
     app.run(
         debug=True,
         host='0.0.0.0',
