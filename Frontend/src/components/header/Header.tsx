@@ -10,9 +10,9 @@ const Header: React.FC = () => {
             width={'100%'}
             height={'100%'}
             alignItems={'center'}
-            justifyContent={'flex-start'}
-            flexWrap={'wrap'}
+            justifyContent={'space-between'}
             backgroundColor={colors.blue.main}
+            flexWrap={'wrap'}
             boxShadow={`0px 0px 10px 2px ${colors.grey.dark}`}
         >
             {/* Larger screens */}

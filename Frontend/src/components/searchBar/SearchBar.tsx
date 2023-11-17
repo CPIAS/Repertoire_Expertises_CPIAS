@@ -51,7 +51,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 size={'lg'}
             >
                 <AutoResizeTextarea 
-                    placeholder={'Effectuer une recherche...'} 
+                    placeholder={'Rechercher...'} 
                     fontSize={{ base: 'sm', md: 'lg', lg: 'xl' }}
                     backgroundColor={colors.darkAndLight.white}
                     paddingRight={'4.5rem'}

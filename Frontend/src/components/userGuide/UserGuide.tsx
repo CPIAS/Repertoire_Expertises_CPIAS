@@ -27,9 +27,7 @@ const UserGuide: React.FC<UserGuideSteps> = ({
         }
         default: {
             return getDescriptionPage();
-        }
-
-        }
+        }}
     };
 
     const openSearchExamplesDocument = () => {
@@ -45,7 +43,8 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                 flexWrap={'wrap'}
                 justifyContent={'center'}
                 alignItems={'flex-start'}
-                padding={'1rem'}
+                paddingTop={'1rem'}
+                paddingRight={'1rem'}
                 alignContent={'flex-start'}
                 overflow={'scroll'}
             >
@@ -56,9 +55,9 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                     {'Il offre un moteur de recherche avancé qui permet aux utilisateurs de découvrir les membres de la CPIAS en se basant sur leurs compétences spécifiques en IA et en santé. '}
                 </Text>
                 <Text textAlign={'justify'} fontWeight={'semibold'}>
-                    {'Cet outil va au-delà de la simple recherche, puisqu\'il propose également un système de recommandation d\'expertise. '}
+                    {'Cet outil va au-delà de la simple recherche, puisqu\'il propose également un système de recommandation d\'expertises. '}
                     {'Grâce à cette fonctionnalité, il devient possible de former des équipes multidisciplinaires en toute simplicité, en connectant des professionnels dont les compétences se complètent. '}
-                    {'L\'objectif premier de cette application est de stimuler l\'intégration de l\'IA dans le domaine de la santé, en consolidant un répertoire dynamique d\'experts et en facilitant les interactions entre les acteurs clés.'}
+                    {'L\'objectif premier de cette application est de favoriser l\'intégration de l\'IA dans le domaine de la santé, en consolidant un répertoire dynamique d\'experts et en facilitant les interactions entre les acteurs clés.'}
                 </Text>
             </Flex>
             
@@ -70,8 +69,9 @@ const UserGuide: React.FC<UserGuideSteps> = ({
             <Flex
                 width={'100%'}
                 flexWrap={'wrap'}
-                alignItems={'center'}
-                alignContent={'center'}
+                alignItems={'flex-start'}
+                alignContent={'flex-start'}
+                paddingRight={'1rem'}
                 gap={'1rem'}
                 overflow={'scroll'}
             >
@@ -134,8 +134,14 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                 flexWrap={'wrap'}
                 alignItems={'center'}
                 alignContent={'center'}
+                paddingTop={'1rem'}
+
+                paddingRight={'1rem'}
+
                 gap={'2rem'}
                 overflow={'scroll'}
+
+                zIndex={1}
             >
                 <Text textAlign={'justify'} fontWeight={'semibold'}>
                     {'Pour consulter le profil d\'un expert, rendez-vous dans l\'onglet "Membres". '}
@@ -148,8 +154,10 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                     width={'100%'}
                     justifyContent={'center'}
                     flexWrap={'wrap'}
+
+                    zIndex={0}
                 >
-                    <MemberCard members={[mockMembers[0]]} isReadOnly={true}/>
+                    <MemberCard member={mockMembers[0]} isReadOnly={true}/>
                 </Flex>
             </Flex>
         );
