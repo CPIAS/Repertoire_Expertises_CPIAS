@@ -175,7 +175,7 @@ class Database:
         data = self.read_csv(SERVER_SETTINGS["users_csv_file"])
         updated_data = []
 
-        for row in data[1:]:  # Skip the header row.
+        for row in data:
             if row[self.user_attributes_to_csv_columns_map["email"]] == user_email:
                 continue
             updated_data.append(row)
