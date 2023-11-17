@@ -2,6 +2,7 @@ SERVER_SETTINGS = {
     "template_directory": "../templates",
     "database_directory": "../database",
     "resources_directory": "../resources",
+    "user_photos_directory": "../resources/user_photos",
     "vector_directory": "../vector_store",
     "expert_recommendation_llm_model": "mistral:instruct",
     "keywords_llm_model": "camembert/camembert-large",
