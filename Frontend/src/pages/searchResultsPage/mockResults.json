@@ -5,8 +5,6 @@
             "recommendation": [
                 {"expert": 
                     {
-                        "user_id": 1,
-                        "name": "John Doe",
                         "affiliationOrganization": "TÉLUQ - Université TÉLUQ",
                         "affiliationOrganizationOther": "",
                         "communityInvolvement": "Volunteer at Local Charity",
