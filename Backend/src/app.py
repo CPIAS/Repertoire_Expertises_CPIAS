@@ -352,6 +352,37 @@ def download_csv():
         return jsonify({"message": "An error occurred while downloading the csv file."}), 500
 
 
+@app.route('/upload_csv', methods=['POST'], endpoint='upload_csv_file')
+@require_api_key
+def upload_csv_file():
+    try:
+        if 'csv_file' not in request.files:
+            return jsonify({"message": "No file part"}), 400
+
+        file = request.files['csv_file']
+
+        if file.filename == '':
+            return jsonify({"message": "No selected file"}), 400
+
+        if file:
+            resources_path = os.path.abspath(SERVER_SETTINGS['resources_directory'])
+
+            if not os.path.exists(resources_path):
+                os.makedirs(resources_path)
+
+            file.save(SERVER_SETTINGS["users_csv_file"])
+            db.update(SERVER_SETTINGS["users_csv_file"])
+
+            if not db.is_available:
+                raise Exception("Database update from uploaded file failed.")
+
+            return jsonify({"message": "CSV file uploaded and database updated successfully"}), 200
+
+    except Exception as e:
+        app_logger.error(msg=str(e), exc_info=True)
+        return jsonify({"message": "File upload failed. An error occurred while uploading the csv file or updating the database."}), 500
+
+
 if __name__ == '__main__':
     init_server()
     app.run(
