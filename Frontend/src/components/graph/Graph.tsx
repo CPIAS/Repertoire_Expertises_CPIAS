@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Flex} from '@chakra-ui/react';
 import React, { useState } from 'react';
 import Graph from 'react-graph-vis';
-import { useSearchParams } from 'react-router-dom';
-import { Member, Recommendation, ResultsMembers } from '../../models/member';
+import { Member, ResultsMembers } from '../../models/member';
 import * as d3 from 'd3';
 import MemberDrawer from './components/MemberDrawer';
 
@@ -19,7 +19,12 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
     const colorScale = d3
         .scaleLinear<string>()
         .domain(d3.extent(scores) as [number, number]  || [0, 1])
-        .range(['#00ff00', '#FFA500']);
+        .range(['#13e30b', '#FFA500']);
+
+    const legendColorScale = d3
+        .scaleLinear<string>()
+        .domain([1, 0.75, 0.5, 0.25, 0])
+        .range(['#ff1100','#ff5900','#FFA500', '#FFD700', '#13e30b']);
 
     const GraphData = {
         nodes: [] as Node[],
@@ -33,7 +38,7 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         color: string | { border: string; background: string };
         shape: string;
         borderRadius?: number;
-        width?: number; // Add the width property for edge thickness
+        width?: number;
         margin?: number;
     };
 
@@ -53,7 +58,6 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
     results.forEach((result, categoryIndex) => {
         const categoryId = categoryIndex + 1;
       
-        // Create a node for the category
         GraphData.nodes.push({
             id: categoryId,
             label: result.category,
@@ -66,11 +70,9 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         result.recommendation.forEach((recommendation) => {
             const userId = recommendation.expert.userId;
         
-            // Check if the expert with the same userId already has a node
             let expertNodeId = userIdToNodeIdMap[userId];
         
             if (!expertNodeId) {
-                // If not, create a new node
                 expertNodeId = parseInt(`${categoryId}${recommendation.expert.userId}`);
                 console.log(expertNodeId);
                 userIdToNodeIdMap[userId] = expertNodeId;
@@ -126,7 +128,9 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
                 iterations: 1000,
             },
             barnesHut: {
-                centralGravity:0.7,
+                centralGravity: 0.7, 
+                springLength: 100, 
+                springConstant: 0.04, 
                 avoidOverlap: 0.5,
             },
         },
@@ -187,6 +191,14 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         },
     };
     
+    const legendData = [
+        { color: legendColorScale(1), label: '0% Score' },
+        { color: legendColorScale(0.75), label: '25% Score' },
+        { color: legendColorScale(0.5), label: '50% Score' },
+        { color: legendColorScale(0.25), label: '75% Score' },
+        { color: legendColorScale(0), label: '100% Score' },
+    ];
+    
     return (
         <Flex
             width={'100%'}
@@ -196,6 +208,30 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
             alignItems={'center'}
             border={'1px solid grey'}
         >
+            {/* Legend component */}
+            <div
+                style={{
+                    position: 'absolute',
+                    top: '100px', // Adjust the top position as needed
+                    left: '8vh', // Adjust the left position as needed
+                    display: 'flex',
+                    flexDirection: 'column',
+                }}
+            >
+                {legendData.map((entry, index) => (
+                    <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                        <div
+                            style={{
+                                width: '20px',
+                                height: '10px',
+                                backgroundColor: entry.color,
+                                marginRight: '5px',
+                            }}
+                        ></div>
+                        <span style={{ fontSize: '12px' }}>{entry.label}</span>
+                    </div>
+                ))}
+            </div>
             <Graph
                 graph={GraphData}
                 options={options}
