@@ -300,6 +300,7 @@ def delete_user(user_id):
 
 
 @app.route('/update_user/<int:user_id>', methods=['PUT'], endpoint='update_user')
+@require_api_key
 def update_user(user_id):
     try:
         if not db.is_available:
@@ -331,6 +332,7 @@ def update_user(user_id):
 
 
 @app.route('/download_csv', methods=['GET'], endpoint='download_csv')
+@require_api_key
 def download_csv():
     try:
         csv_file_path = SERVER_SETTINGS['users_csv_file']
@@ -381,6 +383,38 @@ def upload_csv_file():
     except Exception as e:
         app_logger.error(msg=str(e), exc_info=True)
         return jsonify({"message": "File upload failed. An error occurred while uploading the csv file or updating the database."}), 500
+
+
+@app.route('/download_user_photo/<int:user_id>', methods=['GET'], endpoint='download_user_photo')
+@require_api_key
+def download_user_photo(user_id):
+    try:
+        if not db.is_available:
+            return jsonify({"message": "Database not available"}), 503
+
+        user = db.session.get(User, user_id)
+
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        if not user.profile_photo:
+            return jsonify({'message': 'User does not have a profile photo.'}), 404
+
+        user_photo_path = os.path.join(SERVER_SETTINGS['user_photos_directory'], user.profile_photo)
+
+        if not os.path.exists(user_photo_path):
+            return jsonify({'message': 'User profile photo not found on the server.'}), 404
+
+        return send_file(
+            user_photo_path,
+            as_attachment=True,
+            download_name=user.profile_photo,
+            mimetype='image/png'
+        )
+
+    except Exception as e:
+        app_logger.error(msg=str(e), exc_info=True)
+        return jsonify({"message": "An error occurred while downloading the user photo profile."}), 500
 
 
 if __name__ == '__main__':
