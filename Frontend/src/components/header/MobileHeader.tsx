@@ -42,6 +42,7 @@ const MobileHeader: React.FC = () => {
                                 <NavItem path="/accueil" label="Accueil" />
                                 <NavItem path="/membres" label="Membres" />
                                 <NavItem path="/apropos" label="À propos" />
+                                <NavItem path="/admin" label="Se connecter" />
                             </Flex>
                         </DrawerBody>
                     </DrawerContent>

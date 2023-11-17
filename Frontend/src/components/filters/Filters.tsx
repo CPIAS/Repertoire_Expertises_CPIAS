@@ -277,23 +277,29 @@ const Filters: React.FC<FiltersProps> = ({
                         justifyContent={{base:'center', md: 'space-between'}}
                         alignItems={'center'}
                         flexWrap={'wrap'}
-                    >                        
-                        <Button
-                            size={'md'}
-                            backgroundColor={colors.darkAndLight.white}
-                            color={colors.blue.main}
-                            border={`1px solid ${colors.grey.lighter}`}
-                            _hover={{
-                                backgroundColor: colors.blue.lighter,
-                            }}
-                            _active={{
-                                backgroundColor: colors.blue.lighter,
-                            }}
-                            onClick={()=>resetFilters()}
-                            marginBottom={{base: '1rem', md: '0'}}
+                    >       
+                        <Flex
+                            width={{base:'100%', md: '35%'}}
+                            justifyContent={{base:'center', md: 'flex-start'}}
                         >
-                            {'Réinitialiser les filtres'}
-                        </Button>
+                                        
+                            <Button
+                                size={'md'}
+                                backgroundColor={colors.darkAndLight.white}
+                                color={colors.blue.main}
+                                border={`1px solid ${colors.grey.lighter}`}
+                                _hover={{
+                                    backgroundColor: colors.blue.lighter,
+                                }}
+                                _active={{
+                                    backgroundColor: colors.blue.lighter,
+                                }}
+                                onClick={()=>resetFilters()}
+                                marginBottom={{base: '1rem', md: '0'}}
+                            >
+                                {'Réinitialiser les filtres'}
+                            </Button>
+                        </Flex> 
                         <Flex gap={'1rem'}>
                             <Button 
                                 size={'lg'}

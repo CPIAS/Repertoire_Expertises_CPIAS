@@ -20,7 +20,7 @@ const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [results, setResults] = useState<ResultsMembers[]>([]);
-    const [noResultsText, setNoResultsText] = useState<string>('Aucun résultat');
+    const [noResultsText, setNoResultsText] = useState<string>('');
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
 
@@ -44,6 +44,7 @@ const SearchResultsPage: React.FC = () => {
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error while fetching members: ', error);
+                setNoResultsText('Aucun résultat');
                 setIsLoading(false);
             }
         };

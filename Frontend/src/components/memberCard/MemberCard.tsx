@@ -54,6 +54,28 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
             .join(' ');
     };
 
+    const getTags = () => {
+        return member.tags.length > 0 
+            && member.tags.split(/,| et /).slice(0, 5).map((tag, index) => (
+                <Flex
+                    key={`${index}_flex`}
+                    alignItems={'center'}
+                    textOverflow={'ellipsis'}
+                    whiteSpace={'nowrap'}
+                >
+                    <Tag 
+                        colorScheme='orange'
+                        borderRadius='full'
+                        size={{ base: 'sm', md:'md', lg: 'md' }}
+                        border={'1px solid'}
+                        borderColor={colors.orange.main}
+                    >
+                        {tag.trim().length <= 3 ? tag.trim().toUpperCase() : `${tag.trim().charAt(0).toUpperCase()}${tag.trim().slice(1).toLowerCase()}`}
+                    </Tag>
+                </Flex>
+            ));
+    };
+
     return (
         <Accordion 
             width={'100%'} 
@@ -75,82 +97,88 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                     _hover={{backgroundColor:'none'}}
                 >
                     <Flex
-                        width={'95%'}
-                        flexWrap={'nowrap'}
+                        width={'100%'}
+                        alignItems={'center'}
+                       
                     >
-                        <Flex
-                            marginRight={'0.5rem'}
-                            width={'10%'}
-                        >
-                            <Image 
-                                src={member.profilePicture ? `https://drive.google.com/uc?export=view&id=${member.profilePicture}` : './images/avatar/generic-avatar.png'}
-                                borderRadius='full'
-                                border={`1px solid ${colors.grey.dark}`}
-                                boxSize='125px'
-                            />
-                        </Flex>
+                    
                         <Flex
                             width={'90%'}
-                            flexWrap={'wrap'}
-                            alignItems={'center'}
-                            gap={'0.5rem'}
+                            flexWrap={'nowrap'}
+                            gap={'1rem'}
                         >
-                            <Flex 
-                                width={'100%'}
-                                flexWrap={'wrap'}
-                                alignItems={'center'}
+                            <Flex
+                                marginRight={{ base: 'none', md:'0.5rem', lg: '0.5rem' }}
+                                width={{ base: '100px', md:'125px', lg: '125px' }}
+
                             >
-                                <Flex width={'100%'} fontSize={'xl'} fontWeight={'bold'} alignItems={'center'}>
-                                    {formatName(`${member.firstName} ${member.lastName}`)}
-                                </Flex>
-                                <Flex maxWidth={'100%'} alignItems={'center'} overflowX={'auto'}>
-                                    {getDescription(member)}
-                                </Flex>
+                                <Image 
+                                    src={member.profilePicture ? `https://drive.google.com/uc?export=view&id=${member.profilePicture}` : './images/avatar/generic-avatar.png'}
+                                    borderRadius='full'
+                                    border={`1px solid ${colors.grey.dark}`}
+
+                                />
                             </Flex>
                             <Flex
-                                maxWidth={'95%'}
+                                width={'90%'}
+                                flexWrap={'wrap'}
+                                alignItems={'center'}
                                 gap={'0.5rem'}
-                                paddingY={'0.25rem'}
-                                overflowX={'auto'}
                             >
-                                {member.tags.length > 0 
-                                        && member.tags.split(/,| et /).slice(0, 5).map((tag, index) => (
-                                            <Flex
-                                                key={`${index}_flex`}
-                                                alignItems={'center'}
-                                                textOverflow={'ellipsis'}
-                                                whiteSpace={'nowrap'}
-                                            >
-                                                <Tag 
-                                                    colorScheme='orange'
-                                                    borderRadius='full'
-                                                    size={'md'}
-                                                    border={'1px solid'}
-                                                    borderColor={colors.orange.main}
-                                                >
-                                                    {tag.trim().length <= 3 ? tag.trim().toUpperCase() : `${tag.trim().charAt(0).toUpperCase()}${tag.trim().slice(1).toLowerCase()}`}
-                                                </Tag>
-                                            </Flex>
-                                        ))
-                                }
-
+                                <Flex 
+                                    width={'100%'}
+                                    flexWrap={'wrap'}
+                                    alignItems={'center'}
+                                >
+                                    <Flex width={'100%'} fontSize={{ base: 'sm', md:'lg', lg: 'xl' }} fontWeight={'bold'} alignItems={'center'}>
+                                        {formatName(`${member.firstName} ${member.lastName}`)}
+                                    </Flex>
+                                    <Flex 
+                                        maxWidth={'100%'} 
+                                        alignItems={'center'} 
+                                        overflowX={'auto'} 
+                                        display={{ base: 'none', md:'flex', lg: 'flex' }}
+                                    >
+                                        {getDescription(member)}
+                                    </Flex>
+                                </Flex>
+                                <Flex
+                                    maxWidth={'95%'}
+                                    gap={'0.5rem'}
+                                    paddingY={'0.25rem'}
+                                    overflowX={'auto'}
+                                    display={{ base: 'none', md:'flex', lg: 'flex' }}
+                                >
+                                    {getTags()}
+                                </Flex>
                             </Flex>
                         </Flex>
-                    </Flex>
-                    <Flex
-                        width={'5%'}
-                    >
-                        <AccordionIcon 
-                            boxSize={16}
-                            color={colors.grey.dark}
-                            _hover={{color: colors.orange.main}}
-                        />
+                        <Flex
+                            width={'10%'}
+                            justifyContent={'center'}
+                        >
+                            <AccordionIcon 
+                                boxSize={{base: 8, sm: 12, md: 16}}
+                                color={colors.grey.dark}
+                                _hover={{color: colors.orange.main}}
+                            />
+                        </Flex>
                     </Flex>
                     
                 </AccordionButton>
                 <AccordionPanel 
-                    padding={'1.5rem'}  
+                    padding={{ base: 'none', md:'1.5rem', lg: '1.5rem' }}  
                 >
+                    <Flex
+                        width={'100%'}
+                        gap={'0.5rem'}
+                        paddingBottom={'1.5rem'}
+                        display={{ base: 'flex', md:'none', lg: 'none' }}
+                        overflowX={'scroll'}
+                    >
+                        {getTags()}
+                    </Flex>
+
                     <Flex
                         width={'100%'}
                         alignItems={'center'}

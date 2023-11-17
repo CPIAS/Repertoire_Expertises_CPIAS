@@ -1,9 +1,9 @@
 import { Flex, Image } from '@chakra-ui/react';
 import React from 'react';
 import { FaUserCircle } from 'react-icons/fa';
+import { useNavigate } from 'react-router';
 import colors from '../../utils/theme/colors';
 import NavItem from './NavItem';
-import { useNavigate } from 'react-router';
 
 const DesktopHeader: React.FC = () => {
     const navigate = useNavigate();
