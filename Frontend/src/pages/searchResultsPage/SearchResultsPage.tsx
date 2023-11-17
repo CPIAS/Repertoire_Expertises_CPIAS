@@ -4,15 +4,16 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../../components/header/Header';
 import SearchBar from '../../components/searchBar/SearchBar';
-import { ResultsMembers } from '../../models/member';
+import { Member, Recommendation, ResultsMembers } from '../../models/member';
 import colors from '../../utils/theme/colors';
 // import mockMembers from '../membersPage/mockMembers.json';
 import axios from 'axios';
+import humps from 'humps';
 import ResultsTabs from './components/ResultsTabs';
-import mockResults from './mockResults.json';
+// import mockResults from './mockResults.json';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
-// const API_KEY = process.env.REACT_APP_API_KEY;
+const API_KEY = process.env.REACT_APP_API_KEY;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const SearchResultsPage: React.FC = () => {
@@ -26,11 +27,19 @@ const SearchResultsPage: React.FC = () => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await axios.post(`${API_HOST}/search`, query);
-                const resultsTemp: ResultsMembers[] = [];
-                response.data.experts.map((res: ResultsMembers) => {
-                    resultsTemp.push({category: res.category, recommendation: res.recommendation});
+                const response = await axios.post(`${API_HOST}/search`, query, {
+                    headers: {
+                        'Authorization': `${API_KEY}`,
+                        'Content-Type': 'application/json',
+                    },
                 });
+                const resultsTemp: ResultsMembers[] = response.data.experts.map((res: ResultsMembers) => ({
+                    category: res.category,
+                    recommendation: res.recommendation.map((rec: Recommendation) => ({
+                        expert: humps.camelizeKeys(rec.expert) as Member,
+                        score: rec.score,
+                    })),
+                }));
                 setResults(resultsTemp);
                 setIsLoading(false);
             } catch (error) {
@@ -42,17 +51,6 @@ const SearchResultsPage: React.FC = () => {
 
         fetchMembers();
     }, [query]);
-
-    //TODO: REMOVE BEFORE DEPLOYMENT
-    useEffect(() => {
-        const resultsTemp: ResultsMembers[] = [];
-        mockResults.experts.map((res) => {
-            resultsTemp.push({category: res.category, recommendation: res.recommendation});
-        });
-
-        setResults(resultsTemp);
-        setIsLoading(false); //TODO: Remove
-    }, []);
 
     return (
         <Flex 

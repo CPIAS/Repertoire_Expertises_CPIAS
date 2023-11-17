@@ -5,6 +5,7 @@ import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
+const API_KEY = process.env.REACT_APP_API_KEY;
 
 type ModalProps = {
     selectedMember: Member;
@@ -36,7 +37,11 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
         try {
             if (editedMember && editedMember.userId) {
                 setIsWaitingForDeletion(true);
-                await axios.delete(`${API_HOST}/delete_user/${editedMember.userId}`);
+                await axios.delete(`${API_HOST}/delete_user/${editedMember.userId}`, {
+                    headers: {
+                        'Authorization': `${API_KEY}`
+                    }
+                });
                 toast({
                     title: 'Succès!',
                     description: 'Le membre a été supprimé avec succès.',
@@ -63,7 +68,14 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
         try {
             if (editedMember && editedMember.userId) {
                 setIsWaitingForSave(true);
-                await axios.put(`${API_HOST}/update_user/${editedMember.userId}`, editedMember);
+        
+                await axios.put(`${API_HOST}/update_user/${editedMember.userId}`, editedMember, {
+                    headers: {
+                        'Authorization': `${API_KEY}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+    
                 toast({
                     title: 'Succès!',
                     description: 'Les changements ont été sauvegardés avec succès.',
@@ -71,11 +83,13 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                     duration: 3000,
                     isClosable: true,
                 });
+    
                 setIsModalOpen(false);
                 setIsWaitingForSave(false);
             }
         } catch (error) {
             console.error('Error while updating user:', error);
+    
             toast({
                 title: 'Une erreur est survenue',
                 description: 'Veuillez réessayer plus tard.',
@@ -83,6 +97,7 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                 duration: 3000,
                 isClosable: true,
             });
+    
             setIsWaitingForSave(false);
         }
     };

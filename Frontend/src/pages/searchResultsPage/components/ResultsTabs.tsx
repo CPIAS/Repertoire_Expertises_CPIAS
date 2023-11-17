@@ -4,6 +4,7 @@ import Loader from '../../../components/loader/Loader';
 import MemberCard from '../../../components/memberCard/MemberCard';
 import { ResultsMembers } from '../../../models/member';
 import colors from '../../../utils/theme/colors';
+import NetworkGraph from '../../../components/graph/Graph';
 
 interface SearchResultsProps {
     results: ResultsMembers[];
@@ -120,7 +121,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                             alignContent={'center'}
                                             alignItems={'center'}
                                         >
-                                            {/* <NetworkGraph members={members}/> */}
+                                            { <NetworkGraph results={results}/> }
                                         </TabPanel>
                                         <TabPanel width={'100%'}>
                                             <Text
@@ -129,7 +130,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                 fontSize={'2xl'}
                                                 paddingBottom={'1rem'}
                                             >
-                                                {'Pour réaliser de type de projet, vous avez besoin de...'}
+                                                {'Pour réaliser ce type de projet, vous avez besoin de...'}
                                             </Text>
                                             {results.map((res) => (
                                                 <Flex width={'100%'}>
@@ -173,8 +174,8 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                                     paddingX={'3rem'}
                                                                     paddingBottom={'1rem'}
                                                                 >
-                                                                    {res.recommendation.map((expert) => (
-                                                                        <MemberCard member={expert.expert} />
+                                                                    {res.recommendation.map((expert, index) => (
+                                                                        <MemberCard member={expert.expert} key={`${index}_${expert.expert.userId}`}/>
                                                                     ))}
                                                                 </Flex>
                                                             </AccordionPanel>

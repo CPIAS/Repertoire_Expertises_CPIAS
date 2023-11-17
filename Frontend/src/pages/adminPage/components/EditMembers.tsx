@@ -12,9 +12,9 @@ import EditMemberProfileModal from '../../../components/modals/EditMemberProfile
 import { Member } from '../../../models/member';
 import { formatDate } from '../../../utils/formatDate';
 import colors from '../../../utils/theme/colors';
-import mockMembers from '../../membersPage/mockMembers.json';
+// import mockMembers from '../../membersPage/mockMembers.json';
 const API_HOST = process.env.REACT_APP_SERVER_URL;
-// const API_KEY = process.env.REACT_APP_API_KEY;
+const API_KEY = process.env.REACT_APP_API_KEY;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const EditMembers: React.FC = () => {
@@ -23,7 +23,7 @@ const EditMembers: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isWaitingForFile, setIsWaitingForFile] = useState<boolean>(false);
     const [noMemberText, setNoMemberText] = useState<string>('Aucun résultat');
-    const [members, setMembers] = useState<Member[]>(mockMembers); //TODO: Change to '[]' for deployment
+    const [members, setMembers] = useState<Member[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<Member | null>(null);
     const toast = useToast();
@@ -63,7 +63,11 @@ const EditMembers: React.FC = () => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await axios.get(`${API_HOST}/users`);
+                const response = await axios.get(`${API_HOST}/users`, {
+                    headers: {
+                        'Authorization': `${API_KEY}`
+                    }
+                });
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
             } catch (error) {
@@ -80,6 +84,9 @@ const EditMembers: React.FC = () => {
         try {
             setIsWaitingForFile(true);
             const response = await axios.get(`${API_HOST}/download_csv`, {
+                headers: {
+                    'Authorization': `${API_KEY}`
+                },
                 responseType: 'blob',
             });
             const blob = new Blob([response.data], { type: 'text/csv' });
@@ -124,7 +131,7 @@ const EditMembers: React.FC = () => {
     return (
         <Flex
             width={'100%'}
-            height={members.length === 0 ? '100vh' : '100%'}
+            height={isLoading || members.length === 0 ? '100vh' : '100%'}
             justifyContent={'center'}
             alignContent={'center'}
             flexWrap={'wrap'}
