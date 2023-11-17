@@ -1,5 +1,6 @@
 import { Button, Flex, Tag, TagLabel, Text } from '@chakra-ui/react';
 import axios from 'axios';
+import humps from 'humps';
 import React, { useEffect, useState } from 'react';
 import { FaFilter } from 'react-icons/fa';
 import Filters from '../../components/filters/Filters';
@@ -9,10 +10,9 @@ import MemberCard from '../../components/memberCard/MemberCard';
 import { IFilters } from '../../models/filters';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
-// import mockMembers from './mockMembers.json';
-import humps from 'humps';
+import mockMembers from './mockMembers.json';
 const API_HOST = process.env.REACT_APP_SERVER_URL;
-// const API_KEY = process.env.REACT_APP_API_KEY;
+const API_KEY = process.env.REACT_APP_API_KEY;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const MembersPage: React.FC = () => {
@@ -29,7 +29,11 @@ const MembersPage: React.FC = () => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await axios.get(`${API_HOST}/users`);
+                const response = await axios.get(`${API_HOST}/users`, {
+                    headers: {
+                        'Authorization': `${API_KEY}`
+                    }
+                });
                 setMembers(humps.camelizeKeys(response.data) as Member[]);
                 setFilteredMembers(humps.camelizeKeys(response.data) as Member[]);
                 setIsLoading(false);
@@ -272,6 +276,7 @@ const MembersPage: React.FC = () => {
                         </Flex>
                         <Flex 
                             width={'100%'} 
+                            flexWrap={'wrap'}
                         >
                             {filteredMembers.length > 0 ?
                                 filteredMembers.map((member) => (

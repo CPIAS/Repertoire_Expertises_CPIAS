@@ -3,8 +3,9 @@ import { DownloadIcon, EditIcon } from '@chakra-ui/icons';
 import { Button, Flex, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useToast } from '@chakra-ui/react';
 import axios from 'axios';
 import humps from 'humps';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FaSignOutAlt } from 'react-icons/fa';
+import { MdRefresh } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 import Loader from '../../../components/loader/Loader';
 import EditMemberProfileModal from '../../../components/modals/EditMemberProfileModal';
@@ -18,19 +19,48 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const EditMembers: React.FC = () => {
     const navigate = useNavigate();
-
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isWaitingForFile, setIsWaitingForFile] = useState<boolean>(false);
     const [noMemberText, setNoMemberText] = useState<string>('Aucun résultat');
     const [members, setMembers] = useState<Member[]>(mockMembers); //TODO: Change to '[]' for deployment
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const toast = useToast();
+
+    const handleButtonClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            const formData = new FormData();
+            formData.append('csvFile', files[0]);
+            try {
+            // Perform your upload logic here, for example using fetch or axios
+            // Example using fetch:
+                // const response = await fetch('/upload-endpoint', {
+                //     method: 'POST',
+                //     body: formData,
+                // });
+    
+                // Handle the response as needed
+                console.log(formData);
+            } catch (error) {
+                console.error('Error uploading file:', error);
+            }
+        }
+    };
     
     const openModal = (member: Member) => {
         setSelectedMember(member);
         setIsModalOpen(true);
     };
+
     useEffect(() => {
         const fetchMembers = async () => {
             try {
@@ -70,6 +100,29 @@ const EditMembers: React.FC = () => {
                 isClosable: true,
             });
             setIsWaitingForFile(false);
+        }
+    };
+
+    const uploadDatabaseFile = async () => {
+        if (selectedFile) {
+            const formData = new FormData();
+            formData.append('csvFile', selectedFile);
+    
+            try {
+            // Perform your upload logic here, for example using fetch or axios
+            // Example using fetch:
+                // const response = await fetch('/upload-endpoint', {
+                //     method: 'POST',
+                //     body: formData,
+                // });
+    
+                // Handle the response as needed
+                console.log(formData);
+            } catch (error) {
+                console.error('Error uploading file:', error);
+            }
+        } else {
+            console.error('No file selected');
         }
     };
 
@@ -159,6 +212,29 @@ const EditMembers: React.FC = () => {
                                 gap={'1rem'}
                                 paddingBottom={'1rem'}
                             >
+                                <input 
+                                    type="file" 
+                                    accept=".csv" 
+                                    onChange={handleFileChange} 
+                                    ref={fileInputRef} 
+                                    style={{ display: 'none' }}
+                                />
+                                <Button
+                                    backgroundColor={colors.darkAndLight.white}
+                                    color={colors.blue.main}
+                                    border={`2px solid ${colors.blue.light}`}
+                                    _hover={{
+                                        backgroundColor: colors.blue.lighter,
+                                    }}
+                                    _active={{
+                                        backgroundColor: colors.blue.lighter,
+                                    }}
+                                    leftIcon={<MdRefresh />}
+                                    onClick={handleButtonClick}
+                                    // isLoading={isWaitingForFile}
+                                >
+                                    {'Mettre à jour la base de données'}
+                                </Button>
                                 <Button
                                     backgroundColor={colors.darkAndLight.white}
                                     color={colors.blue.main}
