@@ -40,7 +40,7 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
     
                 setProfilePicture(imageUrl);
             } catch (error: any) {        
-                if (error.response.status === 404) {
+                if (error?.response?.status === 404) {
                     console.clear();
                     setProfilePicture('./images/avatar/generic-avatar.png');
                 }

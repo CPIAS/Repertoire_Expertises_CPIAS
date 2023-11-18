@@ -38,11 +38,10 @@ const EditMembers: React.FC = () => {
         const files = event.target.files;
         if (files && files.length > 0) {
             const formData = new FormData();
-            formData.append('csvFile', files[0]);
-
+            formData.append('csv_file', files[0]);
+            
             try {
-                // Perform your upload logic here, for example using axios
-                await axios.put(`${API_HOST}/upload_csv`, formData, {
+                await axios.post(`${API_HOST}/upload_csv`, formData, {
                     headers: {
                         'Authorization': `${API_KEY}`,
                         'Content-Type': 'multipart/form-data',
