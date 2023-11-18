@@ -53,11 +53,9 @@ const ContactModal: React.FC<ModalProps> = ({
         formData.append('requesterLastName', lastName);
         formData.append('requesterEmail', email);
         formData.append('message', message);
-        if (selectedFile) 
-            formData.append('profilePicture', selectedFile);
 
         axios
-            .post(`${API_HOST}/request_profile_correction`, formData, {
+            .post(`${API_HOST}/request_contact`, formData, {
                 headers: {
                     'Authorization': `${API_KEY}`,
                     'Content-Type': 'multipart/form-data'
@@ -66,8 +64,8 @@ const ContactModal: React.FC<ModalProps> = ({
             .then(() => {
                 setIsWaitingForResponse(false);
                 toast({
-                    title: 'Demande de modification transmise à l\'administrateur.',
-                    description: 'Nous vous tiendrons informé de l\'état de votre demande.',
+                    title: 'Message envoyé à l\'administrateur du site.',
+                    description: 'Nous vous remercions pour votre message. L\'administrateur vous répondra dès que possible.',
                     status: 'success',
                     duration: 5000,
                     isClosable: true,
