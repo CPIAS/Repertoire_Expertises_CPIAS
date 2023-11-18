@@ -492,7 +492,7 @@ class LLM:
 
         for i, sentence in enumerate(translated_text_tokenized):
             sentences.append(sentence.lstrip())
-            if len(sentences) == 8 or i == len(translated_text_tokenized) - 1:  # A paragraphe of height sentences, or it is the last sentence.
+            if len(sentences) == 5 or i == len(translated_text_tokenized) - 1:  # A paragraphe of five sentences, or it is the last sentence.
                 paragraph = '\n'.join(sentences)
                 sentences.clear()
                 llm_keywords = self.keywords_chain.predict_and_parse(document=paragraph).lstrip().split(', ')
@@ -503,7 +503,7 @@ class LLM:
                     candidates=candidate_keywords,
                     stop_words=self.stop_words_fr,
                     keyphrase_ngram_range=(1, 4),
-                    top_n=2,
+                    top_n=3,
                 )
                 keybert_keywords = [k[0] for k in keybert_keywords]
 
