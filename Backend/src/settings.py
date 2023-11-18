@@ -5,6 +5,7 @@ SERVER_SETTINGS = {
     "user_photos_directory": "../resources/user_photos",
     "vector_directory": "../vector_store",
     "expert_recommendation_llm_model": "mistral:instruct",
+    "expert_recommendation_embeddings": "all-mpnet-base-v2",
     "keywords_llm_model": "camembert/camembert-large",
     "spacy_nlp_fr": "fr_core_news_sm",
     "spacy_nlp_en": "en_core_web_sm",
