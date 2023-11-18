@@ -2,6 +2,7 @@
 import { DownloadIcon, EditIcon } from '@chakra-ui/icons';
 import { Button, Flex, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useToast } from '@chakra-ui/react';
 import axios from 'axios';
+import humps from 'humps';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { MdRefresh } from 'react-icons/md';
@@ -11,7 +12,6 @@ import EditMemberProfileModal from '../../../components/modals/EditMemberProfile
 import { Member } from '../../../models/member';
 import { formatDate } from '../../../utils/formatDate';
 import colors from '../../../utils/theme/colors';
-import humps from 'humps';
 // import mockMembers from '../../membersPage/mockMembers.json';
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 const API_KEY = process.env.REACT_APP_API_KEY;
@@ -34,23 +34,43 @@ const EditMembers: React.FC = () => {
         }
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files && files.length > 0) {
             const formData = new FormData();
             formData.append('csvFile', files[0]);
+
             try {
-            // Perform your upload logic here, for example using fetch or axios
-            // Example using fetch:
-                // const response = await fetch('/upload-endpoint', {
-                //     method: 'POST',
-                //     body: formData,
-                // });
-    
-                // Handle the response as needed
-                console.log(formData);
+                // Perform your upload logic here, for example using axios
+                await axios.put(`${API_HOST}/upload_csv`, formData, {
+                    headers: {
+                        'Authorization': `${API_KEY}`,
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                const updatedMembersResponse = await axios.get(`${API_HOST}/users`, {
+                    headers: {
+                        'Authorization': `${API_KEY}`
+                    }
+                });
+                setMembers(humps.camelizeKeys(updatedMembersResponse.data) as Member[]);
+
+                toast({
+                    title: 'Mise à jour réussie',
+                    description: 'La base de données a été mise à jour avec succès.',
+                    status: 'success',
+                    duration: 3000,
+                    isClosable: true,
+                });
             } catch (error) {
-                console.error('Error uploading file:', error);
+                toast({
+                    title: 'Erreur de mise à jour',
+                    description: 'Une erreur est survenue lors de la mise à jour de la base de données.',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                });
             }
         }
     };

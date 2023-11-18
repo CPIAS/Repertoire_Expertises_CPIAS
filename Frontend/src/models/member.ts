@@ -15,7 +15,7 @@ export interface Member {
     yearsExperienceHealthcare: number;
     yearsExperienceIa: number;
     tags: string;
-    profilePicture?: string;
+    profilePhoto?: string;
 }
 
 export interface ResultsMembers {

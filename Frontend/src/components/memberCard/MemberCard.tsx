@@ -1,9 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { EmailIcon } from '@chakra-ui/icons';
-import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Image, Link, Tag, Text } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Image, Link, SkeletonCircle, Tag, Text } from '@chakra-ui/react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
 import ProfileCorrectionModal from '../modals/ProfileCorrectionModal';
+
+const API_HOST = process.env.REACT_APP_SERVER_URL;
+const API_KEY = process.env.REACT_APP_API_KEY;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 interface MemberCardProps {
     member: Member;
@@ -12,6 +18,35 @@ interface MemberCardProps {
 
 const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) => {
     const [profileCorrectionModalState, setProfileCorrectionModalState] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [profilePicture, setProfilePicture] = useState<string>('');
+
+    // Fetch profile picture from the server
+    useEffect(() => {
+        const fetchProfilePicture = async () => {
+            try {
+                const response = await axios.get(`${API_HOST}/download_user_photo/${member.userId}`, {
+                    headers: {
+                        'Authorization': `${API_KEY}`
+                    },
+                    responseType: 'arraybuffer',
+                });
+                const imageData = btoa(new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+                const imageUrl = `data:image/png;base64,${imageData}`;
+        
+                setProfilePicture(imageUrl);
+            } catch (error: any) {        
+                if (error.response.status === 404) {
+                    console.clear();
+                    setProfilePicture('./images/avatar/generic-avatar.png');
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProfilePicture();
+    }, []);
 
     const openProfileCorrectionModal = () => {
         if (isReadOnly) return;
@@ -109,15 +144,14 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                         >
                             <Flex
                                 marginRight={{ base: 'none', md:'0.5rem', lg: '0.5rem' }}
-                                width={{ base: '100px', md:'125px', lg: '125px' }}
+                                width={{ base: '100px', md:'125px' }}
 
                             >
-                                <Image 
-                                    src={member.profilePicture ? `https://drive.google.com/uc?export=view&id=${member.profilePicture}` : './images/avatar/generic-avatar.png'}
-                                    borderRadius='full'
-                                    border={`1px solid ${colors.grey.dark}`}
-
-                                />
+                                {isLoading ? (
+                                    <SkeletonCircle size={{ base: '100px', md:'125px' }} />
+                                ) : (
+                                    <Image src={profilePicture} borderRadius='full' border={`1px solid ${colors.grey.dark}`} />
+                                )}
                             </Flex>
                             <Flex
                                 width={'90%'}

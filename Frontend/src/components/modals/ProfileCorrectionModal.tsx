@@ -25,8 +25,7 @@ type ModalProps = {
 };
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
-// const API_KEY = process.env.REACT_APP_API_KEY;
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+const API_KEY = process.env.REACT_APP_API_KEY;
 
 const ProfileCorrectionModal: React.FC<ModalProps> = ({ 
     member,
@@ -91,6 +90,7 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
         axios
             .post(`${API_HOST}/request_profile_correction`, formData, {
                 headers: {
+                    'Authorization': `${API_KEY}`,
                     'Content-Type': 'multipart/form-data'
                 }
             })

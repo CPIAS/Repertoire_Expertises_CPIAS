@@ -35,24 +35,26 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
     
     const handleDeleteUser = async () => {
         try {
-            if (editedMember && editedMember.userId) {
-                setIsWaitingForDeletion(true);
-                await axios.delete(`${API_HOST}/delete_user/${editedMember.userId}`, {
-                    headers: {
-                        'Authorization': `${API_KEY}`
-                    }
-                });
-                toast({
-                    title: 'Succès!',
-                    description: 'Le membre a été supprimé avec succès.',
-                    status: 'success',
-                    duration: 3000,
-                    isClosable: true,
-                });
-                setIsModalOpen(false);
-                setIsWaitingForDeletion(false);
-            }
+            setIsWaitingForDeletion(true);
+    
+            await axios.delete(`${API_HOST}/delete_user/${editedMember?.userId}`, {
+                headers: {
+                    'Authorization': `${API_KEY}`,
+                },
+            });
+    
+            toast({
+                title: 'Succès!',
+                description: 'Le membre a été supprimé avec succès.',
+                status: 'success',
+                duration: 3000,
+                isClosable: true,
+            });
+    
+            setIsModalOpen(false);
         } catch (error) {
+            console.error('Error while deleting user:', error);
+    
             toast({
                 title: 'Une erreur est survenue',
                 description: 'Veuillez réessayer plus tard.',
@@ -60,6 +62,7 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                 duration: 3000,
                 isClosable: true,
             });
+        } finally {
             setIsWaitingForDeletion(false);
         }
     };
@@ -68,7 +71,7 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
         try {
             if (editedMember && editedMember.userId) {
                 setIsWaitingForSave(true);
-        
+    
                 await axios.put(`${API_HOST}/update_user/${editedMember.userId}`, editedMember, {
                     headers: {
                         'Authorization': `${API_KEY}`,
@@ -77,27 +80,26 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                 });
     
                 toast({
-                    title: 'Succès!',
-                    description: 'Les changements ont été sauvegardés avec succès.',
+                    title: 'Success!',
+                    description: 'Changes saved successfully.',
                     status: 'success',
                     duration: 3000,
                     isClosable: true,
                 });
     
                 setIsModalOpen(false);
-                setIsWaitingForSave(false);
             }
         } catch (error) {
             console.error('Error while updating user:', error);
     
             toast({
-                title: 'Une erreur est survenue',
-                description: 'Veuillez réessayer plus tard.',
+                title: 'An error occurred',
+                description: 'Please try again later.',
                 status: 'error',
                 duration: 3000,
                 isClosable: true,
             });
-    
+        } finally {
             setIsWaitingForSave(false);
         }
     };
