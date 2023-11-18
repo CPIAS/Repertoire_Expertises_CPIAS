@@ -4,6 +4,7 @@ import smtplib
 import logging
 import gdown
 import time
+import uuid
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from email.mime.application import MIMEApplication
@@ -442,8 +443,8 @@ def upload_user_photo(user_id):
 
         file_extension = os.path.splitext(file.filename)[1].lower()
 
-        if file_extension != '.png':
-            return jsonify({"message": "Only PNG format photos are allowed."}), 400
+        if file_extension != '.jpg':
+            return jsonify({"message": "Only JPG format photos are allowed."}), 400
 
         if file:
             user_photos_directory = os.path.abspath(SERVER_SETTINGS['user_photos_directory'])
@@ -451,10 +452,11 @@ def upload_user_photo(user_id):
             if not os.path.exists(user_photos_directory):
                 os.makedirs(user_photos_directory)
 
-            photo_name = f'user_{user_id}.png'
+            photo_name = str(uuid.uuid4()) + file_extension
             photo_path = os.path.join(user_photos_directory, photo_name)
             file.save(photo_path)
 
+            db.update_user_in_csv(user.email, {"profile_photo": photo_name})
             user.profile_photo = photo_name
             db.session.commit()
 
