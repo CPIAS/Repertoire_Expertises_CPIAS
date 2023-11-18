@@ -114,7 +114,7 @@ class LLM:
     ) -> Collection:
         vector_store = expert_recommendation_chroma_db_client.get_or_create_collection(name=collection_name, embedding_function=expert_recommendation_embeddings, metadata={"hnsw:space": "cosine"})
 
-        if vector_store.count():
+        if not vector_store.count():
             self.__populate_or_update_expert_recommendation_vector_store(vector_store, nlp_en, expert_skills, expert_emails)
 
         return vector_store
