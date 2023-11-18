@@ -40,20 +40,16 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                             width={'100%'}
                             flexWrap={'wrap'}
                         >
-                            {results.length > 0 ? 
-
-                                (
-                                    <Flex
-                                        width={'100%'}
-                                        fontSize={'3xl'}
-                                        fontWeight={'bold'}
-                                        flexWrap={'wrap'}
-                                    >
-                                        
-                                    </Flex>
-                                )
-                                : noResultsText
-                            }
+                            <Flex
+                                width={'100%'}
+                                fontSize={'3xl'}
+                                fontWeight={'bold'}
+                                flexWrap={'wrap'}
+                                paddingTop={'2rem'}
+                            >
+                                {noResultsText}
+                            </Flex>
+                            
                         </Flex>
                         
                         {results.length > 0 &&

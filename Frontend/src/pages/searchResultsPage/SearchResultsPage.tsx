@@ -3,7 +3,7 @@ import { Flex } from '@chakra-ui/react';
 import axios from 'axios';
 import humps from 'humps';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../../components/header/Header';
 import SearchBar from '../../components/searchBar/SearchBar';
 import { Member, Recommendation, ResultsMembers } from '../../models/member';
@@ -17,6 +17,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
+    const location = useLocation();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [results, setResults] = useState<ResultsMembers[]>([]);
     const [noResultsText, setNoResultsText] = useState<string>('');
@@ -26,6 +27,7 @@ const SearchResultsPage: React.FC = () => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
+                setIsLoading(true);
                 const response = await axios.post(`${API_HOST}/search`, query, {
                     headers: {
                         'Authorization': `${API_KEY}`,
@@ -49,7 +51,7 @@ const SearchResultsPage: React.FC = () => {
         };
 
         fetchMembers();
-    }, []);
+    }, [location.key]);
 
     return (
         <Flex 
@@ -110,7 +112,7 @@ const SearchResultsPage: React.FC = () => {
                             marginLeft={'2rem'}
                             width={'100%'}
                         >
-                            <SearchBar defaultValue={query}/>
+                            <SearchBar defaultValue={query} isDisabled={isLoading}/>
                         </Flex>
                     </Flex>
 
