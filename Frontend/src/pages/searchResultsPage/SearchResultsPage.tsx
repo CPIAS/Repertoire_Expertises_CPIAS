@@ -1,14 +1,13 @@
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { Flex } from '@chakra-ui/react';
+import axios from 'axios';
+import humps from 'humps';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../../components/header/Header';
 import SearchBar from '../../components/searchBar/SearchBar';
 import { Member, Recommendation, ResultsMembers } from '../../models/member';
 import colors from '../../utils/theme/colors';
-// import mockMembers from '../membersPage/mockMembers.json';
-import axios from 'axios';
-import humps from 'humps';
 import ResultsTabs from './components/ResultsTabs';
 // import mockResults from './mockResults.json';
 
@@ -80,7 +79,7 @@ const SearchResultsPage: React.FC = () => {
                 overflowY={'scroll'}
             >
                 <Flex
-                    width={'90%'}
+                    width={{base: '95%', lg:'90%'}}
                     height={'100%'}
                     flexWrap={'wrap'}
                     gap={'2rem'}

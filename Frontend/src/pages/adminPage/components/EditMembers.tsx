@@ -2,7 +2,6 @@
 import { DownloadIcon, EditIcon } from '@chakra-ui/icons';
 import { Button, Flex, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useToast } from '@chakra-ui/react';
 import axios from 'axios';
-import humps from 'humps';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { MdRefresh } from 'react-icons/md';
@@ -12,6 +11,7 @@ import EditMemberProfileModal from '../../../components/modals/EditMemberProfile
 import { Member } from '../../../models/member';
 import { formatDate } from '../../../utils/formatDate';
 import colors from '../../../utils/theme/colors';
+import humps from 'humps';
 // import mockMembers from '../../membersPage/mockMembers.json';
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 const API_KEY = process.env.REACT_APP_API_KEY;
@@ -118,7 +118,7 @@ const EditMembers: React.FC = () => {
                 <Td textAlign={'center'}>{formatDate(member.registrationDate)}</Td>
                 <Td textAlign={'center'}>
                     <EditIcon
-                        boxSize={'24px'}
+                        boxSize={{base:'18px', md: '24px'}}
                         cursor={'pointer'}
                         onClick={() => openModal(member)}
                         _hover={{color: colors.grey.dark}}
@@ -135,7 +135,7 @@ const EditMembers: React.FC = () => {
             justifyContent={'center'}
             alignContent={'center'}
             flexWrap={'wrap'}
-            backgroundColor={colors.grey.light}
+            backgroundColor={colors.grey.lighter}
         >
             <EditMemberProfileModal 
                 selectedMember={selectedMember!}
@@ -146,14 +146,14 @@ const EditMembers: React.FC = () => {
                 <Loader /> 
                 :
                 <Flex
-                    width={'70%'}
+                    width={{base:'100%', lg:'70%'}}
                     height={'100%'}
                     flexWrap={'wrap'}
                     justifyContent={'center'}
                     alignContent={'flex-start'}
                     paddingX={'3rem'}
                     backgroundColor={colors.darkAndLight.white}
-                    paddingY={'1rem'}
+                    // paddingY={'1rem'}
                 >
                     {members.length > 0 ? ( 
                         <Flex
@@ -165,75 +165,120 @@ const EditMembers: React.FC = () => {
                             <Flex
                                 width={'100%'}
                                 justifyContent={'space-between'}
-                                paddingBottom={'2rem'}
+                                flexWrap={{base: 'wrap', md:'nowrap'}}
+                                paddingBottom={{base: '1rem', md:'2rem'}}
+                                gap={'1rem'}
                             >
-                                <Text
-                                    fontWeight={'bold'}
-                                    fontSize={'xl'}
+                                <Flex
+                                    width={{base: '100%', md: '50%'}}
+                                    justifyContent={'flex-end'}
+                                    display={{base: 'flex', md:'none'}}
                                 >
-                                    {'Gérer les membres'}
-                                </Text>
-                                <Button
-                                    fontWeight={'normal'}
-                                    backgroundColor={colors.blue.main}
-                                    color={colors.darkAndLight.white}
-                                    _hover={{
-                                        backgroundColor: colors.blue.light,
-                                    }}
-                                    _active={{
-                                        backgroundColor: colors.blue.light,
-                                    }}
-                                    rightIcon={<FaSignOutAlt />}
-                                    onClick={()=>navigate('/accueil')}
+                                    <Button
+                                        fontWeight={'normal'}
+                                        fontSize={{base:'sm', md:'md'}}
+                                        backgroundColor={colors.blue.main}
+                                        color={colors.darkAndLight.white}
+                                        _hover={{
+                                            backgroundColor: colors.blue.light,
+                                        }}
+                                        _active={{
+                                            backgroundColor: colors.blue.light,
+                                        }}
+                                        rightIcon={<FaSignOutAlt />}
+                                        onClick={()=>navigate('/accueil')}
+                                    >
+                                        {'Déconnexion'}
+                                    </Button>
+                                </Flex>
+                                <Flex
+                                    width={{base: '100%', md: '50%'}}
+                                    justifyContent={'flex-start'}
+                                    alignItems={'center'}
                                 >
-                                    {'Déconnexion'}
-                                </Button>
+                                    <Text
+                                        fontWeight={'bold'}
+                                        fontSize={{base:'md', md:'lg', lg:'xl'}}
+                                    >
+                                        {'Gérer les membres'}
+                                    </Text>
+                                </Flex>
+                                <Flex
+                                    width={{base: '100%', md: '50%'}}
+                                    justifyContent={'flex-end'}
+                                    display={{base: 'none', md:'flex'}}
+                                >
+                                    <Button
+                                        fontWeight={'normal'}
+                                        fontSize={{base:'sm', md:'md'}}
+                                        backgroundColor={colors.blue.main}
+                                        color={colors.darkAndLight.white}
+                                        _hover={{
+                                            backgroundColor: colors.blue.light,
+                                        }}
+                                        _active={{
+                                            backgroundColor: colors.blue.light,
+                                        }}
+                                        rightIcon={<FaSignOutAlt />}
+                                        onClick={()=>navigate('/accueil')}
+                                    >
+                                        {'Déconnexion'}
+                                    </Button>
+                                </Flex>
                             </Flex>
                             <Flex 
                                 width={'100%'}
                                 justifyContent={'flex-end'}
+                                flexWrap={{base: 'wrap', md:'nowrap'}}
                                 gap={'1rem'}
                                 paddingBottom={'1rem'}
+                                alignItems={'center'}   
                             >
-                                <input 
-                                    type="file" 
-                                    accept=".csv" 
-                                    onChange={handleFileChange} 
-                                    ref={fileInputRef} 
-                                    style={{ display: 'none' }}
-                                />
-                                <Button
-                                    backgroundColor={colors.darkAndLight.white}
-                                    color={colors.blue.main}
-                                    border={`2px solid ${colors.blue.light}`}
-                                    _hover={{
-                                        backgroundColor: colors.blue.lighter,
-                                    }}
-                                    _active={{
-                                        backgroundColor: colors.blue.lighter,
-                                    }}
-                                    leftIcon={<MdRefresh />}
-                                    onClick={handleButtonClick}
+                                <Flex>
+                                    <Button
+                                        backgroundColor={colors.darkAndLight.white}
+                                        color={colors.blue.main}
+                                        fontSize={{base:'sm', md:'md'}}
+                                        border={`2px solid ${colors.blue.light}`}
+                                        _hover={{
+                                            backgroundColor: colors.blue.lighter,
+                                        }}
+                                        _active={{
+                                            backgroundColor: colors.blue.lighter,
+                                        }}
+                                        leftIcon={<DownloadIcon />}
+                                        onClick={()=>downloadDatabaseFile()}
+                                        isLoading={isWaitingForFile}
+                                    >
+                                        {'Exporter au format CSV'}
+                                    </Button>
+                                </Flex>
+                                <Flex>
+                                    <input 
+                                        type="file" 
+                                        accept=".csv" 
+                                        onChange={handleFileChange} 
+                                        ref={fileInputRef} 
+                                        style={{ display: 'none' }}
+                                    />
+                                    <Button
+                                        backgroundColor={colors.darkAndLight.white}
+                                        color={colors.blue.main}
+                                        fontSize={{base:'sm', md:'md'}}
+                                        border={`2px solid ${colors.blue.light}`}
+                                        _hover={{
+                                            backgroundColor: colors.blue.lighter,
+                                        }}
+                                        _active={{
+                                            backgroundColor: colors.blue.lighter,
+                                        }}
+                                        leftIcon={<MdRefresh />}
+                                        onClick={handleButtonClick}
                                     // isLoading={isWaitingForFile}
-                                >
-                                    {'Mettre à jour la base de données'}
-                                </Button>
-                                <Button
-                                    backgroundColor={colors.darkAndLight.white}
-                                    color={colors.blue.main}
-                                    border={`2px solid ${colors.blue.light}`}
-                                    _hover={{
-                                        backgroundColor: colors.blue.lighter,
-                                    }}
-                                    _active={{
-                                        backgroundColor: colors.blue.lighter,
-                                    }}
-                                    leftIcon={<DownloadIcon />}
-                                    onClick={()=>downloadDatabaseFile()}
-                                    isLoading={isWaitingForFile}
-                                >
-                                    {'Exporter au format CSV'}
-                                </Button>
+                                    >
+                                        {'Mettre à jour la base de données'}
+                                    </Button>
+                                </Flex>
                             </Flex>
                             <Flex
                                 backgroundColor={'white'}
@@ -242,8 +287,8 @@ const EditMembers: React.FC = () => {
                                 borderRadius={'0.25rem'}
                             >
                                 <TableContainer width={'100%'}>
-                                    <Table variant={'striped'}>
-                                        <Thead >
+                                    <Table variant={'striped'} size={{base:'md', lg:'lg'}}>
+                                        <Thead>
                                             <Tr>
                                                 <Th textAlign={'center'}>{'ID'}</Th>
                                                 <Th textAlign={'center'}>{'Nom'}</Th>

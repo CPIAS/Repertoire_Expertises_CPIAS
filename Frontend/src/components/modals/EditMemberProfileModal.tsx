@@ -103,7 +103,7 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size='6xl'>
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size={{base:'full', md:'6xl'}}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>{'Détails du membre'}</ModalHeader>
@@ -163,24 +163,30 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                 <ModalFooter>
                     <Flex 
                         width={'100%'}
-                        justifyContent={'space-between'}
+                        justifyContent={{base:'center', sm:'space-between'}}
+                        flexWrap={{base:'wrap', sm: 'nowrap'}}
+                        gap={'1rem'}
                     >
-                    
-                        <Button size={'md'}
-                            backgroundColor={colors.red.light}
-                            color={colors.darkAndLight.white}
-                            fontWeight={'normal'}
-                            _hover={{
-                                backgroundColor: colors.red.dark,
-                            }}
-                            _active={{
-                                backgroundColor: colors.red.dark,
-                            }} onClick={() => handleDeleteUser()}
-                            isLoading={isWaitingForDeletion}
-                            isDisabled={isWaitingForSave}
+                        <Flex
+                            justifyContent={{base:'center', sm:'space-between'}}
+                            width={{base: '100%', md:'none'}}
                         >
-                            {'Supprimer le membre'}
-                        </Button>
+                            <Button size={'md'}
+                                backgroundColor={colors.red.light}
+                                color={colors.darkAndLight.white}
+                                fontWeight={'normal'}
+                                _hover={{
+                                    backgroundColor: colors.red.dark,
+                                }}
+                                _active={{
+                                    backgroundColor: colors.red.dark,
+                                }} onClick={() => handleDeleteUser()}
+                                isLoading={isWaitingForDeletion}
+                                isDisabled={isWaitingForSave}
+                            >
+                                {'Supprimer le membre'}
+                            </Button>
+                        </Flex>
                         <Flex
                             gap={'1rem'}
                         >
