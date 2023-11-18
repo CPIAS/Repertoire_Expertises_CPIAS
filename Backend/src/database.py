@@ -30,7 +30,8 @@ class Database:
         "community_involvement": 10,
         "suggestions": 11,
         "consent": 12,
-        "profile_photo": 13
+        "profile_photo": 13,
+        "linkedin": 14
     }
 
     def __init__(self, app: Flask, llm: LLM, app_logger: Logger):
@@ -89,17 +90,14 @@ class Database:
             job_position=row[self.user_attributes_to_csv_columns_map["job_position"]],
             affiliation_organization=row[self.user_attributes_to_csv_columns_map["affiliation_organization"]],
             skills=row[self.user_attributes_to_csv_columns_map["skills"]],
-            skills_linkedin=self.__get_expert_skills_from_json(SERVER_SETTINGS['users_json_file'], row[self.user_attributes_to_csv_columns_map["email"]]),
             years_experience_ia=self.get_number(row[self.user_attributes_to_csv_columns_map["years_experience_ia"]], float),
             years_experience_healthcare=self.get_number(row[self.user_attributes_to_csv_columns_map["years_experience_healthcare"]], float),
             community_involvement=row[self.user_attributes_to_csv_columns_map["community_involvement"]],
             suggestions=row[self.user_attributes_to_csv_columns_map["suggestions"]],
-            tags=', '.join(self.llm.get_keywords(
-                row[self.user_attributes_to_csv_columns_map["skills"]] + '\n' +
-                self.__get_expert_skills_from_json(SERVER_SETTINGS['users_json_file'], row[self.user_attributes_to_csv_columns_map["email"]]))
-            ),
+            tags=', '.join(self.llm.get_keywords(row[self.user_attributes_to_csv_columns_map["skills"]])),
             consent=row[self.user_attributes_to_csv_columns_map["consent"]],
-            profile_photo=row[self.user_attributes_to_csv_columns_map["profile_photo"]]
+            profile_photo=row[self.user_attributes_to_csv_columns_map["profile_photo"]],
+            linkedin=row[self.user_attributes_to_csv_columns_map["linkedin"]]
         )
 
     def is_empty(self) -> bool:
@@ -137,11 +135,7 @@ class Database:
                             if getattr(user, attr) != new_value:
                                 setattr(user, attr, new_value)
                                 if attr == "skills":
-                                    setattr(user, "skills_linkedin", self.__get_expert_skills_from_json(SERVER_SETTINGS['users_json_file'], getattr(user, 'email')))
-                                    setattr(user, "tags", ', '.join(self.llm.get_keywords(
-                                        new_value + '\n' +
-                                        self.__get_expert_skills_from_json(SERVER_SETTINGS['users_json_file'], getattr(user, 'email')))
-                                    ))
+                                    setattr(user, "tags", ', '.join(self.llm.get_keywords(new_value)))
                     else:
                         new_user = self.create_user_from_csv_row(row)
                         self.session.add(new_user)
@@ -232,7 +226,6 @@ class User(Database.db.Model):
     job_position: str = Column(Text, nullable=True)
     affiliation_organization: str = Column(Text, nullable=True)
     skills: str = Column(Text, nullable=True)
-    skills_linkedin: str = Column(Text, nullable=True)
     years_experience_ia: float = Column(Float, nullable=True)
     years_experience_healthcare: float = Column(Float, nullable=True)
     community_involvement: str = Column(Text, nullable=True)
@@ -240,3 +233,4 @@ class User(Database.db.Model):
     tags: str = Column(Text, nullable=True)
     consent: str = Column(Text, nullable=True)
     profile_photo: str = Column(Text, nullable=True)
+    linkedin: str = Column(Text, nullable=True)
