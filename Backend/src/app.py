@@ -362,6 +362,9 @@ def download_csv():
 @require_api_key
 def upload_csv():
     try:
+        if not db.is_available:
+            return jsonify({"message": "Database not available"}), 503
+
         if 'csv_file' not in request.files:
             return jsonify({"message": "No file part"}), 400
 
