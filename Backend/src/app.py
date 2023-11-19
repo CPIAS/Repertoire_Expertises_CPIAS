@@ -229,6 +229,47 @@ def request_profile_correction():
         return jsonify({"message": "An error occurred and email could not be sent."}), 500
 
 
+@app.route('/request_contact', methods=['POST'], endpoint='request_contact')
+@require_api_key
+def request_contact():
+    try:
+        requester_first_name = request.form.get('requesterFirstName')
+        requester_last_name = request.form.get('requesterLastName')
+        requester_email = request.form.get('requesterEmail')
+        message = request.form.get('message')
+
+        subject = 'Demande de contact depuis le site'
+        email_message = '''
+            Bonjour,
+
+            {} {} ({}) a envoyé une demande de contact depuis le site. Voici le message :
+
+            "{}"
+        '''.format(requester_first_name, requester_last_name, requester_email, message)
+
+        sender = os.environ.get('EMAIL_SENDER')
+        recipients = os.environ.get('EMAIL_RECIPIENT')
+        password = os.environ.get('EMAIL_SENDER_PASSWORD')
+
+        msg = MIMEMultipart()
+        msg['Subject'] = subject
+        msg['From'] = sender
+        msg['To'] = recipients
+
+        body = MIMEText(email_message, 'plain')
+        msg.attach(body)
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+            smtp_server.login(sender, password)
+            smtp_server.sendmail(sender, recipients, msg.as_string())
+
+        return jsonify({"message": "Email sent successfully."}), 200
+
+    except Exception as e:
+        app_logger.error(msg=str(e), exc_info=True)
+        return jsonify({"message": "An error occurred, and the email could not be sent."}), 500
+
+
 @app.route('/filter', methods=['POST'], endpoint='filter_users')
 @require_api_key
 def filter_users():
