@@ -4,6 +4,7 @@ import smtplib
 import logging
 import gdown
 import time
+import uuid
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from email.mime.application import MIMEApplication
@@ -39,20 +40,20 @@ def init_server() -> None:
         app_logger.setLevel(logging.INFO)
 
         if not os.path.exists(SERVER_SETTINGS["users_csv_file"]):
-            download_users_csv_file_from_google_drive()
+            raise Exception(f"Server initialization failed. {SERVER_SETTINGS['users_csv_file']} does not exist.")
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             llm_future = executor.submit(llm.init)
             llm_future.result()
 
             if not llm.is_available:
-                raise Exception("Server initialization failed.")
+                raise Exception("Server initialization failed. LLM is not available.")
 
             db_future = executor.submit(db.init)
             db_future.result()
 
             if not db.is_available:
-                raise Exception("Server initialization failed.")
+                raise Exception("Server initialization failed. Database is not available.")
 
     except Exception as e:
         app_logger.error(msg=str(e), exc_info=True)
@@ -60,7 +61,7 @@ def init_server() -> None:
         app_logger.info(msg="The server has been successfully initialized.")
 
 
-def download_users_csv_file_from_google_drive() -> None:
+def download_users_csv_file_from_google_drive() -> None:  # Only works if the file is public on Google Drive
     if not os.path.exists(SERVER_SETTINGS["resources_directory"]):
         os.makedirs(SERVER_SETTINGS["resources_directory"])
 
@@ -148,18 +149,32 @@ def search_experts():
         question = request.get_data(as_text=True)
 
         if question:
-            experts = llm.get_experts_recommendation(question)
+            experts_recommendation = llm.get_experts_recommendation(question)
+            response = {"experts": []}
 
-            if experts:
-                return experts, 200
+            for generic_profile in experts_recommendation:
+                response["experts"].append(
+                    {
+                        "category": generic_profile,
+                        "recommendation": [
+                            {
+                                "expert": User.query.filter(User.email == expert_email).first(),
+                                "score": experts_recommendation[generic_profile]['scores'][i]
+                            } for i, expert_email in enumerate(experts_recommendation[generic_profile]['expert_emails'])
+                        ]
+                    }
+                )
+
+            if response:
+                return response, 200
             else:
-                return jsonify({"message": "No users were found matching your query"}), 404
+                return jsonify({"message": "No experts were found matching your query"}), 404
         else:
             return jsonify({"message": "No question provided"}), 400
 
     except Exception as e:
         app_logger.error(msg=str(e), exc_info=True)
-        return jsonify({"message": "An error occurred while searching for the answer to the question."}), 500
+        return jsonify({"message": "An error occurred while searching for experts related to your request."}), 500
 
 
 @app.route('/request_profile_correction', methods=['POST'], endpoint='request_profile_correction')
@@ -214,6 +229,47 @@ def request_profile_correction():
         return jsonify({"message": "An error occurred and email could not be sent."}), 500
 
 
+@app.route('/request_contact', methods=['POST'], endpoint='request_contact')
+@require_api_key
+def request_contact():
+    try:
+        requester_first_name = request.form.get('requesterFirstName')
+        requester_last_name = request.form.get('requesterLastName')
+        requester_email = request.form.get('requesterEmail')
+        message = request.form.get('message')
+
+        subject = 'Demande de contact depuis le site'
+        email_message = '''
+            Bonjour,
+
+            {} {} ({}) a envoyé une demande de contact depuis le site. Voici le message :
+
+            "{}"
+        '''.format(requester_first_name, requester_last_name, requester_email, message)
+
+        sender = os.environ.get('EMAIL_SENDER')
+        recipients = os.environ.get('EMAIL_RECIPIENT')
+        password = os.environ.get('EMAIL_SENDER_PASSWORD')
+
+        msg = MIMEMultipart()
+        msg['Subject'] = subject
+        msg['From'] = sender
+        msg['To'] = recipients
+
+        body = MIMEText(email_message, 'plain')
+        msg.attach(body)
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+            smtp_server.login(sender, password)
+            smtp_server.sendmail(sender, recipients, msg.as_string())
+
+        return jsonify({"message": "Email sent successfully."}), 200
+
+    except Exception as e:
+        app_logger.error(msg=str(e), exc_info=True)
+        return jsonify({"message": "An error occurred, and the email could not be sent."}), 500
+
+
 @app.route('/filter', methods=['POST'], endpoint='filter_users')
 @require_api_key
 def filter_users():
@@ -265,20 +321,20 @@ def get_keywords_from_user_expertise():
 @require_api_key
 def delete_user(user_id):
     try:
-        # Update the database before deleting the requested user.
-        download_users_csv_file_from_google_drive()
-        db.update(SERVER_SETTINGS["users_csv_file"])
-
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
 
-        # Get the user based on the provided ID
         user = db.session.get(User, user_id)
 
         if user:
+            user_photo_path = os.path.join(SERVER_SETTINGS['user_photos_directory'], user.profile_photo)
             db.delete_user_from_csv(user.email)
             db.session.delete(user)
             db.session.commit()
+
+            if user.profile_photo and os.path.exists(user_photo_path):
+                os.remove(user_photo_path)
+
             return jsonify({'message': 'User deleted successfully'}), 200
         else:
             return jsonify({'message': 'User not found'}), 404
@@ -290,16 +346,12 @@ def delete_user(user_id):
 
 
 @app.route('/update_user/<int:user_id>', methods=['PUT'], endpoint='update_user')
+@require_api_key
 def update_user(user_id):
     try:
-        # Update the database before updating the requested user.
-        download_users_csv_file_from_google_drive()
-        db.update(SERVER_SETTINGS["users_csv_file"])
-
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
 
-        # Get the user based on the provided ID
         user = db.session.get(User, user_id)
 
         if user:
@@ -325,6 +377,7 @@ def update_user(user_id):
 
 
 @app.route('/download_csv', methods=['GET'], endpoint='download_csv')
+@require_api_key
 def download_csv():
     try:
         csv_file_path = SERVER_SETTINGS['users_csv_file']
@@ -346,9 +399,144 @@ def download_csv():
         return jsonify({"message": "An error occurred while downloading the csv file."}), 500
 
 
+@app.route('/upload_csv', methods=['POST'], endpoint='upload_csv')
+@require_api_key
+def upload_csv():
+    try:
+        if not db.is_available:
+            return jsonify({"message": "Database not available"}), 503
+
+        if 'csv_file' not in request.files:
+            return jsonify({"message": "No file part"}), 400
+
+        file = request.files['csv_file']
+
+        if file.filename == '':
+            return jsonify({"message": "No selected file"}), 400
+
+        file_extension = os.path.splitext(file.filename)[1].lower()
+
+        if file_extension != '.csv':
+            return jsonify({"message": "Only CSV format files are allowed."}), 400
+
+        if file:
+            resources_path = os.path.abspath(SERVER_SETTINGS['resources_directory'])
+
+            if not os.path.exists(resources_path):
+                os.makedirs(resources_path)
+
+            # Temporarily save the file to be validated before saving it permanently
+            temp_file_path = os.path.join(resources_path, 'temp.csv')
+            file.save(temp_file_path)
+
+            # Validate the CSV file
+            is_valid, message = db.validate_csv(temp_file_path)
+
+            if is_valid:
+                db.update(temp_file_path)
+
+                if db.is_available:
+                    os.remove(SERVER_SETTINGS["users_csv_file"])
+                    os.rename(temp_file_path, SERVER_SETTINGS["users_csv_file"])
+                    return jsonify({"message": "CSV file uploaded and database updated successfully"}), 200
+                else:
+                    os.remove(temp_file_path)
+                    raise Exception("Database update from the uploaded csv file failed.")
+            else:
+                os.remove(temp_file_path)
+                return jsonify({"message": message}), 400
+
+    except Exception as e:
+        app_logger.error(msg=str(e), exc_info=True)
+        return jsonify({"message": "File upload failed. An error occurred while uploading the csv file or updating the database."}), 500
+
+
+@app.route('/download_user_photo/<int:user_id>', methods=['GET'], endpoint='download_user_photo')
+@require_api_key
+def download_user_photo(user_id):
+    try:
+        if not db.is_available:
+            return jsonify({"message": "Database not available"}), 503
+
+        user = db.session.get(User, user_id)
+
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        if not user.profile_photo:
+            return jsonify({'message': 'User does not have a profile photo.'}), 404
+
+        user_photo_path = os.path.join(SERVER_SETTINGS['user_photos_directory'], user.profile_photo)
+
+        if not os.path.exists(user_photo_path):
+            return jsonify({'message': 'User profile photo not found on the server.'}), 404
+
+        return send_file(
+            user_photo_path,
+            as_attachment=True,
+            download_name=user.profile_photo,
+            mimetype='image/png'
+        )
+
+    except Exception as e:
+        app_logger.error(msg=str(e), exc_info=True)
+        return jsonify({"message": "An error occurred while downloading the user photo profile."}), 500
+
+
+@app.route('/upload_user_photo/<int:user_id>', methods=['POST'], endpoint='upload_user_photo')
+@require_api_key
+def upload_user_photo(user_id):
+    try:
+        if not db.is_available:
+            return jsonify({"message": "Database not available"}), 503
+
+        user = db.session.get(User, user_id)
+
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        if 'user_photo' not in request.files:
+            return jsonify({"message": "No file part"}), 400
+
+        file = request.files['user_photo']
+
+        if file.filename == '':
+            return jsonify({"message": "No selected file"}), 400
+
+        file_extension = os.path.splitext(file.filename)[1].lower()
+
+        if file_extension != '.jpg':
+            return jsonify({"message": "Only JPG format photos are allowed."}), 400
+
+        if file:
+            user_photos_directory = os.path.abspath(SERVER_SETTINGS['user_photos_directory'])
+
+            user_old_photo_path = os.path.join(user_photos_directory, user.profile_photo)
+
+            if user.profile_photo and os.path.exists(user_old_photo_path):  # delete the old photo if it exists
+                os.remove(user_old_photo_path)
+
+            if not os.path.exists(user_photos_directory):
+                os.makedirs(user_photos_directory)
+
+            photo_name = str(uuid.uuid4()) + file_extension
+            photo_path = os.path.join(user_photos_directory, photo_name)
+            file.save(photo_path)
+
+            db.update_user_in_csv(user.email, {"profile_photo": photo_name})
+            user.profile_photo = photo_name
+            db.session.commit()
+
+            return jsonify({"message": "User profile photo uploaded and database updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(msg=str(e), exc_info=True)
+        return jsonify({"message": "File upload failed. An error occurred while uploading the user profile photo or updating the database."}), 500
+
+
 if __name__ == '__main__':
     init_server()
-    start_scheduled_tasks_thread()
     app.run(
         debug=True,
         host='0.0.0.0',
