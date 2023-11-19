@@ -27,7 +27,7 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
     const [isWaitingForDeletion, setIsWaitingForDeletion] = useState<boolean>(false);
     const [isWaitingForSave, setIsWaitingForSave] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [profilePicture, setProfilePicture] = useState<string>('');
+    const [profilePicture, setProfilePicture] = useState<string>('./images/avatar/generic-avatar.png');
     const toast = useToast();
     
     useEffect(()=>{

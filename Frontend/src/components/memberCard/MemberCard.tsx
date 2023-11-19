@@ -19,7 +19,7 @@ interface MemberCardProps {
 const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) => {
     const [profileCorrectionModalState, setProfileCorrectionModalState] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [profilePicture, setProfilePicture] = useState<string>('');
+    const [profilePicture, setProfilePicture] = useState<string>('./images/avatar/generic-avatar.png');
 
     // Fetch profile picture from the server
     useEffect(() => {
