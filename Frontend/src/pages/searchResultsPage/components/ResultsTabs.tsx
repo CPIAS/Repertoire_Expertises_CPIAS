@@ -45,7 +45,6 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                 fontSize={'3xl'}
                                 fontWeight={'bold'}
                                 flexWrap={'wrap'}
-                                paddingTop={'2rem'}
                             >
                                 {noResultsText}
                             </Flex>
@@ -75,18 +74,6 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                         paddingX={'1rem'}
                                         border={'none'}
                                     >
-                                        <Tab
-                                            paddingX={{base: '1rem', md:'5rem'}}
-                                            _active={{
-                                                backgroundColor: colors.grey.main,
-                                            }}
-                                            _selected={{ 
-                                                borderBottom: `3.5px solid ${colors.orange.main}`,
-                                            }}
-                                            fontSize={{base: 'sm', sm: 'md', lg: 'lg'}}
-                                        >
-                                            {'Liste des experts'}
-                                        </Tab>
                                         <Tab 
                                             paddingX={{base: '1rem', md:'5rem'}}
                                             _active={{
@@ -99,6 +86,19 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                         >
                                             {'Cartographie'}
                                         </Tab>
+                                        <Tab
+                                            paddingX={{base: '1rem', md:'5rem'}}
+                                            _active={{
+                                                backgroundColor: colors.grey.main,
+                                            }}
+                                            _selected={{ 
+                                                borderBottom: `3.5px solid ${colors.orange.main}`,
+                                            }}
+                                            fontSize={{base: 'sm', sm: 'md', lg: 'lg'}}
+                                        >
+                                            {'Liste des experts'}
+                                        </Tab>
+
                                     </TabList>
 
                                     <TabPanels 
@@ -111,6 +111,15 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                         alignContent={'center'}
                                         alignItems={'center'}
                                     >
+                                        <TabPanel
+                                            width={'100%'} 
+                                            height={'auto' || '100%'}   
+                                            justifyContent={'center'}
+                                            alignContent={'center'}
+                                            alignItems={'center'}
+                                        >
+                                            { <NetworkGraph results={results}/> }
+                                        </TabPanel>
 
                                         <TabPanel width={'100%'}>
                                             <Text
@@ -173,15 +182,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                 </Flex>
                                             ))}
                                         </TabPanel>
-                                        <TabPanel
-                                            width={'100%'} 
-                                            height={'auto' || '100%'}   
-                                            justifyContent={'center'}
-                                            alignContent={'center'}
-                                            alignItems={'center'}
-                                        >
-                                            { <NetworkGraph results={results}/> }
-                                        </TabPanel>
+
                                     </TabPanels>
                                 </Tabs>
                             </Flex>
