@@ -511,6 +511,11 @@ def upload_user_photo(user_id):
         if file:
             user_photos_directory = os.path.abspath(SERVER_SETTINGS['user_photos_directory'])
 
+            user_old_photo_path = os.path.join(user_photos_directory, user.profile_photo)
+
+            if user.profile_photo and os.path.exists(user_old_photo_path):  # delete the old photo if it exists
+                os.remove(user_old_photo_path)
+
             if not os.path.exists(user_photos_directory):
                 os.makedirs(user_photos_directory)
 
