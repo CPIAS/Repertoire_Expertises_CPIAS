@@ -472,7 +472,8 @@ class LLM:
             }
 
             for j, metadata in enumerate(found_experts['metadatas'][i]):
-                if metadata['expert_email'] not in response[translated_generic_profile]['expert_emails']:
+                # Considering only experts whose cosine similarity score is less than or equal to 0.5
+                if metadata['expert_email'] not in response[translated_generic_profile]['expert_emails'] and found_experts['distances'][i][j] <= 0.5:
                     response[translated_generic_profile]['expert_emails'].append(metadata['expert_email'])
                     response[translated_generic_profile]['scores'].append(found_experts['distances'][i][j])
 
