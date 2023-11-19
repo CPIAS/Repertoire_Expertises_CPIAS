@@ -16,6 +16,23 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
     const scores: number[] = results.flatMap(result =>
         result.recommendation.map(recommendation => recommendation.score || 0)
     );
+
+    const formatName = (name: string) => {
+        return name
+            .split(/\s+/)
+            .map((word) => {
+                const hyphenIndex = word.indexOf('-');
+                if (hyphenIndex !== -1) {
+                    const firstPart = word.slice(0, hyphenIndex + 1);
+                    const restOfWord = word.slice(hyphenIndex + 1).charAt(0).toUpperCase() + word.slice(hyphenIndex + 2).toLowerCase();
+                    return `${firstPart}${restOfWord}`;
+                } else {
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }
+            })
+            .join(' ');
+    };
+
     const colorScale = d3
         .scaleLinear<string>()
         .domain(d3.extent(scores) as [number, number]  || [0, 1])
@@ -76,7 +93,7 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
                 expertNodeId = parseInt(`${categoryId}${recommendation.expert.userId}`);
                 userIdToNodeIdMap[userId] = expertNodeId;
             
-                const fullName = `${recommendation.expert.firstName} ${recommendation.expert.lastName}`;
+                const fullName = formatName(`${recommendation.expert.firstName} ${recommendation.expert.lastName}`);
             
                 GraphData.nodes.push({
                     id: expertNodeId,
@@ -121,18 +138,17 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
             },
             color: 'black',
         },
-        physics: {
-            stabilization: {
-                enabled: true,
-                iterations: 1000,
-            },
-            barnesHut: {
-                centralGravity: 0.7, 
-                springLength: 100, 
-                springConstant: 0.04, 
-                avoidOverlap: 0.5,
-            },
+        physics:{
+            barnesHut:{
+                gravitationalConstant: -2000,
+                springConstant:0.02,
+            }
         },
+        smoothCurves: {dynamic:true},
+        hideEdgesOnDrag: true,
+        stabilize: true,
+        stabilizationIterations: 1000,
+
         autoResize: true,
         height: '100%',
         width: '100%',
