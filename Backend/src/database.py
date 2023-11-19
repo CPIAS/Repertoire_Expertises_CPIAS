@@ -34,6 +34,24 @@ class Database:
         "linkedin": 14
     }
 
+    required_columns = [
+        "Date d'inscription",
+        "Prénom",
+        "Nom",
+        "Adresse courriel",
+        "Catégorie de membres",
+        "Titre d'emploi",
+        "Organisation d'affiliation",
+        "Compétences ou Expertise",
+        "Nombre d'années d'expérience en IA",
+        "Nombre d'années d'expérience en santé",
+        "Impliquation dans la communauté",
+        "Suggestions",
+        "Consentement",
+        "Photo de profil",
+        "LinkedIn"
+    ]
+
     def __init__(self, app: Flask, llm: LLM, app_logger: Logger):
         self.__database_directory: str = os.path.abspath(SERVER_SETTINGS['database_directory'])
         self.app: Flask = app
@@ -211,6 +229,21 @@ class Database:
                     break
 
         return expert_skills
+
+    def validate_csv(self, users_csv_file: str):
+        headers = self.read_csv(users_csv_file)[0]
+
+        # Check if all required columns are present
+        missing_columns = [col for col in self.required_columns if col not in headers]
+
+        if missing_columns:
+            return False, f"Missing columns: {', '.join(missing_columns)}"
+
+        # Check if the order of columns is correct
+        if headers != self.required_columns:
+            return False, "Incorrect column order."
+
+        return True, "CSV file format is correct."
 
 
 @dataclass
