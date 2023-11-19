@@ -15,6 +15,5 @@ SERVER_SETTINGS = {
     "access_log_file": "../server_access.log",
     "error_log_file": "../server_error.log",
     "sqlite_db": "users.db",
-    "chroma_collection_name": "Experts",
-    "google_drive_csv_file_id": "1GdqBrGbhtBrvnOgeIwJWA-WP0VFzr8d9"
+    "chroma_collection_name": "Experts"
 }
