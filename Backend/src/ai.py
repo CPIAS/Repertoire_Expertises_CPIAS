@@ -18,7 +18,7 @@ from langchain.llms import Ollama
 from langchain.output_parsers import CommaSeparatedListOutputParser, PydanticOutputParser
 from langchain.prompts import FewShotPromptTemplate
 from langchain.prompts.prompt import PromptTemplate
-from langchain.schema import Document
+from langchain.schema import Document, OutputParserException
 from spacy import Language
 from settings import SERVER_SETTINGS
 from ai_models import Experts
@@ -36,6 +36,7 @@ class LLM:
         self.expert_recommendation_prompt: Optional[FewShotPromptTemplate] = None
         self.keywords_embeddings: Optional[TransformerDocumentEmbeddings] = None
         self.keywords_model: Optional[KeyBERT] = None
+        self.keywords_parser: Optional[CommaSeparatedListOutputParser] = None
         self.keywords_prompt: Optional[PromptTemplate] = None
         self.keywords_chain: Optional[LLMChain] = None
         self.nlp_fr: Optional[Language] = None
@@ -345,6 +346,10 @@ class LLM:
         return KeyBERT(model=keywords_embeddings)
 
     @staticmethod
+    def __get_keywords_parser() -> CommaSeparatedListOutputParser:
+        return CommaSeparatedListOutputParser()
+
+    @staticmethod
     def __get_keywords_prompt() -> PromptTemplate:
         prompt_template = """
                 <s>
@@ -376,7 +381,7 @@ class LLM:
                 "Here are the keywords present in the document"
                 [/INST]
         """
-        return PromptTemplate(input_variables=["document"], template=prompt_template, parser=CommaSeparatedListOutputParser())
+        return PromptTemplate(input_variables=["document"], template=prompt_template)
 
     @staticmethod
     def __get_keywords_chain(qa_llm: Ollama, keywords_prompt: PromptTemplate, ) -> LLMChain:
@@ -461,6 +466,7 @@ class LLM:
     def __init_keywords_chain(self) -> None:
         self.keywords_embeddings = self.__get_keywords_embeddings(SERVER_SETTINGS['keywords_llm_model'])
         self.keywords_model = self.__get_keywords_model(self.keywords_embeddings)
+        self.keywords_parser = self.__get_keywords_parser()
         self.keywords_prompt = self.__get_keywords_prompt()
         self.keywords_chain = self.__get_keywords_chain(self.expert_recommendation_llm, self.keywords_prompt)
         self.nlp_fr = self.__get_nlp(SERVER_SETTINGS["spacy_nlp_fr"])
@@ -476,13 +482,13 @@ class LLM:
             self.is_available = True
             self.app_logger.info(msg="The LLM has been successfully initialized.")
 
-    def __try_get_llm_expert_recommendation(self, llm_input, max_attempts=4, retry_delay=1) -> List[str]:
+    def __try_get_llm_expert_recommendation(self, llm_input: str, max_attempts: int = 4, retry_delay: int = 1) -> List[str]:
         for attempt in range(1, max_attempts):
             try:
                 llm_output = self.expert_recommendation_llm(llm_input)
-                generic_profiles = self.__get_expert_recommendation_parser().parse(llm_output).profiles
+                generic_profiles = self.expert_recommendation_parser.parse(llm_output).profiles
                 return generic_profiles
-            except Exception as e:
+            except OutputParserException as e:
                 self.app_logger.error(msg=str(e), exc_info=True)
                 time.sleep(retry_delay)
 
@@ -491,7 +497,7 @@ class LLM:
     def get_experts_recommendation(self, question: str):
         query = GoogleTranslator(source='auto', target='en').translate(question)
         llm_input = self.expert_recommendation_prompt.format(input=query)
-        generic_profiles = self.__try_get_llm_expert_recommendation(llm_input, 4, 1)  # max attempts = 4 , wait 1 second between each try.
+        generic_profiles = self.__try_get_llm_expert_recommendation(llm_input)  # max attempts = 4 , wait 1 second between each try.
         found_experts = self.expert_recommendation_vector_store.query(query_texts=generic_profiles, n_results=20)
         response = {}
 
@@ -513,6 +519,18 @@ class LLM:
 
         return response
 
+    def __try_get_llm_keywords(self, llm_input: str, max_attempts: int = 4, retry_delay: int = 1) -> List[str]:
+        for attempt in range(1, max_attempts):
+            try:
+                llm_output = self.keywords_chain.predict(document=llm_input)
+                llm_keywords = self.keywords_parser.parse(llm_output)
+                return llm_keywords
+            except AttributeError as e:
+                self.app_logger.error(msg=str(e), exc_info=True)
+                time.sleep(retry_delay)
+
+        raise Exception(f"Error occurred when parsing LLM output for keywords.")
+
     def get_keywords(self, text: str) -> list[str]:
         if not text:
             return []
@@ -527,7 +545,7 @@ class LLM:
             if len(sentences) == 5 or i == len(translated_text_tokenized) - 1:  # A paragraphe of five sentences, or it is the last sentence.
                 paragraph = '\n'.join(sentences)
                 sentences.clear()
-                llm_keywords = self.keywords_chain.predict_and_parse(document=paragraph).lstrip().split(', ')
+                llm_keywords = self.__try_get_llm_keywords(paragraph)  # max attempts = 4 , wait 1 second between each try.
                 llm_keywords = [k.lower() for k in llm_keywords]
                 candidate_keywords = self.__remove_stop_words(llm_keywords, self.nlp_fr)
                 keybert_keywords = self.keywords_model.extract_keywords(
