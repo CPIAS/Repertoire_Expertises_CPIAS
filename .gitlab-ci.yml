@@ -136,6 +136,8 @@ deploy:server:
 pages:
   image: node:latest
   stage: deploy
+  only:
+    - main
   script:
     - cd Frontend/
     - npm ci --cache .npm --prefer-offline
