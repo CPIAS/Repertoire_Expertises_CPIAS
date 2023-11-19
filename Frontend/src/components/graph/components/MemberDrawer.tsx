@@ -152,13 +152,13 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                 gap={'0.5rem'}
                             >
                                 <Text
-                                    fontSize={'lg'}
+                                    fontSize={{base: 'sm', md:'lg'}}
                                     fontWeight={'bold'}
                                     width={'100%'}
                                 >
                                     {'Type de membre'}
                                 </Text>
-                                <Text width={'100%'}>
+                                <Text width={'100%'} fontSize={{base: 'sm', md:'lg'}}>
                                     {selectedMember.membershipCategory}
                                 </Text>
                             </Flex>
@@ -169,7 +169,7 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                 flexWrap={'wrap'}
                             >
                                 <Text
-                                    fontSize={'lg'}
+                                    fontSize={{base: 'sm', md:'lg'}}
                                     fontWeight={'bold'}
                                     width={'100%'}
                                     paddingBottom={'0.5rem'}
@@ -177,7 +177,7 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                     {'Organisation(s) d\'affiliation'}
                                 </Text>
                                 {selectedMember.affiliationOrganization.split(',').map((org: string, index: number) => (
-                                    <Text key={index} width={'100%'}>
+                                    <Text key={index} width={'100%'} fontSize={{base: 'sm', md:'lg'}}>
                                         {org}
                                     </Text>
                                 ))}
@@ -188,14 +188,14 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                 flexWrap={'wrap'}
                             >
                                 <Text
-                                    fontSize={'lg'}
+                                    fontSize={{base: 'sm', md:'lg'}}
                                     fontWeight={'bold'}
                                     width={'100%'}
                                     paddingBottom={'0.5rem'}
                                 >
                                     {'Titre d\'emploi'}
                                 </Text>
-                                <Text width={'100%'}>
+                                <Text width={'100%'} fontSize={{base: 'sm', md:'lg'}}>
                                     {selectedMember.jobPosition}
                                 </Text>
 
@@ -207,7 +207,7 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                 gap={'0.5rem'}
                             >
                                 <Text
-                                    fontSize={'lg'}
+                                    fontSize={{base: 'sm', md:'lg'}}
                                     fontWeight={'bold'}
                                     width={'100%'}
                                 >
@@ -228,22 +228,23 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                         {selectedMember.email}
                                     </Link>
                                 </Flex>
-                                <Flex
-                                    width={'100%'}
-                                    alignItems={'center'}
-                                >
-                                    <FaLinkedin size={'32'} color={'#0077B5'}/> 
-                                    <Link 
-                                        href={'http://linkedin.com'} //TODO : Add profile URL
-                                        isExternal 
-                                        color="blue.500" 
-                                        textDecoration="underline"
-                                        paddingLeft={'0.75rem'}
+                                {selectedMember.linkedin && (
+                                    <Flex
+                                        width={'100%'}
+                                        alignItems={'center'}
                                     >
-                                        {/* //TODO : Add profile URL */}
-                                        {'TODO: Add LinkedIn URL'} 
-                                    </Link>
-                                </Flex>
+                                        <FaLinkedin size={'32'} color={'#0077B5'}/> 
+                                        <Link 
+                                            href={selectedMember.linkedin}
+                                            isExternal 
+                                            color="blue.500" 
+                                            textDecoration="underline"
+                                            paddingLeft={'0.75rem'}
+                                        >
+                                            {`Retrouver ${selectedMember.firstName} sur LinkedIn`} 
+                                        </Link>
+                                    </Flex>
+                                )}
                             </Flex>
                             
                         </Flex>

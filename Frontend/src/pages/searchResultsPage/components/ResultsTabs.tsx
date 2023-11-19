@@ -119,7 +119,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                 fontSize={{base: 'lg', md:'xl', lg:'2xl'}}
                                                 paddingBottom={'1rem'}
                                             >
-                                                {'Pour réaliser ce type de projet, vous avez besoin d\'experts dans les domaines suivants...'}
+                                                {'Pour réaliser ce type de projet, vous avez besoin de...'}
                                             </Text>
                                             {results.map((res) => (
                                                 <Flex width={'100%'}>
@@ -146,7 +146,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                                         textAlign={'start'}
 
                                                                     >
-                                                                        {`${res.category.toLowerCase()}`}
+                                                                        {`${res.category.charAt(0).toUpperCase()}${res.category.slice(1)}`}
                                                                     </Flex>
                                                                     <AccordionIcon 
                                                                         boxSize={{base: 8, sm: 12, md: 16}}

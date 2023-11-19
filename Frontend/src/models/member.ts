@@ -16,6 +16,7 @@ export interface Member {
     yearsExperienceIa: number;
     tags: string;
     profilePhoto?: string;
+    linkedin?: string;
 }
 
 export interface ResultsMembers {

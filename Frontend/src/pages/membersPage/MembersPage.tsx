@@ -43,7 +43,7 @@ const MembersPage: React.FC = () => {
                 setIsLoading(false);
             }
         };
-
+        
         fetchMembers();
     }, []);
     

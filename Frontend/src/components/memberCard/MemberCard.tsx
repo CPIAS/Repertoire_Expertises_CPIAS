@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EmailIcon } from '@chakra-ui/icons';
 import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Image, Link, SkeletonCircle, Tag, Text } from '@chakra-ui/react';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { FaLinkedin, FaRegEnvelope } from 'react-icons/fa';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
 import ProfileCorrectionModal from '../modals/ProfileCorrectionModal';
@@ -205,49 +205,141 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                 >
                     <Flex
                         width={'100%'}
-                        gap={'0.5rem'}
-                        paddingBottom={'1.5rem'}
-                        display={{ base: 'flex', md:'none', lg: 'none' }}
-                        overflowX={'scroll'}
+                        gap={'0.75rem'}
+                        flexWrap={'wrap'}
                     >
-                        {getTags()}
-                    </Flex>
+                    
+                        <Flex
+                            width={'100%'}
+                            gap={'0.5rem'}
+                            paddingBottom={'1.5rem'}
+                            display={{ base: 'flex', md:'none', lg: 'none' }}
+                            overflowX={'scroll'}
+                        >
+                            {getTags()}
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-start'}
+                            flexWrap={'wrap'}
+                            gap={'0.5rem'}
+                        >
+                            <Text
+                                fontSize={'lg'}
+                                fontWeight={'bold'}
+                                width={'100%'}
+                            >
+                                {'Type de membre'}
+                            </Text>
+                            <Text width={'100%'}>
+                                {member.membershipCategory}
+                            </Text>
+                        </Flex>
 
-                    <Flex
-                        width={'100%'}
-                        alignItems={'center'}
-                    >
-                        <EmailIcon boxSize={8} paddingRight={'0.5rem'}/> 
-                        <Link 
-                            href={`mailto:${member.email}`} 
-                            isExternal 
-                            color="blue.500" 
-                            textDecoration="underline"
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-start'}
+                            flexWrap={'wrap'}
                         >
-                            {member.email}
-                        </Link>
-                    </Flex>
-                    <Flex
-                        width={'100%'}
-                        justifyContent={'flex-end'}
-                        display={isReadOnly ? 'none':'flex'}
-                    >
-                        <Link 
-                            fontWeight={'medium'}
-                            color={colors.grey.dark}
-                            onClick={()=>openProfileCorrectionModal()}
+                            <Text
+                                fontSize={'lg'}
+                                fontWeight={'bold'}
+                                width={'100%'}
+                                paddingBottom={'0.5rem'}
+                            >
+                                {'Organisation(s) d\'affiliation'}
+                            </Text>
+                            {member.affiliationOrganization.split(',').map((org: string, index: number) => (
+                                <Text key={index} width={'100%'}>
+                                    {org}
+                                </Text>
+                            ))}
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-start'}
+                            flexWrap={'wrap'}
                         >
-                            {'Corriger les informations'}
-                            {profileCorrectionModalState && (
-                                <ProfileCorrectionModal 
-                                    member={member}
-                                    isOpen={profileCorrectionModalState}
-                                    onClose={() => closeProfileCorrectionModal()} 
-                                />
+                            <Text
+                                fontSize={'lg'}
+                                fontWeight={'bold'}
+                                width={'100%'}
+                                paddingBottom={'0.5rem'}
+                            >
+                                {'Titre d\'emploi'}
+                            </Text>
+                            <Text width={'100%'}>
+                                {member.jobPosition}
+                            </Text>
+
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-start'}
+                            flexWrap={'wrap'}
+                            gap={'0.5rem'}
+                        >
+                            <Text
+                                fontSize={'lg'}
+                                fontWeight={'bold'}
+                                width={'100%'}
+                            >
+                                {'Informations de contact'}
+                            </Text>
+                            <Flex
+                                width={'100%'}
+                                alignItems={'center'}
+                            >
+                                <FaRegEnvelope size={'32'} /> 
+                                <Link 
+                                    href={`mailto:${member.email}`} 
+                                    isExternal 
+                                    color="blue.500" 
+                                    textDecoration="underline"
+                                    paddingLeft={'0.75rem'}
+                                >
+                                    {member.email}
+                                </Link>
+                            </Flex>
+                            {member.linkedin && (
+                                <Flex
+                                    width={'100%'}
+                                    alignItems={'center'}
+                                >
+                                    <FaLinkedin size={'32'} color={'#0077B5'}/> 
+                                    <Link 
+                                        href={member.linkedin}
+                                        isExternal 
+                                        color="blue.500" 
+                                        textDecoration="underline"
+                                        paddingLeft={'0.75rem'}
+                                    >
+                                        {`Retrouver ${member.firstName} sur LinkedIn`} 
+                                    </Link>
+                                </Flex>
                             )}
-                        </Link>
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-end'}
+                            display={isReadOnly ? 'none':'flex'}
+                        >
+                            <Link 
+                                fontWeight={'medium'}
+                                color={colors.grey.dark}
+                                onClick={()=>openProfileCorrectionModal()}
+                            >
+                                {'Corriger les informations'}
+                                {profileCorrectionModalState && (
+                                    <ProfileCorrectionModal 
+                                        member={member}
+                                        isOpen={profileCorrectionModalState}
+                                        onClose={() => closeProfileCorrectionModal()} 
+                                    />
+                                )}
+                            </Link>
+                        </Flex>
                     </Flex>
-                        
                 </AccordionPanel>
             </AccordionItem>
         </Accordion>

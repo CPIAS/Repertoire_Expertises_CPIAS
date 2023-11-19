@@ -309,6 +309,13 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                                             onChange={(e) => handleFieldChange('affiliationOrganization', e.target.value)}
                                         />
 
+                                        <FormLabel htmlFor="linkedin" paddingTop={'1rem'}>Profil LinkedIn</FormLabel>
+                                        <Input
+                                            id="linkedin"
+                                            value={editedMember.linkedin}
+                                            onChange={(e) => handleFieldChange('linkedin', e.target.value)}
+                                        />
+
                                     </>
                                 )}
                                 <Flex 
