@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 from dataclasses import dataclass
 from datetime import datetime, date
@@ -28,7 +29,28 @@ class Database:
         "years_experience_healthcare": 9,
         "community_involvement": 10,
         "suggestions": 11,
+        "consent": 12,
+        "profile_photo": 13,
+        "linkedin": 14
     }
+
+    required_columns = [
+        "Date d'inscription",
+        "Prénom",
+        "Nom",
+        "Adresse courriel",
+        "Catégorie de membres",
+        "Titre d'emploi",
+        "Organisation d'affiliation",
+        "Compétences ou Expertise",
+        "Nombre d'années d'expérience en IA",
+        "Nombre d'années d'expérience en santé",
+        "Impliquation dans la communauté",
+        "Suggestions",
+        "Consentement",
+        "Photo de profil",
+        "LinkedIn"
+    ]
 
     def __init__(self, app: Flask, llm: LLM, app_logger: Logger):
         self.__database_directory: str = os.path.abspath(SERVER_SETTINGS['database_directory'])
@@ -90,7 +112,10 @@ class Database:
             years_experience_healthcare=self.get_number(row[self.user_attributes_to_csv_columns_map["years_experience_healthcare"]], float),
             community_involvement=row[self.user_attributes_to_csv_columns_map["community_involvement"]],
             suggestions=row[self.user_attributes_to_csv_columns_map["suggestions"]],
-            tags=', '.join(self.llm.get_keywords(row[self.user_attributes_to_csv_columns_map["skills"]]))
+            tags=', '.join(self.llm.get_keywords(row[self.user_attributes_to_csv_columns_map["skills"]])),
+            consent=row[self.user_attributes_to_csv_columns_map["consent"]],
+            profile_photo=row[self.user_attributes_to_csv_columns_map["profile_photo"]],
+            linkedin=row[self.user_attributes_to_csv_columns_map["linkedin"]]
         )
 
     def is_empty(self) -> bool:
@@ -176,9 +201,10 @@ class Database:
         data = self.read_csv(SERVER_SETTINGS["users_csv_file"])
         user = []
 
-        for row in data:
+        for row in data[1:]:  # Skip the header row.
             if row[self.user_attributes_to_csv_columns_map["email"]] == user_email:
                 user = row
+                break
 
         if not user:
             raise Exception("User not found in the csv file. There is probably an inconsistency between the sqlite database and the csv file.")
@@ -187,6 +213,37 @@ class Database:
             user[self.user_attributes_to_csv_columns_map[key]] = value
 
         self.write_csv(SERVER_SETTINGS["users_csv_file"], data)
+
+    @staticmethod
+    def __get_expert_skills_from_json(json_file_path: str, expert_email: str) -> str:
+        expert_skills = ''
+
+        with open(json_file_path, 'r') as json_file:
+            data = json.load(json_file)
+
+            for user in data['profiles']:
+                if expert_email == data['profiles'][user]['email']:
+                    for experience in data['profiles'][user]['experiences']:
+                        if experience['description']:
+                            expert_skills += experience['description'] + '\n'
+                    break
+
+        return expert_skills
+
+    def validate_csv(self, users_csv_file: str):
+        headers = self.read_csv(users_csv_file)[0]
+
+        # Check if all required columns are present
+        missing_columns = [col for col in self.required_columns if col not in headers]
+
+        if missing_columns:
+            return False, f"Missing columns: {', '.join(missing_columns)}"
+
+        # Check if the order of columns is correct
+        if headers != self.required_columns:
+            return False, "Incorrect column order."
+
+        return True, "CSV file format is correct."
 
 
 @dataclass
@@ -207,3 +264,6 @@ class User(Database.db.Model):
     community_involvement: str = Column(Text, nullable=True)
     suggestions: str = Column(Text, nullable=True)
     tags: str = Column(Text, nullable=True)
+    consent: str = Column(Text, nullable=True)
+    profile_photo: str = Column(Text, nullable=True)
+    linkedin: str = Column(Text, nullable=True)

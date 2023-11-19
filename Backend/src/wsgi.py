@@ -1,9 +1,9 @@
-from app import app, init_server, start_scheduled_tasks_thread
+from flask import Flask
+from app import app, init_server
 
 
-def start_server():
+def start_server() -> Flask:
     init_server()
-    start_scheduled_tasks_thread()
     return app
 
 
