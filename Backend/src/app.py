@@ -464,7 +464,7 @@ def download_user_photo(user_id):
             return jsonify({"message": "User not found"}), 404
 
         if not user.profile_photo:
-            return jsonify({'message': 'User does not have a profile photo.'}), 404
+            return jsonify({'message': 'User does not have a profile photo.'}), 204
 
         user_photo_path = os.path.join(SERVER_SETTINGS['user_photos_directory'], user.profile_photo)
 
