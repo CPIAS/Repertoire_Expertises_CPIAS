@@ -44,8 +44,11 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                 setIsLoading(false);
             }
         };
-
-        fetchProfilePicture();
+        if (!isReadOnly)
+            fetchProfilePicture();
+        else {
+            setProfilePicture('./images/avatar/generic-avatar.png');
+        }
     }, []);
 
     const openProfileCorrectionModal = () => {
