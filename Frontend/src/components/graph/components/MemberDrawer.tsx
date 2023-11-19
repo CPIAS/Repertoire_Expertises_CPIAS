@@ -22,7 +22,7 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
     setDrawerOpen
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [profilePicture, setProfilePicture] = useState<string>('');
+    const [profilePicture, setProfilePicture] = useState<string>('./images/avatar/generic-avatar.png');
 
     // Fetch profile picture from the server
     useEffect(() => {
@@ -41,7 +41,6 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                 setProfilePicture(imageUrl);
             } catch (error: any) {        
                 if (error?.response?.status === 404) {
-                    console.clear();
                     setProfilePicture('./images/avatar/generic-avatar.png');
                 }
             } finally {
