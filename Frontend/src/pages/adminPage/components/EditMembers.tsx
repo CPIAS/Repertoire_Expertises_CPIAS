@@ -34,6 +34,22 @@ const EditMembers: React.FC = () => {
         }
     };
 
+    const fetchMembers = async () => {
+        try {
+            const response = await axios.get(`${API_HOST}/users`, {
+                headers: {
+                    'Authorization': `${API_KEY}`
+                }
+            });
+            setMembers(humps.camelizeKeys(response.data) as Member[]);
+            setIsLoading(false);
+        } catch (error) {
+            console.error('Error while fetching members: ', error);
+            setNoMemberText('Une erreur est survenue.');
+            setIsLoading(false);
+        }
+    };
+
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files && files.length > 0) {
@@ -48,12 +64,7 @@ const EditMembers: React.FC = () => {
                     },
                 });
 
-                const updatedMembersResponse = await axios.get(`${API_HOST}/users`, {
-                    headers: {
-                        'Authorization': `${API_KEY}`
-                    }
-                });
-                setMembers(humps.camelizeKeys(updatedMembersResponse.data) as Member[]);
+                fetchMembers();
 
                 toast({
                     title: 'Mise à jour réussie',
@@ -80,22 +91,6 @@ const EditMembers: React.FC = () => {
     };
 
     useEffect(() => {
-        const fetchMembers = async () => {
-            try {
-                const response = await axios.get(`${API_HOST}/users`, {
-                    headers: {
-                        'Authorization': `${API_KEY}`
-                    }
-                });
-                setMembers(humps.camelizeKeys(response.data) as Member[]);
-                setIsLoading(false);
-            } catch (error) {
-                console.error('Error while fetching members: ', error);
-                setNoMemberText('Une erreur est survenue.');
-                setIsLoading(false);
-            }
-        };
-
         fetchMembers();
     }, []);
 
@@ -160,6 +155,7 @@ const EditMembers: React.FC = () => {
                 selectedMember={selectedMember!}
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
+                fetchMembers={fetchMembers}
             /> 
             {isLoading ? 
                 <Loader /> 

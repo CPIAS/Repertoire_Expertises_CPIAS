@@ -13,18 +13,19 @@ type ModalProps = {
     selectedMember: Member;
     isModalOpen: boolean;
     setIsModalOpen: (isOpen: boolean) => void;
+    fetchMembers: () => Promise<void>
 };
 
 const EditMemberProfileModal: React.FC<ModalProps> = ({
     selectedMember,
     isModalOpen,
-    setIsModalOpen
+    setIsModalOpen,
+    fetchMembers
 }) => {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [editedMember, setEditedMember] = useState<Member | null>(selectedMember);
     const [isWaitingForDeletion, setIsWaitingForDeletion] = useState<boolean>(false);
     const [isWaitingForSave, setIsWaitingForSave] = useState<boolean>(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [profilePicture, setProfilePicture] = useState<string>('');
     const toast = useToast();
@@ -47,19 +48,17 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
 
     useEffect(() => {
         fetchProfilePicture();
-    }, []);
+    }, [selectedMember]);
   
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files !== null ? event.target.files[0] : null;
         if (selectedFile) {
-            if (selectedFile.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|tiff)$/.test(selectedFile.name.toLowerCase())) {
-                setSelectedFile(selectedFile);
-                handleUploadPicture();
+            if (selectedFile.type.startsWith('image/') || /\.(jpg)$/.test(selectedFile.name.toLowerCase())) {
+                handleUploadPicture(selectedFile);
             } else {
-                setSelectedFile(null);
                 toast({
                     title: 'Fichier invalide.',
-                    description: 'Veuillez ajouter une image.',
+                    description: 'Veuillez ajouter une image en format JPG.',
                     status: 'error',
                     duration: 3000,
                     isClosable: true,
@@ -106,8 +105,8 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                 duration: 3000,
                 isClosable: true,
             });
-    
             setIsModalOpen(false);
+            fetchMembers();
         } catch (error) {
             console.error('Error while deleting user:', error);
     
@@ -128,7 +127,16 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
             if (editedMember && editedMember.userId) {
                 setIsWaitingForSave(true);
     
-                await axios.put(`${API_HOST}/update_user/${editedMember.userId}`, editedMember, {
+                const requestData = {
+                    last_name: editedMember.lastName,
+                    first_name: editedMember.firstName,
+                    email: editedMember.email,
+                    membership_category: editedMember.membershipCategory,
+                    job_position: editedMember.jobPosition,
+                    affiliation_organization: editedMember.affiliationOrganization,
+                };
+    
+                await axios.put(`${API_HOST}/update_user/${editedMember.userId}`, requestData, {
                     headers: {
                         'Authorization': `${API_KEY}`,
                         'Content-Type': 'application/json',
@@ -144,6 +152,7 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                 });
     
                 setIsModalOpen(false);
+                fetchMembers();
             }
         } catch (error) {
             console.error('Error while updating user:', error);
@@ -160,12 +169,11 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
         }
     };
 
-    const handleUploadPicture = async () => {
+    const handleUploadPicture = async (image: File) => {
         try {
-            if (selectedFile) {
+            if (image) {
                 const formData = new FormData();
-                formData.append('user_photo', selectedFile);
-
+                formData.append('user_photo', image);
                 await axios.post(`${API_HOST}/upload_user_photo/${selectedMember.userId}`, formData, {
                     headers: {
                         'Authorization': `${API_KEY}`,
@@ -270,7 +278,7 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                                         <Input
                                             id="firstName"
                                             value={editedMember.firstName}
-                                            onChange={(e) => handleFieldChange('email', e.target.value)}
+                                            onChange={(e) => handleFieldChange('firstName', e.target.value)}
                                         />
 
                                         <FormLabel htmlFor="email" paddingTop={'1rem'}>Courriel</FormLabel>
