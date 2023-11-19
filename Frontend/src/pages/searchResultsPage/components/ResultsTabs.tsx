@@ -1,10 +1,10 @@
 import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react';
 import React from 'react';
+import NetworkGraph from '../../../components/graph/Graph';
 import Loader from '../../../components/loader/Loader';
 import MemberCard from '../../../components/memberCard/MemberCard';
 import { ResultsMembers } from '../../../models/member';
 import colors from '../../../utils/theme/colors';
-import NetworkGraph from '../../../components/graph/Graph';
 
 interface SearchResultsProps {
     results: ResultsMembers[];
@@ -29,7 +29,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                     <Loader/> 
                     :
                     <Flex
-                        width={'90%'}
+                        width={{base: '100%', lg:'90%'}}
                         height={'100%'}
                         flexWrap={'wrap'}
                         alignContent={'flex-start'}
@@ -40,20 +40,16 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                             width={'100%'}
                             flexWrap={'wrap'}
                         >
-                            {results.length > 0 ? 
-
-                                (
-                                    <Flex
-                                        width={'100%'}
-                                        fontSize={'3xl'}
-                                        fontWeight={'bold'}
-                                        flexWrap={'wrap'}
-                                    >
-                                        
-                                    </Flex>
-                                )
-                                : noResultsText
-                            }
+                            <Flex
+                                width={'100%'}
+                                fontSize={'3xl'}
+                                fontWeight={'bold'}
+                                flexWrap={'wrap'}
+                                paddingTop={'2rem'}
+                            >
+                                {noResultsText}
+                            </Flex>
+                            
                         </Flex>
                         
                         {results.length > 0 &&
@@ -79,27 +75,29 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                         paddingX={'1rem'}
                                         border={'none'}
                                     >
-                                        <Tab 
-                                            paddingX={'5rem'}
-                                            _active={{
-                                                backgroundColor: colors.grey.main,
-                                            }}
-                                            _selected={{ 
-                                                borderBottom: `3.5px solid ${colors.orange.main}`,
-                                            }}
-                                        >
-                                            {'Cartographie'}
-                                        </Tab>
                                         <Tab
-                                            paddingX={'5rem'}
+                                            paddingX={{base: '1rem', md:'5rem'}}
                                             _active={{
                                                 backgroundColor: colors.grey.main,
                                             }}
                                             _selected={{ 
                                                 borderBottom: `3.5px solid ${colors.orange.main}`,
                                             }}
+                                            fontSize={{base: 'sm', sm: 'md', lg: 'lg'}}
                                         >
                                             {'Liste des experts'}
+                                        </Tab>
+                                        <Tab 
+                                            paddingX={{base: '1rem', md:'5rem'}}
+                                            _active={{
+                                                backgroundColor: colors.grey.main,
+                                            }}
+                                            _selected={{ 
+                                                borderBottom: `3.5px solid ${colors.orange.main}`,
+                                            }}
+                                            fontSize={{base: 'sm', sm: 'md', lg: 'lg'}}
+                                        >
+                                            {'Cartographie'}
                                         </Tab>
                                     </TabList>
 
@@ -114,20 +112,11 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                         alignItems={'center'}
                                     >
 
-                                        <TabPanel
-                                            width={'100%'} 
-                                            height={'auto' || '100%'}   
-                                            justifyContent={'center'}
-                                            alignContent={'center'}
-                                            alignItems={'center'}
-                                        >
-                                            { <NetworkGraph results={results}/> }
-                                        </TabPanel>
                                         <TabPanel width={'100%'}>
                                             <Text
                                                 width={'100%'}
                                                 fontWeight={'bold'}
-                                                fontSize={'2xl'}
+                                                fontSize={{base: 'lg', md:'xl', lg:'2xl'}}
                                                 paddingBottom={'1rem'}
                                             >
                                                 {'Pour réaliser ce type de projet, vous avez besoin de...'}
@@ -143,7 +132,6 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                             backgroundColor={colors.grey.main}
                                                             borderRadius={'0.25rem'}
                                                             marginY={'0.25rem'}
-                                                          
                                                         >
                                                             <AccordionButton
                                                                 _hover={{backgroundColor:'none'}}
@@ -154,13 +142,14 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                                     alignItems={'center'}
                                                                 >
                                                                     <Flex
-                                                                        fontSize={'xl'}
+                                                                        fontSize={{base:'sm', md:'lg', lg:'xl'}}
+                                                                        textAlign={'start'}
 
                                                                     >
-                                                                        {`Expert(s) en ${res.category.toLowerCase()}`}
+                                                                        {`${res.category.charAt(0).toUpperCase()}${res.category.slice(1)}`}
                                                                     </Flex>
                                                                     <AccordionIcon 
-                                                                        boxSize={16}
+                                                                        boxSize={{base: 8, sm: 12, md: 16}}
                                                                         color={colors.grey.dark}
                                                                         _hover={{color: colors.orange.main}}
                                                                     />
@@ -171,7 +160,7 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                                 <Flex
                                                                     width={'100%'}
                                                                     flexWrap={'wrap'}
-                                                                    paddingX={'3rem'}
+                                                                    paddingX={{base: '0rem', md: '2.5rem'}}
                                                                     paddingBottom={'1rem'}
                                                                 >
                                                                     {res.recommendation.map((expert, index) => (
@@ -179,11 +168,19 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                                     ))}
                                                                 </Flex>
                                                             </AccordionPanel>
-
                                                         </AccordionItem>
                                                     </Accordion>
                                                 </Flex>
                                             ))}
+                                        </TabPanel>
+                                        <TabPanel
+                                            width={'100%'} 
+                                            height={'auto' || '100%'}   
+                                            justifyContent={'center'}
+                                            alignContent={'center'}
+                                            alignItems={'center'}
+                                        >
+                                            { <NetworkGraph results={results}/> }
                                         </TabPanel>
                                     </TabPanels>
                                 </Tabs>

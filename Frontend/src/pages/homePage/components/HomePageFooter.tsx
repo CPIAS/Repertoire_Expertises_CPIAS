@@ -1,5 +1,6 @@
 import { Flex, Image, Link, Text } from '@chakra-ui/react';
 import React from 'react';
+import colors from '../../../utils/theme/colors';
 
 const HomePageFooter: React.FC = () => {
     return (
@@ -8,14 +9,16 @@ const HomePageFooter: React.FC = () => {
             height={'100%'}
             justifyContent={'space-evenly'}
             alignItems={'flex-start'}
+            alignContent={'flex-start'}
+            gap={'2rem'}
             flexWrap={'wrap'}
+            backgroundColor={colors.darkAndLight.white}
         >
 
             <Flex 
                 width={'100%'}
                 justifyContent={'space-evenly'}
                 alignItems={'center'}
-                paddingTop={'1.5rem'}
             >
                 <Text
                     fontSize='2xl'
@@ -28,9 +31,11 @@ const HomePageFooter: React.FC = () => {
                 width={'100%'}
                 justifyContent={'space-evenly'}
                 alignItems={'center'}
+                flexDirection={{ base: 'column', lg: 'row' }}
+                gap={{ base: '3.5rem', lg: 'none' }}
             >
                 <Flex
-                    width={'20%'} 
+                    width={{ base: '100%', lg: '20%' }} 
                     justifyContent={'center'}
                     alignItems={'center'}
                 >
@@ -40,7 +45,7 @@ const HomePageFooter: React.FC = () => {
                 </Flex>
 
                 <Flex
-                    width={'20%'} 
+                    width={{ base: '100%', lg: '20%' }} 
                     justifyContent={'space-evenly'}
                     alignItems={'center'}
                 >
@@ -50,7 +55,7 @@ const HomePageFooter: React.FC = () => {
                 </Flex>
 
                 <Flex
-                    width={'20%'} 
+                    width={{ base: '100%', lg: '20%' }} 
                     justifyContent={'space-evenly'}
                     alignItems={'center'}
                 >
@@ -60,7 +65,7 @@ const HomePageFooter: React.FC = () => {
                 </Flex>
 
                 <Flex
-                    width={'20%'} 
+                    width={{ base: '100%', lg: '20%' }} 
                     justifyContent={'space-evenly'}
                     alignItems={'center'}
                 >
@@ -70,7 +75,7 @@ const HomePageFooter: React.FC = () => {
                 </Flex>
 
                 <Flex
-                    width={'20%'} 
+                    width={{ base: '100%', lg: '20%' }} 
                     justifyContent={'space-evenly'}
                     alignItems={'center'}
                 >

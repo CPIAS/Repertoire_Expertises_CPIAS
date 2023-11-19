@@ -99,8 +99,9 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                     width={'100%'}
                     alignItems={'center'}
                     flexWrap={'wrap'}
-                    gap={'1rem'}
-                    paddingY={'1.5rem'}
+                    gap={{ base: '2rem', lg: '1rem' }}
+                    paddingY={'1rem'}
+                    flexDirection={{ base: 'column', lg: 'row' }}
                 >
                     <Text fontWeight={'semibold'}>
                         {'Pour consulter plusieurs exemples de requêtes dans un autre onglet, cliquez sur ce bouton :'}
@@ -178,7 +179,10 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                     height={'100%'}
                     justifyContent={'center'}
                     alignItems={'center'}
+                    alignContent={'center'}
                     gap={'2rem'}
+                    flexDirection = {{ base: 'row', md: 'column' }}
+                    flexWrap={{ base: 'wrap', md: 'nowrap' }}
                 >
 
                     <CheckCircleIcon 
@@ -189,6 +193,7 @@ const UserGuide: React.FC<UserGuideSteps> = ({
                     <Text 
                         fontSize={'3xl'} 
                         fontWeight={'bold'} 
+                        textAlign={'center'}
                     >
                         {'Tutoriel complété avec succès !'}
                         

@@ -34,23 +34,53 @@ const EditMembers: React.FC = () => {
         }
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fetchMembers = async () => {
+        try {
+            const response = await axios.get(`${API_HOST}/users`, {
+                headers: {
+                    'Authorization': `${API_KEY}`
+                }
+            });
+            setMembers(humps.camelizeKeys(response.data) as Member[]);
+            setIsLoading(false);
+        } catch (error) {
+            console.error('Error while fetching members: ', error);
+            setNoMemberText('Une erreur est survenue.');
+            setIsLoading(false);
+        }
+    };
+
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files && files.length > 0) {
             const formData = new FormData();
-            formData.append('csvFile', files[0]);
+            formData.append('csv_file', files[0]);
+            
             try {
-            // Perform your upload logic here, for example using fetch or axios
-            // Example using fetch:
-                // const response = await fetch('/upload-endpoint', {
-                //     method: 'POST',
-                //     body: formData,
-                // });
-    
-                // Handle the response as needed
-                console.log(formData);
+                await axios.post(`${API_HOST}/upload_csv`, formData, {
+                    headers: {
+                        'Authorization': `${API_KEY}`,
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                fetchMembers();
+
+                toast({
+                    title: 'Mise à jour réussie',
+                    description: 'La base de données a été mise à jour avec succès.',
+                    status: 'success',
+                    duration: 3000,
+                    isClosable: true,
+                });
             } catch (error) {
-                console.error('Error uploading file:', error);
+                toast({
+                    title: 'Erreur de mise à jour',
+                    description: 'Une erreur est survenue lors de la mise à jour de la base de données.',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                });
             }
         }
     };
@@ -61,22 +91,6 @@ const EditMembers: React.FC = () => {
     };
 
     useEffect(() => {
-        const fetchMembers = async () => {
-            try {
-                const response = await axios.get(`${API_HOST}/users`, {
-                    headers: {
-                        'Authorization': `${API_KEY}`
-                    }
-                });
-                setMembers(humps.camelizeKeys(response.data) as Member[]);
-                setIsLoading(false);
-            } catch (error) {
-                console.error('Error while fetching members: ', error);
-                setNoMemberText('Une erreur est survenue.');
-                setIsLoading(false);
-            }
-        };
-
         fetchMembers();
     }, []);
 
@@ -118,7 +132,7 @@ const EditMembers: React.FC = () => {
                 <Td textAlign={'center'}>{formatDate(member.registrationDate)}</Td>
                 <Td textAlign={'center'}>
                     <EditIcon
-                        boxSize={'24px'}
+                        boxSize={{base:'18px', md: '24px'}}
                         cursor={'pointer'}
                         onClick={() => openModal(member)}
                         _hover={{color: colors.grey.dark}}
@@ -135,25 +149,26 @@ const EditMembers: React.FC = () => {
             justifyContent={'center'}
             alignContent={'center'}
             flexWrap={'wrap'}
-            backgroundColor={colors.grey.light}
+            backgroundColor={colors.grey.lighter}
         >
             <EditMemberProfileModal 
                 selectedMember={selectedMember!}
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
+                fetchMembers={fetchMembers}
             /> 
             {isLoading ? 
                 <Loader /> 
                 :
                 <Flex
-                    width={'70%'}
+                    width={{base:'100%', lg:'70%'}}
                     height={'100%'}
                     flexWrap={'wrap'}
                     justifyContent={'center'}
                     alignContent={'flex-start'}
                     paddingX={'3rem'}
                     backgroundColor={colors.darkAndLight.white}
-                    paddingY={'1rem'}
+                    // paddingY={'1rem'}
                 >
                     {members.length > 0 ? ( 
                         <Flex
@@ -165,75 +180,120 @@ const EditMembers: React.FC = () => {
                             <Flex
                                 width={'100%'}
                                 justifyContent={'space-between'}
-                                paddingBottom={'2rem'}
+                                flexWrap={{base: 'wrap', md:'nowrap'}}
+                                paddingBottom={{base: '1rem', md:'2rem'}}
+                                gap={'1rem'}
                             >
-                                <Text
-                                    fontWeight={'bold'}
-                                    fontSize={'xl'}
+                                <Flex
+                                    width={{base: '100%', md: '50%'}}
+                                    justifyContent={'flex-end'}
+                                    display={{base: 'flex', md:'none'}}
                                 >
-                                    {'Gérer les membres'}
-                                </Text>
-                                <Button
-                                    fontWeight={'normal'}
-                                    backgroundColor={colors.blue.main}
-                                    color={colors.darkAndLight.white}
-                                    _hover={{
-                                        backgroundColor: colors.blue.light,
-                                    }}
-                                    _active={{
-                                        backgroundColor: colors.blue.light,
-                                    }}
-                                    rightIcon={<FaSignOutAlt />}
-                                    onClick={()=>navigate('/accueil')}
+                                    <Button
+                                        fontWeight={'normal'}
+                                        fontSize={{base:'sm', md:'md'}}
+                                        backgroundColor={colors.blue.main}
+                                        color={colors.darkAndLight.white}
+                                        _hover={{
+                                            backgroundColor: colors.blue.light,
+                                        }}
+                                        _active={{
+                                            backgroundColor: colors.blue.light,
+                                        }}
+                                        rightIcon={<FaSignOutAlt />}
+                                        onClick={()=>navigate('/accueil')}
+                                    >
+                                        {'Déconnexion'}
+                                    </Button>
+                                </Flex>
+                                <Flex
+                                    width={{base: '100%', md: '50%'}}
+                                    justifyContent={'flex-start'}
+                                    alignItems={'center'}
                                 >
-                                    {'Déconnexion'}
-                                </Button>
+                                    <Text
+                                        fontWeight={'bold'}
+                                        fontSize={{base:'md', md:'lg', lg:'xl'}}
+                                    >
+                                        {'Gérer les membres'}
+                                    </Text>
+                                </Flex>
+                                <Flex
+                                    width={{base: '100%', md: '50%'}}
+                                    justifyContent={'flex-end'}
+                                    display={{base: 'none', md:'flex'}}
+                                >
+                                    <Button
+                                        fontWeight={'normal'}
+                                        fontSize={{base:'sm', md:'md'}}
+                                        backgroundColor={colors.blue.main}
+                                        color={colors.darkAndLight.white}
+                                        _hover={{
+                                            backgroundColor: colors.blue.light,
+                                        }}
+                                        _active={{
+                                            backgroundColor: colors.blue.light,
+                                        }}
+                                        rightIcon={<FaSignOutAlt />}
+                                        onClick={()=>navigate('/accueil')}
+                                    >
+                                        {'Déconnexion'}
+                                    </Button>
+                                </Flex>
                             </Flex>
                             <Flex 
                                 width={'100%'}
                                 justifyContent={'flex-end'}
+                                flexWrap={{base: 'wrap', md:'nowrap'}}
                                 gap={'1rem'}
                                 paddingBottom={'1rem'}
+                                alignItems={'center'}   
                             >
-                                <input 
-                                    type="file" 
-                                    accept=".csv" 
-                                    onChange={handleFileChange} 
-                                    ref={fileInputRef} 
-                                    style={{ display: 'none' }}
-                                />
-                                <Button
-                                    backgroundColor={colors.darkAndLight.white}
-                                    color={colors.blue.main}
-                                    border={`2px solid ${colors.blue.light}`}
-                                    _hover={{
-                                        backgroundColor: colors.blue.lighter,
-                                    }}
-                                    _active={{
-                                        backgroundColor: colors.blue.lighter,
-                                    }}
-                                    leftIcon={<MdRefresh />}
-                                    onClick={handleButtonClick}
+                                <Flex>
+                                    <Button
+                                        backgroundColor={colors.darkAndLight.white}
+                                        color={colors.blue.main}
+                                        fontSize={{base:'sm', md:'md'}}
+                                        border={`2px solid ${colors.blue.light}`}
+                                        _hover={{
+                                            backgroundColor: colors.blue.lighter,
+                                        }}
+                                        _active={{
+                                            backgroundColor: colors.blue.lighter,
+                                        }}
+                                        leftIcon={<DownloadIcon />}
+                                        onClick={()=>downloadDatabaseFile()}
+                                        isLoading={isWaitingForFile}
+                                    >
+                                        {'Exporter au format CSV'}
+                                    </Button>
+                                </Flex>
+                                <Flex>
+                                    <input 
+                                        type="file" 
+                                        accept=".csv" 
+                                        onChange={handleFileChange} 
+                                        ref={fileInputRef} 
+                                        style={{ display: 'none' }}
+                                    />
+                                    <Button
+                                        backgroundColor={colors.darkAndLight.white}
+                                        color={colors.blue.main}
+                                        fontSize={{base:'sm', md:'md'}}
+                                        border={`2px solid ${colors.blue.light}`}
+                                        _hover={{
+                                            backgroundColor: colors.blue.lighter,
+                                        }}
+                                        _active={{
+                                            backgroundColor: colors.blue.lighter,
+                                        }}
+                                        leftIcon={<MdRefresh />}
+                                        onClick={handleButtonClick}
                                     // isLoading={isWaitingForFile}
-                                >
-                                    {'Mettre à jour la base de données'}
-                                </Button>
-                                <Button
-                                    backgroundColor={colors.darkAndLight.white}
-                                    color={colors.blue.main}
-                                    border={`2px solid ${colors.blue.light}`}
-                                    _hover={{
-                                        backgroundColor: colors.blue.lighter,
-                                    }}
-                                    _active={{
-                                        backgroundColor: colors.blue.lighter,
-                                    }}
-                                    leftIcon={<DownloadIcon />}
-                                    onClick={()=>downloadDatabaseFile()}
-                                    isLoading={isWaitingForFile}
-                                >
-                                    {'Exporter au format CSV'}
-                                </Button>
+                                    >
+                                        {'Mettre à jour la base de données'}
+                                    </Button>
+                                </Flex>
                             </Flex>
                             <Flex
                                 backgroundColor={'white'}
@@ -242,8 +302,8 @@ const EditMembers: React.FC = () => {
                                 borderRadius={'0.25rem'}
                             >
                                 <TableContainer width={'100%'}>
-                                    <Table variant={'striped'}>
-                                        <Thead >
+                                    <Table variant={'striped'} size={{base:'md', lg:'lg'}}>
+                                        <Thead>
                                             <Tr>
                                                 <Th textAlign={'center'}>{'ID'}</Th>
                                                 <Th textAlign={'center'}>{'Nom'}</Th>

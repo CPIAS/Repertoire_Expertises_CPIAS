@@ -53,24 +53,24 @@ const Login: React.FC<LoginProps> = ({
                 alignItems={'flex-end'}
                 height={'30%'}
             >
-                <Image src={'./images/cpias-logo-white.png'} alt={'cpias'} width='400px'/>
+                <Image src={'./images/cpias-logo-white.png'} alt={'cpias'} width={{base:'300px', md:'400px'}}/>
             </Flex>
             <Flex
-                width={'40%'}
-                height={'25%'}
+                width={{base:'85%', lg:'75%', xl: '50%'}}
+                height={{base:'45%', sm: '25%'}}
             >
                 <Flex 
                     width={'100%'}
-                    height={'100%'}
+                    // height={'100%'}
                     justifyContent={'center'}
                     alignItems={'flex-start'}
-                    alignContent={'flex-start'}
+                    alignContent={'center'}
                     backgroundColor={colors.darkAndLight.white}
                     boxShadow={`0px 0px 5px 0px ${colors.grey.dark}`}
                     borderRadius={'0.25rem'}
                     flexWrap={'wrap'}
                     gap={'1.5rem'}
-                    padding={'3rem'}
+                    padding={{base: '1rem', md:'2rem'}}
                 >
                     <Flex
                         width={'100%'}
@@ -84,23 +84,26 @@ const Login: React.FC<LoginProps> = ({
                             flexWrap={'wrap'}
                             gap={'0.5rem'}
                         >
-                            <Text fontSize={'md'} fontWeight={'bold'} width={'100%'} textAlign={'center'}>
+                            <Text fontSize={{base: 'sm', md:'md'}} fontWeight={'bold'} width={'100%'} textAlign={'center'}>
                                 {'Veuillez saisir le mot de passe pour accéder aux fonctionnalités d\'administrateur.'}
                             </Text>
                         </Flex>
                         <Flex
                             width={'100%'}
                             alignItems={'center'}
+                            justifyContent={'center'}
+                            flexDirection={{base:'column', md:'row'}}
                             flexWrap={'wrap'}
+                            gap={'1rem'}
                         >
                             <Flex
-                                width={'100%'}
-                                gap={'1rem'}
+                                width={{base:'90%', sm: '75%', md:'50%'}}
                                 alignItems={'center'}
                             >
                     
                                 <InputGroup size='lg'>
                                     <Input
+                                        fontSize={{ base: 'sm', md: 'lg', lg: 'xl' }}
                                         type={isPasswordShown ? 'text' : 'password'}
                                         placeholder='Entrer le mot de passe'
                                         onChange={(event) => {
@@ -124,6 +127,11 @@ const Login: React.FC<LoginProps> = ({
                                         }
                                     </InputRightElement>
                                 </InputGroup>
+                            </Flex>
+                            <Flex
+                                alignItems={'center'}
+                                justifyContent={'center'}
+                            >
                                 <Button
                                     size={'lg'}
                                     backgroundColor={colors.blue.main}

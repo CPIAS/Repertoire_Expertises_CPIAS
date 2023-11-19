@@ -1,9 +1,15 @@
-import { EmailIcon } from '@chakra-ui/icons';
-import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Image, Link, Tag, Text } from '@chakra-ui/react';
-import React, { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Flex, Image, Link, SkeletonCircle, Tag, Text } from '@chakra-ui/react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { FaLinkedin, FaRegEnvelope } from 'react-icons/fa';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
 import ProfileCorrectionModal from '../modals/ProfileCorrectionModal';
+
+const API_HOST = process.env.REACT_APP_SERVER_URL;
+const API_KEY = process.env.REACT_APP_API_KEY;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 interface MemberCardProps {
     member: Member;
@@ -12,6 +18,38 @@ interface MemberCardProps {
 
 const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) => {
     const [profileCorrectionModalState, setProfileCorrectionModalState] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [profilePicture, setProfilePicture] = useState<string>('');
+
+    // Fetch profile picture from the server
+    useEffect(() => {
+        const fetchProfilePicture = async () => {
+            try {
+                const response = await axios.get(`${API_HOST}/download_user_photo/${member.userId}`, {
+                    headers: {
+                        'Authorization': `${API_KEY}`
+                    },
+                    responseType: 'arraybuffer',
+                });
+                const imageData = btoa(new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+                const imageUrl = `data:image/png;base64,${imageData}`;
+            
+                setProfilePicture(imageUrl);
+            } catch (error: any) {        
+                if (error?.response?.status === 404) {
+                    console.clear();
+                    setProfilePicture('./images/avatar/generic-avatar.png');
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        if (!isReadOnly)
+            fetchProfilePicture();
+        else {
+            setProfilePicture('./images/avatar/generic-avatar.png');
+        }
+    }, []);
 
     const openProfileCorrectionModal = () => {
         if (isReadOnly) return;
@@ -54,6 +92,28 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
             .join(' ');
     };
 
+    const getTags = () => {
+        return member.tags.length > 0 
+            && member.tags.split(/,| et /).slice(0, 5).map((tag, index) => (
+                <Flex
+                    key={`${index}_flex`}
+                    alignItems={'center'}
+                    textOverflow={'ellipsis'}
+                    whiteSpace={'nowrap'}
+                >
+                    <Tag 
+                        colorScheme='orange'
+                        borderRadius='full'
+                        size={{ base: 'sm', md:'md', lg: 'md' }}
+                        border={'1px solid'}
+                        borderColor={colors.orange.main}
+                    >
+                        {tag.trim().length <= 3 ? tag.trim().toUpperCase() : `${tag.trim().charAt(0).toUpperCase()}${tag.trim().slice(1).toLowerCase()}`}
+                    </Tag>
+                </Flex>
+            ));
+    };
+
     return (
         <Accordion 
             width={'100%'} 
@@ -75,117 +135,214 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                     _hover={{backgroundColor:'none'}}
                 >
                     <Flex
-                        width={'95%'}
-                        flexWrap={'nowrap'}
+                        width={'100%'}
+                        alignItems={'center'}
+                       
                     >
-                        <Flex
-                            marginRight={'0.5rem'}
-                            width={'10%'}
-                        >
-                            <Image 
-                                src={member.profilePicture ? `https://drive.google.com/uc?export=view&id=${member.profilePicture}` : './images/avatar/generic-avatar.png'}
-                                borderRadius='full'
-                                border={`1px solid ${colors.grey.dark}`}
-                                boxSize='125px'
-                            />
-                        </Flex>
+                    
                         <Flex
                             width={'90%'}
-                            flexWrap={'wrap'}
-                            alignItems={'center'}
-                            gap={'0.5rem'}
+                            flexWrap={'nowrap'}
+                            gap={'1rem'}
                         >
-                            <Flex 
-                                width={'100%'}
-                                flexWrap={'wrap'}
-                                alignItems={'center'}
+                            <Flex
+                                marginRight={{ base: 'none', md:'0.5rem', lg: '0.5rem' }}
+                                width={{ base: '100px', md:'125px' }}
+
                             >
-                                <Flex width={'100%'} fontSize={'xl'} fontWeight={'bold'} alignItems={'center'}>
-                                    {formatName(`${member.firstName} ${member.lastName}`)}
-                                </Flex>
-                                <Flex maxWidth={'100%'} alignItems={'center'} overflowX={'auto'}>
-                                    {getDescription(member)}
-                                </Flex>
+                                {isLoading ? (
+                                    <SkeletonCircle size={{ base: '100px', md:'125px' }} />
+                                ) : (
+                                    <Image src={profilePicture} borderRadius='full' border={`1px solid ${colors.grey.dark}`} />
+                                )}
                             </Flex>
                             <Flex
-                                maxWidth={'95%'}
+                                width={'90%'}
+                                flexWrap={'wrap'}
+                                alignItems={'center'}
                                 gap={'0.5rem'}
-                                paddingY={'0.25rem'}
-                                overflowX={'auto'}
                             >
-                                {member.tags.length > 0 
-                                        && member.tags.split(/,| et /).slice(0, 5).map((tag, index) => (
-                                            <Flex
-                                                key={`${index}_flex`}
-                                                alignItems={'center'}
-                                                textOverflow={'ellipsis'}
-                                                whiteSpace={'nowrap'}
-                                            >
-                                                <Tag 
-                                                    colorScheme='orange'
-                                                    borderRadius='full'
-                                                    size={'md'}
-                                                    border={'1px solid'}
-                                                    borderColor={colors.orange.main}
-                                                >
-                                                    {tag.trim().length <= 3 ? tag.trim().toUpperCase() : `${tag.trim().charAt(0).toUpperCase()}${tag.trim().slice(1).toLowerCase()}`}
-                                                </Tag>
-                                            </Flex>
-                                        ))
-                                }
-
+                                <Flex 
+                                    width={'100%'}
+                                    flexWrap={'wrap'}
+                                    alignItems={'center'}
+                                >
+                                    <Flex width={'100%'} fontSize={{ base: 'sm', md:'lg', lg: 'xl' }} fontWeight={'bold'} alignItems={'center'}>
+                                        {formatName(`${member.firstName} ${member.lastName}`)}
+                                    </Flex>
+                                    <Flex 
+                                        maxWidth={'100%'} 
+                                        alignItems={'center'} 
+                                        overflowX={'auto'} 
+                                        display={{ base: 'none', md:'flex', lg: 'flex' }}
+                                    >
+                                        {getDescription(member)}
+                                    </Flex>
+                                </Flex>
+                                <Flex
+                                    maxWidth={'95%'}
+                                    gap={'0.5rem'}
+                                    paddingY={'0.25rem'}
+                                    overflowX={'auto'}
+                                    display={{ base: 'none', md:'flex', lg: 'flex' }}
+                                >
+                                    {getTags()}
+                                </Flex>
                             </Flex>
                         </Flex>
-                    </Flex>
-                    <Flex
-                        width={'5%'}
-                    >
-                        <AccordionIcon 
-                            boxSize={16}
-                            color={colors.grey.dark}
-                            _hover={{color: colors.orange.main}}
-                        />
+                        <Flex
+                            width={'10%'}
+                            justifyContent={'center'}
+                        >
+                            <AccordionIcon 
+                                boxSize={{base: 8, sm: 12, md: 16}}
+                                color={colors.grey.dark}
+                                _hover={{color: colors.orange.main}}
+                            />
+                        </Flex>
                     </Flex>
                     
                 </AccordionButton>
                 <AccordionPanel 
-                    padding={'1.5rem'}  
+                    padding={{ base: 'none', md:'1.5rem', lg: '1.5rem' }}  
                 >
                     <Flex
                         width={'100%'}
-                        alignItems={'center'}
+                        gap={'0.75rem'}
+                        flexWrap={'wrap'}
                     >
-                        <EmailIcon boxSize={8} paddingRight={'0.5rem'}/> 
-                        <Link 
-                            href={`mailto:${member.email}`} 
-                            isExternal 
-                            color="blue.500" 
-                            textDecoration="underline"
+                    
+                        <Flex
+                            width={'100%'}
+                            gap={'0.5rem'}
+                            paddingBottom={'1.5rem'}
+                            display={{ base: 'flex', md:'none', lg: 'none' }}
+                            overflowX={'scroll'}
                         >
-                            {member.email}
-                        </Link>
-                    </Flex>
-                    <Flex
-                        width={'100%'}
-                        justifyContent={'flex-end'}
-                        display={isReadOnly ? 'none':'flex'}
-                    >
-                        <Link 
-                            fontWeight={'medium'}
-                            color={colors.grey.dark}
-                            onClick={()=>openProfileCorrectionModal()}
+                            {getTags()}
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-start'}
+                            flexWrap={'wrap'}
+                            gap={'0.5rem'}
                         >
-                            {'Corriger les informations'}
-                            {profileCorrectionModalState && (
-                                <ProfileCorrectionModal 
-                                    member={member}
-                                    isOpen={profileCorrectionModalState}
-                                    onClose={() => closeProfileCorrectionModal()} 
-                                />
+                            <Text
+                                fontSize={'lg'}
+                                fontWeight={'bold'}
+                                width={'100%'}
+                            >
+                                {'Type de membre'}
+                            </Text>
+                            <Text width={'100%'}>
+                                {member.membershipCategory}
+                            </Text>
+                        </Flex>
+
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-start'}
+                            flexWrap={'wrap'}
+                        >
+                            <Text
+                                fontSize={'lg'}
+                                fontWeight={'bold'}
+                                width={'100%'}
+                                paddingBottom={'0.5rem'}
+                            >
+                                {'Organisation(s) d\'affiliation'}
+                            </Text>
+                            {member.affiliationOrganization.split(',').map((org: string, index: number) => (
+                                <Text key={index} width={'100%'}>
+                                    {org}
+                                </Text>
+                            ))}
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-start'}
+                            flexWrap={'wrap'}
+                        >
+                            <Text
+                                fontSize={'lg'}
+                                fontWeight={'bold'}
+                                width={'100%'}
+                                paddingBottom={'0.5rem'}
+                            >
+                                {'Titre d\'emploi'}
+                            </Text>
+                            <Text width={'100%'}>
+                                {member.jobPosition}
+                            </Text>
+
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-start'}
+                            flexWrap={'wrap'}
+                            gap={'0.5rem'}
+                        >
+                            <Text
+                                fontSize={'lg'}
+                                fontWeight={'bold'}
+                                width={'100%'}
+                            >
+                                {'Informations de contact'}
+                            </Text>
+                            <Flex
+                                width={'100%'}
+                                alignItems={'center'}
+                            >
+                                <FaRegEnvelope size={'32'} /> 
+                                <Link 
+                                    href={`mailto:${member.email}`} 
+                                    isExternal 
+                                    color="blue.500" 
+                                    textDecoration="underline"
+                                    paddingLeft={'0.75rem'}
+                                >
+                                    {member.email}
+                                </Link>
+                            </Flex>
+                            {member.linkedin && (
+                                <Flex
+                                    width={'100%'}
+                                    alignItems={'center'}
+                                >
+                                    <FaLinkedin size={'32'} color={'#0077B5'}/> 
+                                    <Link 
+                                        href={member.linkedin}
+                                        isExternal 
+                                        color="blue.500" 
+                                        textDecoration="underline"
+                                        paddingLeft={'0.75rem'}
+                                    >
+                                        {`Retrouver ${member.firstName} sur LinkedIn`} 
+                                    </Link>
+                                </Flex>
                             )}
-                        </Link>
+                        </Flex>
+                        <Flex
+                            width={'100%'}
+                            justifyContent={'flex-end'}
+                            display={isReadOnly ? 'none':'flex'}
+                        >
+                            <Link 
+                                fontWeight={'medium'}
+                                color={colors.grey.dark}
+                                onClick={()=>openProfileCorrectionModal()}
+                            >
+                                {'Corriger les informations'}
+                                {profileCorrectionModalState && (
+                                    <ProfileCorrectionModal 
+                                        member={member}
+                                        isOpen={profileCorrectionModalState}
+                                        onClose={() => closeProfileCorrectionModal()} 
+                                    />
+                                )}
+                            </Link>
+                        </Flex>
                     </Flex>
-                        
                 </AccordionPanel>
             </AccordionItem>
         </Accordion>

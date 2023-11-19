@@ -26,6 +26,7 @@ const HomePage: React.FC = () => {
             minHeight={'100vh'}
             maxHeight={'100vh'}
             justifyContent={'center'}
+            justifySelf={'center'}
             alignItems={'flex-start'}
             flexWrap={'wrap'}
             overflowY={'hidden'}
@@ -58,7 +59,7 @@ const HomePage: React.FC = () => {
                 </Flex>
 
                 <Flex
-                    width={'60%'}
+                    width={{ base: '90%', md: '75%', lg: '60%' }}
                     height={'20vh'}
                     justifyContent={'center'}
                     alignItems={'flex-start'}
@@ -93,9 +94,10 @@ const HomePage: React.FC = () => {
                 <UserGuideModal isOpen={isUserGuideModalOpen} onClose={closeUserGuideModal} />
                 <Flex 
                     width={'100%'}
-                    height={'35vh'}
+                    alignItems={'flex-start'}
+                    alignContent={'flex-start'}
                     justifyContent={'center'}
-                    alignItems={'center'}
+                    paddingY={'2.5rem'}
                     backgroundColor={colors.darkAndLight.white}
                 >
                     <HomePageFooter />

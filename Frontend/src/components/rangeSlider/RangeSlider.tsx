@@ -30,12 +30,12 @@ const RangeSliderWithLabels: React.FC<RangeSliderWithLabelsProps> = ({
     
     return (
         <Flex width={'100%'} flexWrap={'wrap'} justifyContent={'space-evenly'}>
-            <Flex width={'5%'} justifyContent={'flex-start'}>
+            <Flex width={'5%'} justifyContent={'flex-start'} paddingRight={'1rem'}>
                 <Text>
                     {min}
                 </Text>
             </Flex>
-            <Flex width={'90%'} justifyContent={'center'}>
+            <Flex width={'90%'} justifyContent={'center'} paddingX={'1rem'}>
                 <RangeSlider
                     min={min}
                     max={max}
@@ -60,7 +60,7 @@ const RangeSliderWithLabels: React.FC<RangeSliderWithLabelsProps> = ({
                     </Tooltip>
                 </RangeSlider>
             </Flex>
-            <Flex width={'5%'} justifyContent={'flex-end'}>
+            <Flex width={'5%'} justifyContent={'flex-end'} paddingLeft={'1rem'}>
                 <Text>
                     {max}
                 </Text>

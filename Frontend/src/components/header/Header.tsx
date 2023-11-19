@@ -1,52 +1,10 @@
-import { Flex, Image, Link, Text } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import React from 'react';
-import { FaUserCircle } from 'react-icons/fa';
-import { Link as ReactRouterLink, useLocation, useNavigate } from 'react-router-dom';
 import colors from '../../utils/theme/colors';
-
-interface NavProps {
-    path: string;
-    label: string;
-}
-
-const NavItem: React.FC<NavProps> = ({ path, label }) => {
-    const location = useLocation();
-    const isActive = location.pathname === path;
-  
-    return (
-        <Flex
-            height={'100%'}
-            justifyContent={'center'}
-            alignItems={'center'}
-            borderBottom={'0.35rem'}
-            borderBottomStyle={'solid'}
-            paddingTop={'0.75rem'}
-            borderBottomColor={isActive ? colors.orange.main : colors.blue.main}
-            boxSizing={'border-box'}
-        >
-            <Link
-                as={ReactRouterLink}
-                to={path}
-                textDecoration="none"
-            >
-                <Text
-                    color={colors.darkAndLight.white}
-                    fontSize="2xl"
-                    paddingX={'2rem'}
-                    height={'100%'}
-                    textAlign={'center'}
-                    _hover={{color: isActive ? colors.darkAndLight.white : colors.orange.light }}
-                >
-                    {label}
-                </Text>
-            </Link>
-        </Flex>
-    );
-};
+import DesktopHeader from './DesktopHeader';
+import MobileHeader from './MobileHeader';
 
 const Header: React.FC = () => {
-    const navigate = useNavigate();
-    
     return (
         <Flex 
             width={'100%'}
@@ -56,45 +14,29 @@ const Header: React.FC = () => {
             backgroundColor={colors.blue.main}
             flexWrap={'wrap'}
             boxShadow={`0px 0px 10px 2px ${colors.grey.dark}`}
-        >  
+        >
+            {/* Larger screens */}
             <Flex
-                width={'95%'}
+                width={'100%'}
                 height={'100%'}
                 alignItems={'center'}
-                justifyContent={'flex-start'} 
+                justifyContent={'flex-start'}
                 gap={'2.5rem'}
+                display={{ base: 'none', md: 'none', lg: 'flex' }}
             >
-           
-                <Flex
-                    paddingLeft={'1rem'}
-                    alignItems={'center'}
-                    backgroundColor={colors.blue.main}
-                >
-                    <Image src='./images/cpias-logo.png' alt='cpias' alignSelf="center" height={'10vh'}/>
-                </Flex>
-                <Flex
-                    width={'auto%'}
-                    height={'100%'}
-                    alignItems={'center'}
-                
-                >
-                    <NavItem path="/accueil" label="Accueil" />
-                    <NavItem path="/membres" label="Membres" />
-                    <NavItem path="/apropos" label="À propos" />
-                </Flex>
+                <DesktopHeader />
             </Flex>
+
+            {/* Smaller screens */}
             <Flex
-                width={'5%'}
+                width={'100%'}
                 height={'100%'}
-                justifyContent={'center'}
                 alignItems={'center'}
+                justifyContent={'flex-start'}
+                gap={'2.5rem'}
+                display={{ base: 'flex', md: 'flex', lg: 'none' }}
             >
-                <FaUserCircle 
-                    color={'white'} 
-                    size={'32px'} 
-                    cursor={'pointer'}
-                    onClick={()=>navigate('/admin')}
-                />
+                <MobileHeader />
             </Flex>
         </Flex>
     );

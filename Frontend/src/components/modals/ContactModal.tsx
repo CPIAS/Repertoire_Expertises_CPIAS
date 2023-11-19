@@ -91,13 +91,13 @@ const ContactModal: React.FC<ModalProps> = ({
         <Modal 
             isOpen={isOpen} 
             onClose={onClose}
-            size='4xl'
+            size={{ base: 'full', lg: '4xl' }}
             isCentered
             
         >
             <ModalOverlay/>
             
-            <ModalContent paddingX={'1rem'} height={'70vh'} minHeight={'70vh'}>
+            <ModalContent paddingX={'1rem'} height={'75vh'} minHeight={'75vh'}>
                 <ModalHeader 
                     textAlign={'center'}
                     fontSize={'xl'}
@@ -318,13 +318,13 @@ const ContactModal: React.FC<ModalProps> = ({
 
                         </Flex>
                         <Flex
-                            width={'60%'}
-                            justifyContent={'space-evenly'}
+                            width={'85%'}
+                            justifyContent={{base:'space-between', sm:'space-evenly'}}
                             alignItems={'center'}
                             paddingTop={'1rem'} 
                         >
                             <Button
-                                size={'lg'}
+                                size={{base:'md', md:'lg'}}
                                 backgroundColor={colors.darkAndLight.white}
                                 color={colors.blue.main}
                                 fontWeight={'normal'}
@@ -339,7 +339,7 @@ const ContactModal: React.FC<ModalProps> = ({
                                 {'Annuler'}
                             </Button>
                             <Button
-                                size={'lg'}
+                                size={{base:'md', md:'lg'}}
                                 backgroundColor={colors.blue.main}
                                 color={colors.darkAndLight.white}
                                 fontWeight={'normal'}
