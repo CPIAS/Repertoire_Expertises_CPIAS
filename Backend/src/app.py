@@ -373,19 +373,37 @@ def upload_csv():
         if file.filename == '':
             return jsonify({"message": "No selected file"}), 400
 
+        file_extension = os.path.splitext(file.filename)[1].lower()
+
+        if file_extension != '.csv':
+            return jsonify({"message": "Only CSV format files are allowed."}), 400
+
         if file:
             resources_path = os.path.abspath(SERVER_SETTINGS['resources_directory'])
 
             if not os.path.exists(resources_path):
                 os.makedirs(resources_path)
 
-            file.save(SERVER_SETTINGS["users_csv_file"])
-            db.update(SERVER_SETTINGS["users_csv_file"])
+            # Temporarily save the file to be validated before saving it permanently
+            temp_file_path = os.path.join(resources_path, 'temp.csv')
+            file.save(temp_file_path)
 
-            if not db.is_available:
-                raise Exception("Database update from uploaded file failed.")
+            # Validate the CSV file
+            is_valid, message = db.validate_csv(temp_file_path)
 
-            return jsonify({"message": "CSV file uploaded and database updated successfully"}), 200
+            if is_valid:
+                db.update(temp_file_path)
+
+                if db.is_available:
+                    os.remove(SERVER_SETTINGS["users_csv_file"])
+                    os.rename(temp_file_path, SERVER_SETTINGS["users_csv_file"])
+                    return jsonify({"message": "CSV file uploaded and database updated successfully"}), 200
+                else:
+                    os.remove(temp_file_path)
+                    raise Exception("Database update from the uploaded csv file failed.")
+            else:
+                os.remove(temp_file_path)
+                return jsonify({"message": message}), 400
 
     except Exception as e:
         app_logger.error(msg=str(e), exc_info=True)
