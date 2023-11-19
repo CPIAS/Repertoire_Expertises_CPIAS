@@ -129,6 +129,26 @@ class LLM:
                 for skill in translated_expert_skills_tokenized:
                     expert_recommendation_vector_store.add(documents=[skill], metadatas=[{"expert_email": expert_email}], ids=[str(time.time())])
 
+    def delete_expert_from_vector_store(self, expert_email: str):
+        self.expert_recommendation_vector_store.delete(where={"expert_email": expert_email})
+
+    def add_expert_to_vector_store(self, expert_skills: str, expert_email: str):
+        self.__populate_or_update_expert_recommendation_vector_store(
+            self.expert_recommendation_vector_store,
+            self.nlp_en,
+            [expert_skills],
+            [expert_email]
+        )
+
+    def update_expert_in_vector_store(self, expert_skills: str, expert_email: str):
+        self.delete_expert_from_vector_store(expert_email)
+        self.__populate_or_update_expert_recommendation_vector_store(
+            self.expert_recommendation_vector_store,
+            self.nlp_en,
+            [expert_skills],
+            [expert_email]
+        )
+
     @staticmethod
     def __get_expert_recommendation_parser() -> PydanticOutputParser:
         return PydanticOutputParser(pydantic_object=Experts)

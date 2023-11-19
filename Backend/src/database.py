@@ -154,9 +154,11 @@ class Database:
                                 setattr(user, attr, new_value)
                                 if attr == "skills":
                                     setattr(user, "tags", ', '.join(self.llm.get_keywords(new_value)))
+                                    self.llm.update_expert_in_vector_store(new_value, user.email)
                     else:
                         new_user = self.create_user_from_csv_row(row)
                         self.session.add(new_user)
+                        self.llm.add_expert_to_vector_store(new_user.skills, new_user.email)
 
                 self.session.commit()
             except Exception as e:
