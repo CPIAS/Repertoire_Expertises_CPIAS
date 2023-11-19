@@ -5,7 +5,7 @@ import time
 import chromadb
 import spacy
 from logging import Logger
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 from chromadb import ClientAPI
 from chromadb.api.models import Collection
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
@@ -476,11 +476,22 @@ class LLM:
             self.is_available = True
             self.app_logger.info(msg="The LLM has been successfully initialized.")
 
+    def __try_get_llm_expert_recommendation(self, llm_input, max_attempts=4, retry_delay=1) -> List[str]:
+        for attempt in range(1, max_attempts):
+            try:
+                llm_output = self.expert_recommendation_llm(llm_input)
+                generic_profiles = self.__get_expert_recommendation_parser().parse(llm_output).profiles
+                return generic_profiles
+            except Exception as e:
+                self.app_logger.error(msg=str(e), exc_info=True)
+                time.sleep(retry_delay)
+
+        raise Exception(f"Error occurred when parsing LLM output for generic profiles.")
+
     def get_experts_recommendation(self, question: str):
         query = GoogleTranslator(source='auto', target='en').translate(question)
         llm_input = self.expert_recommendation_prompt.format(input=query)
-        llm_output = self.expert_recommendation_llm(llm_input)
-        generic_profiles = self.__get_expert_recommendation_parser().parse(llm_output).profiles
+        generic_profiles = self.__try_get_llm_expert_recommendation(llm_input, 4, 1)  # max attempts = 4 , wait 1 second between each try.
         found_experts = self.expert_recommendation_vector_store.query(query_texts=generic_profiles, n_results=20)
         response = {}
 
