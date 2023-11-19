@@ -15,7 +15,8 @@ export interface Member {
     yearsExperienceHealthcare: number;
     yearsExperienceIa: number;
     tags: string;
-    profilePicture?: string;
+    profilePhoto?: string;
+    linkedin?: string;
 }
 
 export interface ResultsMembers {

@@ -27,14 +27,13 @@ const NotFoundPage: React.FC = () => {
             </Flex>
             <Flex
                 width={'100%'}
-                // height={'15vh'}
                 justifyContent={'center'}
                 flexWrap={'wrap'}
                 gap={'1rem'}
             >
                 <Text 
                     width={'100%'} 
-                    fontSize={'9xl'} 
+                    fontSize={{base:'6xl', md:'9xl'}} 
                     fontWeight={'bold'}
                     textAlign={'center'} 
                 >
@@ -42,7 +41,7 @@ const NotFoundPage: React.FC = () => {
                 </Text>
                 <Text 
                     width={'100%'} 
-                    fontSize={'2xl'}
+                    fontSize={{base:'lg', md:'2xl'}} 
                     textAlign={'center'}
                 >
                     {'La page que vous recherchez n\'existe pas.'}

@@ -1,8 +1,14 @@
-import { Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerOverlay, Flex, Image, Link, Tag, Text } from '@chakra-ui/react';
-import React from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerOverlay, Flex, Image, Link, SkeletonCircle, Tag, Text } from '@chakra-ui/react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { FaLinkedin, FaRegEnvelope } from 'react-icons/fa';
 import { Member } from '../../../models/member';
 import colors from '../../../utils/theme/colors';
+
+const API_HOST = process.env.REACT_APP_SERVER_URL;
+const API_KEY = process.env.REACT_APP_API_KEY;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 interface MemberDrawer {
     selectedMember: Member;
@@ -15,6 +21,53 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
     isOpen,
     setDrawerOpen
 }) => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [profilePicture, setProfilePicture] = useState<string>('');
+
+    // Fetch profile picture from the server
+    useEffect(() => {
+        const fetchProfilePicture = async () => {
+            setIsLoading(true);
+            try {
+                const response = await axios.get(`${API_HOST}/download_user_photo/${selectedMember.userId}`, {
+                    headers: {
+                        'Authorization': `${API_KEY}`
+                    },
+                    responseType: 'arraybuffer',
+                });
+                const imageData = btoa(new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+                const imageUrl = `data:image/png;base64,${imageData}`;
+    
+                setProfilePicture(imageUrl);
+            } catch (error: any) {        
+                if (error?.response?.status === 404) {
+                    console.clear();
+                    setProfilePicture('./images/avatar/generic-avatar.png');
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProfilePicture();
+    }, [selectedMember]);
+
+    const formatName = (name: string) => {
+        return name
+            .split(/\s+/)
+            .map((word) => {
+                const hyphenIndex = word.indexOf('-');
+                if (hyphenIndex !== -1) {
+                    const firstPart = word.slice(0, hyphenIndex + 1);
+                    const restOfWord = word.slice(hyphenIndex + 1).charAt(0).toUpperCase() + word.slice(hyphenIndex + 2).toLowerCase();
+                    return `${firstPart}${restOfWord}`;
+                } else {
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }
+            })
+            .join(' ');
+    };
+
     return (
         <Drawer
             isOpen={isOpen}
@@ -34,21 +87,16 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                             gap={'0.75rem'}
                             paddingTop={'2rem'}
                         >
-                            {/* <Flex
+                            <Flex
                                 width={'200px'}
-                                height={'200px'}
-                                borderRadius={'full'}
-                                border={'2px solid black'}
-                            > */}
-                            {/* PROFILE PICTURE HERE */}
-                            {/* </Flex> */}
-
-                            <Image
-                                src={selectedMember.profilePicture ? `https://drive.google.com/uc?export=view&id=${selectedMember.profilePicture}` : './images/avatar/generic-avatar.png'}
-                                borderRadius='full'
-                                border={`1px solid ${colors.darkAndLight.black}`}
-                                boxSize='200px'
-                            />
+                                justifyContent={'center'}
+                            >
+                                {isLoading ? (
+                                    <SkeletonCircle size={'200px'} />
+                                ) : (
+                                    <Image src={profilePicture} borderRadius='full' border={`1px solid ${colors.grey.dark}`} width={'200px'}/>
+                                )}
+                            </Flex>
                             <Flex
                                 width={'100%'}
                                 justifyContent={'center'}
@@ -59,7 +107,7 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                     fontSize={'2xl'}
                                     fontWeight={'bold'}
                                 >
-                                    {`${selectedMember.firstName} ${selectedMember.lastName}`}
+                                    {formatName(`${selectedMember.firstName} ${selectedMember.lastName}`)}
                                 </Text>
                             </Flex>
                             <Flex
@@ -104,13 +152,13 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                 gap={'0.5rem'}
                             >
                                 <Text
-                                    fontSize={'lg'}
+                                    fontSize={{base: 'sm', md:'lg'}}
                                     fontWeight={'bold'}
                                     width={'100%'}
                                 >
                                     {'Type de membre'}
                                 </Text>
-                                <Text width={'100%'}>
+                                <Text width={'100%'} fontSize={{base: 'sm', md:'lg'}}>
                                     {selectedMember.membershipCategory}
                                 </Text>
                             </Flex>
@@ -121,7 +169,7 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                 flexWrap={'wrap'}
                             >
                                 <Text
-                                    fontSize={'lg'}
+                                    fontSize={{base: 'sm', md:'lg'}}
                                     fontWeight={'bold'}
                                     width={'100%'}
                                     paddingBottom={'0.5rem'}
@@ -129,7 +177,7 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                     {'Organisation(s) d\'affiliation'}
                                 </Text>
                                 {selectedMember.affiliationOrganization.split(',').map((org: string, index: number) => (
-                                    <Text key={index} width={'100%'}>
+                                    <Text key={index} width={'100%'} fontSize={{base: 'sm', md:'lg'}}>
                                         {org}
                                     </Text>
                                 ))}
@@ -140,14 +188,14 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                 flexWrap={'wrap'}
                             >
                                 <Text
-                                    fontSize={'lg'}
+                                    fontSize={{base: 'sm', md:'lg'}}
                                     fontWeight={'bold'}
                                     width={'100%'}
                                     paddingBottom={'0.5rem'}
                                 >
                                     {'Titre d\'emploi'}
                                 </Text>
-                                <Text width={'100%'}>
+                                <Text width={'100%'} fontSize={{base: 'sm', md:'lg'}}>
                                     {selectedMember.jobPosition}
                                 </Text>
 
@@ -159,7 +207,7 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                 gap={'0.5rem'}
                             >
                                 <Text
-                                    fontSize={'lg'}
+                                    fontSize={{base: 'sm', md:'lg'}}
                                     fontWeight={'bold'}
                                     width={'100%'}
                                 >
@@ -180,22 +228,23 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                                         {selectedMember.email}
                                     </Link>
                                 </Flex>
-                                <Flex
-                                    width={'100%'}
-                                    alignItems={'center'}
-                                >
-                                    <FaLinkedin size={'32'} color={'#0077B5'}/> 
-                                    <Link 
-                                        href={'http://linkedin.com'} //TODO : Add profile URL
-                                        isExternal 
-                                        color="blue.500" 
-                                        textDecoration="underline"
-                                        paddingLeft={'0.75rem'}
+                                {selectedMember.linkedin && (
+                                    <Flex
+                                        width={'100%'}
+                                        alignItems={'center'}
                                     >
-                                        {/* //TODO : Add profile URL */}
-                                        {'TODO: Add LinkedIn URL'} 
-                                    </Link>
-                                </Flex>
+                                        <FaLinkedin size={'32'} color={'#0077B5'}/> 
+                                        <Link 
+                                            href={selectedMember.linkedin}
+                                            isExternal 
+                                            color="blue.500" 
+                                            textDecoration="underline"
+                                            paddingLeft={'0.75rem'}
+                                        >
+                                            {`Retrouver ${selectedMember.firstName} sur LinkedIn`} 
+                                        </Link>
+                                    </Flex>
+                                )}
                             </Flex>
                             
                         </Flex>

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Flex} from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
+import * as d3 from 'd3';
 import React, { useState } from 'react';
 import Graph from 'react-graph-vis';
 import { Member, ResultsMembers } from '../../models/member';
-import * as d3 from 'd3';
 import MemberDrawer from './components/MemberDrawer';
 
 const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
@@ -191,11 +191,11 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
     };
     
     const legendData = [
-        { color: legendColorScale(1), label: '0% Score' },
-        { color: legendColorScale(0.75), label: '25% Score' },
-        { color: legendColorScale(0.5), label: '50% Score' },
-        { color: legendColorScale(0.25), label: '75% Score' },
-        { color: legendColorScale(0), label: '100% Score' },
+        { color: legendColorScale(1), label: '0%' },
+        { color: legendColorScale(0.75), label: '25%' },
+        { color: legendColorScale(0.5), label: '50%' },
+        { color: legendColorScale(0.25), label: '75%' },
+        { color: legendColorScale(0), label: '100%' },
     ];
     
     return (
@@ -208,29 +208,42 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
             border={'1px solid grey'}
         >
             {/* Legend component */}
-            <div
-                style={{
-                    position: 'absolute',
-                    top: '100px', // Adjust the top position as needed
-                    left: '8vh', // Adjust the left position as needed
-                    display: 'flex',
-                    flexDirection: 'column',
-                }}
+            <Flex
+                position={'absolute'}
+                top={{base:'70px', md:'80px'}}
+                left={{base:'none', md:'5vh'}}
+                flexDirection={{base:'row', md:'column'}}
+                justifyContent={'flex-start'}
+                alignItems={'center'}
+                zIndex={999}
+                backgroundColor={'white'}
+                border={'1px solid black'}
+                padding={'0.5rem'}
             >
+                <Flex
+                    display={{base: 'none', md: 'flex'}}
+                >
+                    {'Correspondance'}
+                </Flex>
                 {legendData.map((entry, index) => (
-                    <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                        <div
-                            style={{
-                                width: '20px',
-                                height: '10px',
-                                backgroundColor: entry.color,
-                                marginRight: '5px',
-                            }}
-                        ></div>
-                        <span style={{ fontSize: '12px' }}>{entry.label}</span>
-                    </div>
+                    <Flex 
+                        key={index} 
+                        width={'100%'}
+                        alignItems={'center'}
+                        justifyContent={'flex-start'}
+                        marginBottom={{base: 0, lg:'0.25rem'}}
+                        marginX={{base: '0.15rem', lg:'0rem'}}
+                    >
+                        <Flex
+                            width={'20px'}
+                            height={'10px'}
+                            backgroundColor={entry.color}
+                            marginRight={'5px'}
+                        ></Flex>
+                        <Flex style={{ fontSize: '12px' }}>{entry.label}</Flex>
+                    </Flex>
                 ))}
-            </div>
+            </Flex>
             <Graph
                 graph={GraphData}
                 options={options}

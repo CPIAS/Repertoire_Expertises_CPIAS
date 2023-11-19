@@ -50,12 +50,12 @@ const UserGuideModal: React.FC<ModalProps> = ({
         <Modal 
             isOpen={isOpen} 
             onClose={closeModal}
-            size='6xl'
+            size={{ base: 'full', lg: '6xl' }}
             isCentered
             
         >
             <ModalOverlay/>
-            <ModalContent paddingX={'1rem'} height={'67.5vh'}>
+            <ModalContent paddingX={{ base: 'none', md:'1rem', lg: '1rem' }} height={'70vh'}>
                 <ModalBody
                     overflow={'scroll'}
                 >
@@ -73,6 +73,7 @@ const UserGuideModal: React.FC<ModalProps> = ({
                             paddingTop={'1rem'}
                             justifyContent={'center'}
                             alignItems={'center'}
+                            display={{ base: 'none', md:'flex', lg: 'flex' }}
                         >
                         
                             <Stepper size='md' index={activeStep} colorScheme='facebook' width={'100%'}>
@@ -97,7 +98,7 @@ const UserGuideModal: React.FC<ModalProps> = ({
                         </Flex>
                         <Flex
                             width={'100%'}
-                            height={'70%'}
+                            height={{ base: '85%', md:'70%', lg: '70%' }}
                             justifyContent={'center'}
                             alignItems={'center'}
                             alignContent={'center'}
@@ -115,6 +116,7 @@ const UserGuideModal: React.FC<ModalProps> = ({
                             <Button
                                 size={'lg'}
                                 backgroundColor={colors.darkAndLight.white}
+                                fontSize={{ base: '14px', md:'18px', lg: '18px' }}
                                 color={colors.blue.main}
                                 border={`2px solid ${colors.blue.light}`}
                                 _hover={{
@@ -137,6 +139,7 @@ const UserGuideModal: React.FC<ModalProps> = ({
                                 activeStep === steps.length ? (
                                     <Button
                                         size={'lg'}
+                                        fontSize={{ base: '14px', md:'18px', lg: '18px' }}
                                         backgroundColor={colors.darkAndLight.white}
                                         color={colors.blue.main}
                                         border={`2px solid ${colors.blue.light}`}
@@ -156,6 +159,7 @@ const UserGuideModal: React.FC<ModalProps> = ({
                                     <Button
                                         size={'lg'}
                                         backgroundColor={colors.darkAndLight.white}
+                                        fontSize={{ base: '14px', md:'18px', lg: '18px' }}
                                         color={colors.blue.main}
                                         border={`2px solid ${colors.blue.light}`}
                                         _hover={{

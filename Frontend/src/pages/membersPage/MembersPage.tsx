@@ -43,7 +43,7 @@ const MembersPage: React.FC = () => {
                 setIsLoading(false);
             }
         };
-
+        
         fetchMembers();
     }, []);
     
@@ -168,19 +168,20 @@ const MembersPage: React.FC = () => {
                             alignItems={'center'}
                             justifyContent={'space-between'}
                         >
-                            <Text fontSize={'3xl'} fontWeight={'bold'}>
+                            <Text fontSize={{base: 'xl', md:'3xl'}} fontWeight={'bold'}>
                                 {'Membres de la CPIAS'}
                             </Text>
                         </Flex>
                         <Flex 
                             width={'100%'}
                             alignItems={'center'}
-                            height={'60px'}
                             justifyContent={'space-between'}
+                            flexWrap={{base: 'wrap', lg:'nowrap'}}
+                            gap={{base: '1rem', lg: '0'}}
                         >
                             <Flex
-                                width={'50%'}
-                                height={'100%'}
+                                width={{base: '100%', lg:'50%'}}
+                                height={'60px'}
                             >
                                 <InputGroup 
                                     width={'100%'}
@@ -189,7 +190,7 @@ const MembersPage: React.FC = () => {
                                 >
                                     <Input 
                                         placeholder={'Rechercher un membre...'} 
-                                        fontSize={'xl'}
+                                        fontSize={{ base: 'sm', md: 'xl' }}
                                         backgroundColor={colors.darkAndLight.white}
                                         paddingRight={'4.5rem'}
                                         paddingY={'1rem'}
@@ -225,33 +226,31 @@ const MembersPage: React.FC = () => {
                                     </InputRightElement>
                                 </InputGroup>
                             </Flex>
-                            <Button
-                                size={'lg'}
-                                backgroundColor={colors.blue.main}
-                                color={colors.darkAndLight.white}
-                                leftIcon={<FaFilter/>}
-                                fontWeight={'normal'}
-                                _hover={{
-                                    backgroundColor: colors.blue.light,
-                                }}
-                                _active={{
-                                    backgroundColor: colors.blue.light,
-                                }}
-                                onClick={()=>{
-                                    setIsFilterSectionShown(!isFilterSectionShown);
-                                }}
+                            <Flex
+                                width={{base: '100%', lg:'50%'}}
+                                alignItems={'center'}
+                                justifyContent={'flex-end'}
                             >
-                                {'Appliquer des filtres'}
-                            </Button>
+                                <Button
+                                    size={{base: 'sm', md:'lg'}}
+                                    backgroundColor={colors.blue.main}
+                                    color={colors.darkAndLight.white}
+                                    leftIcon={<FaFilter/>}
+                                    fontWeight={'normal'}
+                                    _hover={{
+                                        backgroundColor: colors.blue.light,
+                                    }}
+                                    _active={{
+                                        backgroundColor: colors.blue.light,
+                                    }}
+                                    onClick={()=>{
+                                        setIsFilterSectionShown(!isFilterSectionShown);
+                                    }}
+                                >
+                                    {'Appliquer des filtres'}
+                                </Button>
+                            </Flex>
                         </Flex>
-                        <Filters 
-                            isOpen={isFilterSectionShown} 
-                            organizationsOptions={organizationsOptions}
-                            memberCategoryOptions={membersCategoryOptions}
-                            tagsOptions={tagsOptions}
-                            setIsFilterSectionShown={setIsFilterSectionShown}
-                            setAppliedFilters={setAppliedFilters}
-                        />
                         <Flex
                             width={'100%'}
                             gap={'0.5rem'}
@@ -262,8 +261,9 @@ const MembersPage: React.FC = () => {
                                     alignItems={'center'}
                                     alignContent={'center'}
                                     paddingTop={'0.1rem'}
+                                    display={{base: 'none', lg:'flex'}}
                                 >
-                                    {'Filtre appliqués :'}
+                                    {'Filtres appliqués :'}
                                 </Flex>
                             }
                             <Flex
@@ -360,8 +360,16 @@ const MembersPage: React.FC = () => {
                     </Flex>
                 }
             </Flex>
-            
+            <Filters 
+                isOpen={isFilterSectionShown} 
+                organizationsOptions={organizationsOptions}
+                memberCategoryOptions={membersCategoryOptions}
+                tagsOptions={tagsOptions}
+                setIsFilterSectionShown={setIsFilterSectionShown}
+                setAppliedFilters={setAppliedFilters}
+            />
         </Flex>
+        
     );
 };
 

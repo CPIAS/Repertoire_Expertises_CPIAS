@@ -93,10 +93,10 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
     return (
         <Flex width={'100%'}>
             <Menu closeOnSelect={false} matchWidth>
-                <MenuButton 
-                    rightIcon={<Icon as={ChevronDownIcon} />} 
+                <MenuButton
+                    rightIcon={<Icon as={ChevronDownIcon} />}
                     width={'100%'}
-                    as={Button} 
+                    as={Button}
                     size={'md'}
                     backgroundColor={colors.darkAndLight.white}
                     color={colors.blue.main}
@@ -104,15 +104,19 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                     border={`1px solid ${colors.grey.lighter}`}
                     _hover={{
                         backgroundColor: colors.blue.lighter,
-                        border: `2px solid ${colors.blue.light2}`
+                        border: `2px solid ${colors.blue.light2}`,
                     }}
                     _active={{
                         backgroundColor: colors.blue.lighter,
-                        border: `2px solid ${colors.blue.light}`
+                        border: `2px solid ${colors.blue.light}`,
                     }}
+                    whiteSpace="nowrap"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
                 >
                     {getButtonLabel()}
                 </MenuButton>
+
                 <MenuList padding={'0'} maxHeight={'35vh'} overflowY={'scroll'} zIndex={5} ref={dropdownRef}>
                     {visibleOptions.map((option) => (
                         <MenuItem key={option.value} onClick={handleMenuItemClick(option)} paddingY={'0.5rem'}>

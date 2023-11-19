@@ -12,18 +12,22 @@ interface SearchBarProps {
     defaultValue?: string;
     isAutoFocus?: boolean;
     isReadOnly?: boolean;
+    isDisabled?: boolean;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
     defaultValue,
     isAutoFocus = false,
-    isReadOnly = false
+    isReadOnly = false,
+    isDisabled = false,
 }) => {
     const [searchQuery, setSearchQuery] = useState<string>('');
     const navigate = useNavigate ();
 
     const handleEnterKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (isDisabled) return;
         if (event.key === ENTER_KEY && searchQuery.trim().length !== 0) {
+            event.preventDefault();
             submitSearch();
         }
     };
@@ -52,13 +56,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
             >
                 <AutoResizeTextarea 
                     placeholder={'Rechercher...'} 
-                    fontSize={'xl'}
+                    fontSize={{ base: 'sm', md: 'lg', lg: 'xl' }}
                     backgroundColor={colors.darkAndLight.white}
                     paddingRight={'4.5rem'}
                     paddingY={'1rem'}
                     borderRadius={'1rem'}
                     cursor={isReadOnly ? 'default' : 'auto'}
-                    border={'1px solid darkgrey'}
+                    border={'1px solid darkgrey !important'}
                     onChange={(event) => {
                         setSearchQuery(event.target.value.trim());
                     }}
@@ -67,6 +71,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                     boxShadow={`0px 0px 7.5px 0px ${colors.grey.dark}`}
                     autoFocus={isAutoFocus}
                     isReadOnly={isReadOnly}
+                    isDisabled={isDisabled}
                     verticalAlign={'center'}
                     resize={'none'}
                     overflowY={'scroll'}
@@ -82,9 +87,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
                     borderRightRadius={'1rem'}
                     border={'1px solid transparent'}
                     borderLeft={'none'}
-                    cursor={'pointer'}
+                    cursor={isDisabled ? 'no-drop' : 'pointer'}
                     onClick={submitSearch}
-                    _hover={{ backgroundColor: colors.orange.main }}
+                    _hover={{ backgroundColor: isDisabled ? colors.blue.main : colors.orange.main }}
                 >
                     <SearchIcon 
                         color={colors.darkAndLight.white}

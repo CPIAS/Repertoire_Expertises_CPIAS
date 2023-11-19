@@ -1,14 +1,13 @@
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { Flex } from '@chakra-ui/react';
+import axios from 'axios';
+import humps from 'humps';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../../components/header/Header';
 import SearchBar from '../../components/searchBar/SearchBar';
 import { Member, Recommendation, ResultsMembers } from '../../models/member';
 import colors from '../../utils/theme/colors';
-// import mockMembers from '../membersPage/mockMembers.json';
-import axios from 'axios';
-import humps from 'humps';
 import ResultsTabs from './components/ResultsTabs';
 // import mockResults from './mockResults.json';
 
@@ -18,15 +17,17 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const SearchResultsPage: React.FC = () => {
     const navigate = useNavigate ();
+    const location = useLocation();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [results, setResults] = useState<ResultsMembers[]>([]);
-    const [noResultsText, setNoResultsText] = useState<string>('Aucun résultat');
+    const [noResultsText, setNoResultsText] = useState<string>('');
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
 
     useEffect(() => {
         const fetchMembers = async () => {
             try {
+                setIsLoading(true);
                 const response = await axios.post(`${API_HOST}/search`, query, {
                     headers: {
                         'Authorization': `${API_KEY}`,
@@ -44,13 +45,13 @@ const SearchResultsPage: React.FC = () => {
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error while fetching members: ', error);
-                setNoResultsText('Une erreur est survenue.');
+                setNoResultsText('Aucun résultat');
                 setIsLoading(false);
             }
         };
 
         fetchMembers();
-    }, [query]);
+    }, [location.key]);
 
     return (
         <Flex 
@@ -80,7 +81,7 @@ const SearchResultsPage: React.FC = () => {
                 overflowY={'scroll'}
             >
                 <Flex
-                    width={'90%'}
+                    width={{base: '95%', lg:'90%'}}
                     height={'100%'}
                     flexWrap={'wrap'}
                     gap={'2rem'}
@@ -111,7 +112,7 @@ const SearchResultsPage: React.FC = () => {
                             marginLeft={'2rem'}
                             width={'100%'}
                         >
-                            <SearchBar defaultValue={query}/>
+                            <SearchBar defaultValue={query} isDisabled={isLoading}/>
                         </Flex>
                     </Flex>
 
