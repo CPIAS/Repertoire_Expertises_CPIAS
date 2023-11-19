@@ -20,7 +20,7 @@ const HomePageTitle: React.FC = () => {
                     fontWeight={'bold'}
                     textAlign={'center'}
                 >
-                    {'Répertoire des expertises'}
+                    {'Répertoire des expertises de la CPIAS'}
                 </Text>
             </Flex>
             <Flex
