@@ -133,7 +133,7 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                     membership_category: editedMember.membershipCategory,
                     job_position: editedMember.jobPosition,
                     affiliation_organization: editedMember.affiliationOrganization,
-                    linkein: editedMember.linkedin
+                    linkedin: editedMember.linkedin
                 };
     
                 await axios.put(`${API_HOST}/update_user/${editedMember.userId}`, requestData, {
