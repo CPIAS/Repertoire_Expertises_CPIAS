@@ -140,8 +140,8 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         },
         physics:{
             barnesHut:{
-                gravitationalConstant: -2000,
-                springConstant:0.02,
+                gravitationalConstant: -5000,
+                springConstant:0.01,
             }
         },
         smoothCurves: {dynamic:true},

@@ -28,6 +28,7 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
     useEffect(() => {
         const fetchProfilePicture = async () => {
             setIsLoading(true);
+            setProfilePicture('./images/avatar/generic-avatar.png');
             try {
                 const response = await axios.get(`${API_HOST}/download_user_photo/${selectedMember.userId}`, {
                     headers: {
