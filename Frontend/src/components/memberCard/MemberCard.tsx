@@ -31,14 +31,14 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                     },
                     responseType: 'arraybuffer',
                 });
-                const imageData = btoa(new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-                const imageUrl = `data:image/png;base64,${imageData}`;
-            
-                setProfilePicture(imageUrl);
-            } catch (error: any) {        
-                if (error?.response?.status === 404) {
-                    setProfilePicture('./images/avatar/generic-avatar.png');
+                if (response.status !== 204) {
+                    const imageData = btoa(new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+                    const imageUrl = `data:image/png;base64,${imageData}`;
+                    setProfilePicture(imageUrl);
                 }
+
+            } catch (error: any) {        
+                setProfilePicture('./images/avatar/generic-avatar.png');
             } finally {
                 setIsLoading(false);
             }
