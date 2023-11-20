@@ -22,12 +22,13 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
     setDrawerOpen
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [profilePicture, setProfilePicture] = useState<string>('');
+    const [profilePicture, setProfilePicture] = useState<string>('./images/avatar/generic-avatar.png');
 
     // Fetch profile picture from the server
     useEffect(() => {
         const fetchProfilePicture = async () => {
             setIsLoading(true);
+            setProfilePicture('./images/avatar/generic-avatar.png');
             try {
                 const response = await axios.get(`${API_HOST}/download_user_photo/${selectedMember.userId}`, {
                     headers: {
@@ -35,15 +36,14 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
                     },
                     responseType: 'arraybuffer',
                 });
-                const imageData = btoa(new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-                const imageUrl = `data:image/png;base64,${imageData}`;
-    
-                setProfilePicture(imageUrl);
-            } catch (error: any) {        
-                if (error?.response?.status === 404) {
-                    console.clear();
-                    setProfilePicture('./images/avatar/generic-avatar.png');
+                if (response.status !== 204) {
+                    const imageData = btoa(new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+                    const imageUrl = `data:image/png;base64,${imageData}`;
+                    setProfilePicture(imageUrl);
                 }
+
+            } catch (error: any) {        
+                setProfilePicture('./images/avatar/generic-avatar.png');
             } finally {
                 setIsLoading(false);
             }

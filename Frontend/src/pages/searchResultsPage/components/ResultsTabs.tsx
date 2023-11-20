@@ -169,12 +169,20 @@ const ResultsTabs: React.FC<SearchResultsProps> = ({
                                                                 <Flex
                                                                     width={'100%'}
                                                                     flexWrap={'wrap'}
-                                                                    paddingX={{base: '0rem', md: '2.5rem'}}
+                                                                    paddingX={{ base: '0rem', md: '2.5rem' }}
                                                                     paddingBottom={'1rem'}
                                                                 >
-                                                                    {res.recommendation.map((expert, index) => (
-                                                                        <MemberCard member={expert.expert} key={`${index}_${expert.expert.userId}`}/>
-                                                                    ))}
+                                                                    {res.recommendation.length > 0 ? (
+                                                                        res.recommendation.map((expert, index) => (
+                                                                            <MemberCard member={expert.expert} key={`${index}_${expert.expert.userId}`} />
+                                                                        ))
+                                                                    ) : (
+                                                                        <Text
+                                                                            fontSize={{ base: 'sm', md: 'lg', lg: 'xl' }}
+                                                                            textAlign={'start'}
+                                                                            fontStyle={'italic'}
+                                                                        >{'Aucun expert trouvé dans cette catégorie'}</Text>
+                                                                    )}
                                                                 </Flex>
                                                             </AccordionPanel>
                                                         </AccordionItem>

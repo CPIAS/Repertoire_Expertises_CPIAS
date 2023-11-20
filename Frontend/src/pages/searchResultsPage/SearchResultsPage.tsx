@@ -100,7 +100,7 @@ const SearchResultsPage: React.FC = () => {
                             boxSize={12}
                             cursor={'pointer'}
                             onClick={()=>{
-                                navigate(-1);
+                                navigate('/accueil');
                             }}
                             _hover={{
                                 backgroundColor: colors.blue.main,

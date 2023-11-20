@@ -59,10 +59,12 @@ const MembersPage: React.FC = () => {
             for (const tags of member.tags.split(/,| et /)) {
                 uniqueTags.add(tags.trim());
             }
-            uniqueMemberCategory.add(member.membershipCategory.trim());
+            for (const category of member.membershipCategory.split(/,| et /)) {
+                uniqueMemberCategory.add(category);
+            }
         }
         setOrganizationsOptions(Array.from(uniqueOrganizations).sort().filter(org => org !== 'Autre'));
-        setMembersCategoryOptions(Array.from(uniqueMemberCategory).sort().filter(cat => cat !== 'Autre' && cat.length > 1));
+        setMembersCategoryOptions(Array.from(uniqueMemberCategory).sort().filter(cat => cat.trim().length > 1));
         setTagsOptions(Array.from(uniqueTags).sort());    
     }, [members]);
 

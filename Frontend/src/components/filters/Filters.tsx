@@ -213,29 +213,6 @@ const Filters: React.FC<FiltersProps> = ({
                                 fontSize={'md'}
                                 fontWeight={'bold'}
                             >
-                                {'Type d\'expertise'}
-                            </Flex>
-                            <MultiSelectDropdown 
-                                options={tagsDropdownOptions}
-                                unit={'types'}
-                                selectedOptions={selectedExpertise}
-                                setSelectedOptions={setSelectedExpertise}
-                            />
-                        </Flex>
-                        <Flex
-                            width={'100%'}
-                            paddingTop={'1.5rem'}
-                            justifyContent={'flex-start'}
-                            flexWrap={'wrap'}
-                            gap={'1rem'}
-                        >
-                            <Flex 
-                                width={'100%'} 
-                                paddingBottom={'0.25rem'}
-                                borderBottomWidth='1px'
-                                fontSize={'md'}
-                                fontWeight={'bold'}
-                            >
                                 {'Années d\'expérience en intelligence artificielle'}
                             </Flex>
                             <RangeSliderWithLabels

@@ -321,6 +321,9 @@ def get_keywords_from_user_expertise():
 @require_api_key
 def delete_user(user_id):
     try:
+        if not llm.is_available:
+            return jsonify({"message": "LLM not available"}), 503
+
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
 
@@ -331,6 +334,7 @@ def delete_user(user_id):
             db.delete_user_from_csv(user.email)
             db.session.delete(user)
             db.session.commit()
+            llm.delete_expert_from_vector_store(user.email)
 
             if user.profile_photo and os.path.exists(user_photo_path):
                 os.remove(user_photo_path)
@@ -349,6 +353,9 @@ def delete_user(user_id):
 @require_api_key
 def update_user(user_id):
     try:
+        if not llm.is_available:
+            return jsonify({"message": "LLM not available"}), 503
+
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
 
@@ -363,6 +370,7 @@ def update_user(user_id):
                 setattr(user, key, value)
                 if key == "skills":
                     setattr(user, "tags", ', '.join(llm.get_keywords(value)))
+                    llm.update_expert_in_vector_store(value, user.email)
 
             db.session.commit()
 
@@ -403,6 +411,9 @@ def download_csv():
 @require_api_key
 def upload_csv():
     try:
+        if not llm.is_available:
+            return jsonify({"message": "LLM not available"}), 503
+
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
 
@@ -433,22 +444,22 @@ def upload_csv():
             is_valid, message = db.validate_csv(temp_file_path)
 
             if is_valid:
-                db.update(temp_file_path)
+                db.update(temp_file_path)  # This method also updates tags and victor store if a new user is added or user skills has been changed.
 
                 if db.is_available:
                     os.remove(SERVER_SETTINGS["users_csv_file"])
                     os.rename(temp_file_path, SERVER_SETTINGS["users_csv_file"])
-                    return jsonify({"message": "CSV file uploaded and database updated successfully"}), 200
+                    return jsonify({"message": "CSV file uploaded, database and vector store updated successfully"}), 200
                 else:
                     os.remove(temp_file_path)
-                    raise Exception("Database update from the uploaded csv file failed.")
+                    raise Exception("Database or vector store update from the uploaded csv file failed.")
             else:
                 os.remove(temp_file_path)
                 return jsonify({"message": message}), 400
 
     except Exception as e:
         app_logger.error(msg=str(e), exc_info=True)
-        return jsonify({"message": "File upload failed. An error occurred while uploading the csv file or updating the database."}), 500
+        return jsonify({"message": "File upload failed. An error occurred while uploading the csv file, updating the database or updating the vector store."}), 500
 
 
 @app.route('/download_user_photo/<int:user_id>', methods=['GET'], endpoint='download_user_photo')
@@ -464,7 +475,7 @@ def download_user_photo(user_id):
             return jsonify({"message": "User not found"}), 404
 
         if not user.profile_photo:
-            return jsonify({'message': 'User does not have a profile photo.'}), 404
+            return jsonify({'message': 'User does not have a profile photo.'}), 204
 
         user_photo_path = os.path.join(SERVER_SETTINGS['user_photos_directory'], user.profile_photo)
 

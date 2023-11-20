@@ -27,7 +27,7 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
     const [isWaitingForDeletion, setIsWaitingForDeletion] = useState<boolean>(false);
     const [isWaitingForSave, setIsWaitingForSave] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [profilePicture, setProfilePicture] = useState<string>('');
+    const [profilePicture, setProfilePicture] = useState<string>('./images/avatar/generic-avatar.png');
     const toast = useToast();
     
     useEffect(()=>{
@@ -74,15 +74,14 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                 },
                 responseType: 'arraybuffer',
             });
-            const imageData = btoa(new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-            const imageUrl = `data:image/png;base64,${imageData}`;
-    
-            setProfilePicture(imageUrl);
-        } catch (error: any) {        
-            if (error?.response?.status === 404) {
-                console.clear();
-                setProfilePicture('./images/avatar/generic-avatar.png');
+            if (response.status !== 204) {
+                const imageData = btoa(new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+                const imageUrl = `data:image/png;base64,${imageData}`;
+                setProfilePicture(imageUrl);
             }
+
+        } catch (error: any) {        
+            setProfilePicture('./images/avatar/generic-avatar.png');
         } finally {
             setIsLoading(false);
         }
@@ -134,6 +133,7 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
                     membership_category: editedMember.membershipCategory,
                     job_position: editedMember.jobPosition,
                     affiliation_organization: editedMember.affiliationOrganization,
+                    linkedin: editedMember.linkedin
                 };
     
                 await axios.put(`${API_HOST}/update_user/${editedMember.userId}`, requestData, {
