@@ -64,7 +64,7 @@ const MembersPage: React.FC = () => {
             }
         }
         setOrganizationsOptions(Array.from(uniqueOrganizations).sort().filter(org => org !== 'Autre'));
-        setMembersCategoryOptions(Array.from(uniqueMemberCategory).sort());
+        setMembersCategoryOptions(Array.from(uniqueMemberCategory).sort().filter(cat => cat.trim().length > 1));
         setTagsOptions(Array.from(uniqueTags).sort());    
     }, [members]);
 
