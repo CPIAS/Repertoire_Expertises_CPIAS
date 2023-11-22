@@ -15,5 +15,7 @@ SERVER_SETTINGS = {
     "access_log_file": "../server_access.log",
     "error_log_file": "../server_error.log",
     "sqlite_db": "users.db",
-    "chroma_collection_name": "Experts"
+    "chroma_collection_name": "Experts",
+    "zeromq_request_address": "tcp://localhost:5555",
+    "zeromq_response_address": "tcp://*:5555",
 }
