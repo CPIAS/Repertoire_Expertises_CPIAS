@@ -1,10 +1,12 @@
-import concurrent.futures
+import atexit
 import os
 import smtplib
 import logging
 import gdown
 import time
 import uuid
+import zmq
+from typing import Literal
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from email.mime.application import MIMEApplication
@@ -39,21 +41,23 @@ def init_server() -> None:
         CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified in a production environment.
         app_logger.setLevel(logging.INFO)
 
+        # Register an exit handler to stop LLM processing gracefully
+        atexit.register(llm.stop_llm_processing)
+
         if not os.path.exists(SERVER_SETTINGS["users_csv_file"]):
             raise Exception(f"Server initialization failed. {SERVER_SETTINGS['users_csv_file']} does not exist.")
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            llm_future = executor.submit(llm.init)
-            llm_future.result()
+        llm.init()
+        if not llm.is_available:
+            raise Exception("Server initialization failed. LLM is not available.")
 
-            if not llm.is_available:
-                raise Exception("Server initialization failed. LLM is not available.")
+        db.init()
+        if not db.is_available:
+            raise Exception("Server initialization failed. Database is not available.")
 
-            db_future = executor.submit(db.init)
-            db_future.result()
-
-            if not db.is_available:
-                raise Exception("Server initialization failed. Database is not available.")
+        # Start the LLM processor in a separate thread
+        llm_processor_thread = Thread(target=llm.start_llm_processing)
+        llm_processor_thread.start()
 
     except Exception as e:
         app_logger.error(msg=str(e), exc_info=True)
@@ -96,6 +100,19 @@ def start_scheduled_tasks_thread():
     t = Thread(target=check_scheduled_tasks)
     t.daemon = True  # Make the thread a daemon, so it doesn't block program termination
     t.start()
+
+
+def query_llm(method: Literal['get_keywords'], arguments: list):
+    socket = zmq.Context().socket(zmq.REQ)
+    socket.connect(SERVER_SETTINGS["zeromq_request_address"])
+    socket.send_json({'method': method, 'arguments': arguments})
+    response = socket.recv_json()
+    socket.close()
+
+    if response['status'] == 'success':
+        return response['result']
+    elif response['status'] == 'error':
+        raise Exception(response['error_message'])
 
 
 ###################################################################################################################
@@ -307,7 +324,7 @@ def get_keywords_from_user_expertise():
         user_expertise = request.get_data(as_text=True)
 
         if user_expertise:
-            keywords = llm.get_keywords(user_expertise)
+            keywords = query_llm('get_keywords', [user_expertise])
             return keywords, 200
         else:
             return jsonify({"message": "No user expertise provided"}), 400
