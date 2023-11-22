@@ -4,6 +4,7 @@ import string
 import time
 import chromadb
 import spacy
+import zmq
 from logging import Logger
 from typing import Optional, Literal, List
 from chromadb import ClientAPI
@@ -20,6 +21,7 @@ from langchain.prompts import FewShotPromptTemplate
 from langchain.prompts.prompt import PromptTemplate
 from langchain.schema import Document, OutputParserException
 from spacy import Language
+from zmq import Socket, Context
 from settings import SERVER_SETTINGS
 from ai_models import Experts
 
@@ -43,6 +45,8 @@ class LLM:
         self.nlp_en: Optional[Language] = None
         self.stop_words_fr: Optional[list[str]] = None
         self.is_available: bool = False
+        self.context: Optional[Context] = None
+        self.socket: Optional[Socket] = None
 
     @staticmethod
     def __get_expert_recommendation_llm(expert_recommendation_llm_model: str, temperature: float = 0.0) -> Ollama:
@@ -472,10 +476,16 @@ class LLM:
         self.nlp_fr = self.__get_nlp(SERVER_SETTINGS["spacy_nlp_fr"])
         self.stop_words_fr = self.__get_stop_words(self.nlp_fr)
 
+    def __init_zmq(self, addr: str) -> None:
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.REP)
+        self.socket.bind(addr)
+
     def init(self) -> None:
         try:
             self.__init_expert_recommendation_chain()
             self.__init_keywords_chain()
+            self.__init_zmq(SERVER_SETTINGS["zeromq_response_address"])
         except Exception as e:
             self.app_logger.error(msg=str(e), exc_info=True)
         else:
@@ -562,3 +572,45 @@ class LLM:
                     keywords.add(llm_keywords[index].upper())
 
         return list(keywords)
+
+    def start_llm_processing(self):
+        while self.is_available:
+            try:
+                # Receive data from the server
+                data = self.socket.recv_json()
+
+                # Extract method name and arguments from the query
+                method_name = data.get('method', '')
+                arguments = data.get('arguments', [])
+
+                # Call the method dynamically
+                if method_name:
+                    response = self.call_method(method_name, arguments)
+                else:
+                    response = {'status': 'error', 'error_message': 'No method specified'}
+
+                # Send the result or error back to the server
+                self.socket.send_json(response)
+            except zmq.error.ContextTerminated:
+                self.is_available = False
+                self.app_logger.warning("Context terminated during processing. Exiting...")
+            except Exception as e:
+                self.socket.send_json({'status': 'error', 'error_message': str(e)})
+                self.app_logger.error(msg=str(e), exc_info=True)
+
+    def stop_llm_processing(self):
+        self.app_logger.info("Shutting down the LLM processor gracefully...")
+        self.is_available = False
+        self.socket.close(0)
+        self.context.term()
+
+    def call_method(self, method_name: str, arguments: list):
+        # Look up the method dynamically
+        method = getattr(self, method_name, None)
+
+        if method and callable(method):
+            # Call the method with the provided arguments
+            result = method(*arguments)
+            return {'status': 'success', 'result': result}
+        else:
+            return {'status': 'error', 'error_message': f'Method not found: {method_name}'}
