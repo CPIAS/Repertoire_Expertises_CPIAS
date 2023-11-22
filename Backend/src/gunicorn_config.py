@@ -1,5 +1,8 @@
 import multiprocessing
+import subprocess
+from gunicorn.arbiter import Arbiter
 from settings import SERVER_SETTINGS
+from app import app_logger
 
 # Change this to the desired host and port
 bind = '0.0.0.0:80'
@@ -33,7 +36,17 @@ worker_class = 'sync'
 preload_app = True
 
 # Configure Gunicorn to gracefully restart workers on code changes
-reload = True
+reload = False
 
 # The WSGI application entry point
 wsgi_app = 'wsgi:start_server()'
+
+
+def on_exit(server: Arbiter):
+    # Command to kill the process using port 5555 used by ZeroMQ
+    command = "sudo fuser -k 5555/tcp"
+    try:
+        app_logger.info("Releasing Port 5555 used by ZeroQM...")
+        subprocess.run(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+    except subprocess.CalledProcessError as e:
+        app_logger.error(msg=str(e), exc_info=True)
