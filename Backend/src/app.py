@@ -5,8 +5,6 @@ import logging
 import gdown
 import time
 import uuid
-import zmq
-from typing import Literal
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from email.mime.application import MIMEApplication
@@ -102,19 +100,6 @@ def start_scheduled_tasks_thread():
     t.start()
 
 
-def query_llm(method: Literal['get_keywords'], arguments: list):
-    socket = zmq.Context().socket(zmq.REQ)
-    socket.connect(SERVER_SETTINGS["zeromq_request_address"])
-    socket.send_json({'method': method, 'arguments': arguments})
-    response = socket.recv_json()
-    socket.close()
-
-    if response['status'] == 'success':
-        return response['result']
-    elif response['status'] == 'error':
-        raise Exception(response['error_message'])
-
-
 ###################################################################################################################
 #                                                 ROUTES                                                          #
 ###################################################################################################################
@@ -166,7 +151,7 @@ def search_experts():
         question = request.get_data(as_text=True)
 
         if question:
-            experts_recommendation = llm.get_experts_recommendation(question)
+            experts_recommendation = llm.query_llm('get_experts_recommendation', [question])
             response = {"experts": []}
 
             for generic_profile in experts_recommendation:
@@ -324,7 +309,7 @@ def get_keywords_from_user_expertise():
         user_expertise = request.get_data(as_text=True)
 
         if user_expertise:
-            keywords = query_llm('get_keywords', [user_expertise])
+            keywords = llm.query_llm('get_keywords', [user_expertise])
             return keywords, 200
         else:
             return jsonify({"message": "No user expertise provided"}), 400
@@ -351,7 +336,7 @@ def delete_user(user_id):
             db.delete_user_from_csv(user.email)
             db.session.delete(user)
             db.session.commit()
-            llm.delete_expert_from_vector_store(user.email)
+            llm.query_llm('delete_expert_from_vector_store', [user.email])
 
             if user.profile_photo and os.path.exists(user_photo_path):
                 os.remove(user_photo_path)
@@ -386,8 +371,8 @@ def update_user(user_id):
             for key, value in request_data.items():
                 setattr(user, key, value)
                 if key == "skills":
-                    setattr(user, "tags", ', '.join(llm.get_keywords(value)))
-                    llm.update_expert_in_vector_store(value, user.email)
+                    setattr(user, "tags", ', '.join(llm.query_llm('get_keywords', [value])))
+                    llm.query_llm('update_expert_in_vector_store', [value, user.email])
 
             db.session.commit()
 
