@@ -5,11 +5,14 @@ from settings import SERVER_SETTINGS
 from app import app_logger
 
 # Change this to the desired host and port
-bind = '0.0.0.0:80'
+bind = 'unix:/home/ubuntu/project_4/Backend/src/server.sock'
 workers = multiprocessing.cpu_count() * 2 + 1
 
 # Set appropriate timeout values
 timeout = 180  # You may adjust this based on the expected response time of your app
+
+# Unix socket permissions
+umask = 0o007
 
 # Logging configuration
 loglevel = 'info'
@@ -44,7 +47,7 @@ wsgi_app = 'wsgi:start_server()'
 
 def on_exit(server: Arbiter):
     # Command to kill the process using port 5555 used by ZeroMQ
-    command = "sudo fuser -k 5555/tcp"
+    command = "/usr/bin/fuser -k 5555/tcp"
     try:
         app_logger.info("Releasing Port 5555 used by ZeroQM...")
         subprocess.run(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)

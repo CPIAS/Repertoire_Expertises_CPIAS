@@ -129,7 +129,7 @@ sleep 5
 echo "Done."
 
 echo "Pulling llama2 LLM..."
-ollama pull llama2:7b-chat-q4_0
+ollama pull mistral:instruct
 echo "Done."
 
 echo "Setting up the server..."
@@ -167,4 +167,5 @@ echo "Done."
 
 echo "Setting up permissions..."
 sudo chmod 755 /home/ubuntu
+sudo chmod 755 /home/ubuntu/project_4/Backend/src/server.sock
 echo "Done."
