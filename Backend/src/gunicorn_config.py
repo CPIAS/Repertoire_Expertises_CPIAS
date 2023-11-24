@@ -30,7 +30,7 @@ max_requests_jitter = 50  # Randomly add jitter to the max_requests value to pre
 # This enhances security by running Gunicorn as a non-privileged user
 # Change these values to match your deployment environment
 user = 'ubuntu'
-group = 'ubuntu'
+group = 'www-data'
 
 # Adapt the worker class to your needs: sync, gthread, gevent...
 worker_class = 'sync'

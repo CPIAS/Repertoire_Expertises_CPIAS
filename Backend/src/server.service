@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User=ubuntu
-Group=ubuntu
+Group=www-data
 WorkingDirectory=/home/ubuntu/project_4/Backend/src
 Environment="PATH=/home/ubuntu/project_4/Backend/venv/bin"
 ExecStart=/home/ubuntu/project_4/Backend/venv/bin/gunicorn -c gunicorn_config.py
