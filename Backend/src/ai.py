@@ -4,8 +4,9 @@ import string
 import time
 import chromadb
 import spacy
+import zmq
 from logging import Logger
-from typing import Optional, Literal, List
+from typing import Optional, Literal, List, Any
 from chromadb import ClientAPI
 from chromadb.api.models import Collection
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
@@ -20,6 +21,7 @@ from langchain.prompts import FewShotPromptTemplate
 from langchain.prompts.prompt import PromptTemplate
 from langchain.schema import Document, OutputParserException
 from spacy import Language
+from zmq import Socket, Context
 from settings import SERVER_SETTINGS
 from ai_models import Experts
 
@@ -43,6 +45,12 @@ class LLM:
         self.nlp_en: Optional[Language] = None
         self.stop_words_fr: Optional[list[str]] = None
         self.is_available: bool = False
+        self.context: Optional[Context] = None
+        self.socket: Optional[Socket] = None
+
+    ###################################################################################################################
+    #                                                 PRIVATE METHODS                                                 #
+    ###################################################################################################################
 
     @staticmethod
     def __get_expert_recommendation_llm(expert_recommendation_llm_model: str, temperature: float = 0.0) -> Ollama:
@@ -130,10 +138,10 @@ class LLM:
                 for skill in translated_expert_skills_tokenized:
                     expert_recommendation_vector_store.add(documents=[skill], metadatas=[{"expert_email": expert_email}], ids=[str(time.time())])
 
-    def delete_expert_from_vector_store(self, expert_email: str):
+    def __delete_expert_from_vector_store(self, expert_email: str):
         self.expert_recommendation_vector_store.delete(where={"expert_email": expert_email})
 
-    def add_expert_to_vector_store(self, expert_skills: str, expert_email: str):
+    def __add_expert_to_vector_store(self, expert_skills: str, expert_email: str):
         self.__populate_or_update_expert_recommendation_vector_store(
             self.expert_recommendation_vector_store,
             self.nlp_en,
@@ -141,8 +149,8 @@ class LLM:
             [expert_email]
         )
 
-    def update_expert_in_vector_store(self, expert_skills: str, expert_email: str):
-        self.delete_expert_from_vector_store(expert_email)
+    def __update_expert_in_vector_store(self, expert_skills: str, expert_email: str):
+        self.__delete_expert_from_vector_store(expert_email)
         self.__populate_or_update_expert_recommendation_vector_store(
             self.expert_recommendation_vector_store,
             self.nlp_en,
@@ -472,15 +480,10 @@ class LLM:
         self.nlp_fr = self.__get_nlp(SERVER_SETTINGS["spacy_nlp_fr"])
         self.stop_words_fr = self.__get_stop_words(self.nlp_fr)
 
-    def init(self) -> None:
-        try:
-            self.__init_expert_recommendation_chain()
-            self.__init_keywords_chain()
-        except Exception as e:
-            self.app_logger.error(msg=str(e), exc_info=True)
-        else:
-            self.is_available = True
-            self.app_logger.info(msg="The LLM has been successfully initialized.")
+    def __init_zmq(self, addr: str) -> None:
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.REP)
+        self.socket.bind(addr)
 
     def __try_get_llm_expert_recommendation(self, llm_input: str, max_attempts: int = 4, retry_delay: int = 1) -> List[str]:
         for attempt in range(1, max_attempts):
@@ -494,7 +497,7 @@ class LLM:
 
         raise Exception(f"Error occurred when parsing LLM output for generic profiles.")
 
-    def get_experts_recommendation(self, question: str):
+    def __get_experts_recommendation(self, question: str):
         query = GoogleTranslator(source='auto', target='en').translate(question)
         llm_input = self.expert_recommendation_prompt.format(input=query)
         generic_profiles = self.__try_get_llm_expert_recommendation(llm_input)  # max attempts = 4 , wait 1 second between each try.
@@ -531,7 +534,7 @@ class LLM:
 
         raise Exception(f"Error occurred when parsing LLM output for keywords.")
 
-    def get_keywords(self, text: str) -> list[str]:
+    def __get_keywords(self, text: str) -> list[str]:
         if not text:
             return []
 
@@ -562,3 +565,81 @@ class LLM:
                     keywords.add(llm_keywords[index].upper())
 
         return list(keywords)
+
+    def __call_method(self, method_name: str, arguments: list) -> Any:
+        # Look up the method dynamically
+        method = getattr(self, f'_{type(self).__name__}__{method_name}', None)  # We need to add _ClassName__ before the method name, as all processing methods are super private.
+
+        if method and callable(method):
+            # Call the method with the provided arguments
+            result = method(*arguments)
+            return {'status': 'success', 'result': result}
+        else:
+            return {'status': 'error', 'error_message': f'Method not found: {method_name}'}
+
+    ###################################################################################################################
+    #                                                 PUBLIC METHODS                                                 #
+    ###################################################################################################################
+
+    def init(self) -> None:
+        try:
+            self.__init_expert_recommendation_chain()
+            self.__init_keywords_chain()
+            self.__init_zmq(SERVER_SETTINGS["zeromq_response_address"])
+        except Exception as e:
+            self.app_logger.error(msg=str(e), exc_info=True)
+        else:
+            self.is_available = True
+            self.app_logger.info(msg="The LLM has been successfully initialized.")
+
+    def start_llm_processing(self):
+        while self.is_available:
+            try:
+                # Receive data from the server
+                data = self.socket.recv_json()
+
+                # Extract method name and arguments from the query
+                method_name = data.get('method', '')
+                arguments = data.get('arguments', [])
+
+                # Call the method dynamically
+                if method_name:
+                    response = self.__call_method(method_name, arguments)
+                else:
+                    response = {'status': 'error', 'error_message': 'No method specified'}
+
+                # Send the result or error back to the server
+                self.socket.send_json(response)
+            except zmq.error.ContextTerminated:
+                self.is_available = False
+                self.app_logger.warning("Context terminated during processing. Exiting...")
+            except Exception as e:
+                self.socket.send_json({'status': 'error', 'error_message': str(e)})
+                self.app_logger.error(msg=str(e), exc_info=True)
+
+    def stop_llm_processing(self):
+        self.app_logger.info("Shutting down the LLM processor gracefully...")
+        self.is_available = False
+        self.socket.close(0)
+        self.context.term()
+
+    @staticmethod
+    def query_llm(
+            method: Literal[
+                'get_keywords',
+                'get_experts_recommendation',
+                'add_expert_to_vector_store',
+                'update_expert_in_vector_store',
+                'delete_expert_from_vector_store'
+            ],
+            arguments: list) -> Any:
+        socket = zmq.Context().socket(zmq.REQ)
+        socket.connect(SERVER_SETTINGS["zeromq_request_address"])
+        socket.send_json({'method': method, 'arguments': arguments})
+        response = socket.recv_json()
+        socket.close()
+
+        if response['status'] == 'success':
+            return response['result']
+        elif response['status'] == 'error':
+            raise Exception(response['error_message'])

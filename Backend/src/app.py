@@ -1,4 +1,4 @@
-import concurrent.futures
+import atexit
 import os
 import smtplib
 import logging
@@ -39,21 +39,23 @@ def init_server() -> None:
         CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified in a production environment.
         app_logger.setLevel(logging.INFO)
 
+        # Register an exit handler to stop LLM processing gracefully
+        atexit.register(llm.stop_llm_processing)
+
         if not os.path.exists(SERVER_SETTINGS["users_csv_file"]):
             raise Exception(f"Server initialization failed. {SERVER_SETTINGS['users_csv_file']} does not exist.")
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            llm_future = executor.submit(llm.init)
-            llm_future.result()
+        llm.init()
+        if not llm.is_available:
+            raise Exception("Server initialization failed. LLM is not available.")
 
-            if not llm.is_available:
-                raise Exception("Server initialization failed. LLM is not available.")
+        db.init()
+        if not db.is_available:
+            raise Exception("Server initialization failed. Database is not available.")
 
-            db_future = executor.submit(db.init)
-            db_future.result()
-
-            if not db.is_available:
-                raise Exception("Server initialization failed. Database is not available.")
+        # Start the LLM processor in a separate thread
+        llm_processor_thread = Thread(target=llm.start_llm_processing)
+        llm_processor_thread.start()
 
     except Exception as e:
         app_logger.error(msg=str(e), exc_info=True)
@@ -149,7 +151,7 @@ def search_experts():
         question = request.get_data(as_text=True)
 
         if question:
-            experts_recommendation = llm.get_experts_recommendation(question)
+            experts_recommendation = llm.query_llm('get_experts_recommendation', [question])
             response = {"experts": []}
 
             for generic_profile in experts_recommendation:
@@ -307,7 +309,7 @@ def get_keywords_from_user_expertise():
         user_expertise = request.get_data(as_text=True)
 
         if user_expertise:
-            keywords = llm.get_keywords(user_expertise)
+            keywords = llm.query_llm('get_keywords', [user_expertise])
             return keywords, 200
         else:
             return jsonify({"message": "No user expertise provided"}), 400
@@ -334,7 +336,7 @@ def delete_user(user_id):
             db.delete_user_from_csv(user.email)
             db.session.delete(user)
             db.session.commit()
-            llm.delete_expert_from_vector_store(user.email)
+            llm.query_llm('delete_expert_from_vector_store', [user.email])
 
             if user.profile_photo and os.path.exists(user_photo_path):
                 os.remove(user_photo_path)
@@ -369,8 +371,8 @@ def update_user(user_id):
             for key, value in request_data.items():
                 setattr(user, key, value)
                 if key == "skills":
-                    setattr(user, "tags", ', '.join(llm.get_keywords(value)))
-                    llm.update_expert_in_vector_store(value, user.email)
+                    setattr(user, "tags", ', '.join(llm.query_llm('get_keywords', [value])))
+                    llm.query_llm('update_expert_in_vector_store', [value, user.email])
 
             db.session.commit()
 

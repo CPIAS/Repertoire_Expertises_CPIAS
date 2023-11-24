@@ -1,12 +1,18 @@
 import multiprocessing
+import subprocess
+from gunicorn.arbiter import Arbiter
 from settings import SERVER_SETTINGS
+from app import app_logger
 
 # Change this to the desired host and port
-bind = '0.0.0.0:80'
+bind = 'unix:/home/ubuntu/project_4/Backend/src/server.sock'
 workers = multiprocessing.cpu_count() * 2 + 1
 
 # Set appropriate timeout values
 timeout = 180  # You may adjust this based on the expected response time of your app
+
+# Unix socket permissions
+umask = 0o007
 
 # Logging configuration
 loglevel = 'info'
@@ -24,7 +30,7 @@ max_requests_jitter = 50  # Randomly add jitter to the max_requests value to pre
 # This enhances security by running Gunicorn as a non-privileged user
 # Change these values to match your deployment environment
 user = 'ubuntu'
-group = 'ubuntu'
+group = 'www-data'
 
 # Adapt the worker class to your needs: sync, gthread, gevent...
 worker_class = 'sync'
@@ -33,7 +39,17 @@ worker_class = 'sync'
 preload_app = True
 
 # Configure Gunicorn to gracefully restart workers on code changes
-reload = True
+reload = False
 
 # The WSGI application entry point
 wsgi_app = 'wsgi:start_server()'
+
+
+def on_exit(server: Arbiter):
+    # Command to kill the process using port 5555 used by ZeroMQ
+    command = "/usr/bin/fuser -k 5555/tcp"
+    try:
+        app_logger.info("Releasing Port 5555 used by ZeroQM...")
+        subprocess.run(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+    except subprocess.CalledProcessError as e:
+        app_logger.error(msg=str(e), exc_info=True)

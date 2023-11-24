@@ -5,9 +5,9 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/home/ubuntu/Backend/src
-Environment="PATH=/home/ubuntu/Backend/venv/bin"
-ExecStart=/home/ubuntu/Backend/venv/bin/gunicorn -c gunicorn_config.py --bind unix:server.sock -m 007 wsgi:app
+WorkingDirectory=/home/ubuntu/project_4/Backend/src
+Environment="PATH=/home/ubuntu/project_4/Backend/venv/bin"
+ExecStart=/home/ubuntu/project_4/Backend/venv/bin/gunicorn -c gunicorn_config.py
 
 [Install]
 WantedBy=multi-user.target

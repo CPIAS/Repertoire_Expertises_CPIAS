@@ -112,7 +112,7 @@ class Database:
             years_experience_healthcare=self.get_number(row[self.user_attributes_to_csv_columns_map["years_experience_healthcare"]], float),
             community_involvement=row[self.user_attributes_to_csv_columns_map["community_involvement"]],
             suggestions=row[self.user_attributes_to_csv_columns_map["suggestions"]],
-            tags=', '.join(self.llm.get_keywords(row[self.user_attributes_to_csv_columns_map["skills"]])),
+            tags=', '.join(self.llm.query_llm('get_keywords', [row[self.user_attributes_to_csv_columns_map["skills"]]])),
             consent=row[self.user_attributes_to_csv_columns_map["consent"]],
             profile_photo=row[self.user_attributes_to_csv_columns_map["profile_photo"]],
             linkedin=row[self.user_attributes_to_csv_columns_map["linkedin"]]
@@ -153,12 +153,12 @@ class Database:
                             if getattr(user, attr) != new_value:
                                 setattr(user, attr, new_value)
                                 if attr == "skills":
-                                    setattr(user, "tags", ', '.join(self.llm.get_keywords(new_value)))
-                                    self.llm.update_expert_in_vector_store(new_value, user.email)
+                                    setattr(user, "tags", ', '.join(self.llm.query_llm('get_keywords', [new_value])))
+                                    self.llm.query_llm('update_expert_in_vector_store', [new_value, user.email])
                     else:
                         new_user = self.create_user_from_csv_row(row)
                         self.session.add(new_user)
-                        self.llm.add_expert_to_vector_store(new_user.skills, new_user.email)
+                        self.llm.query_llm('add_expert_to_vector_store', [new_user.skills, new_user.email])
 
                 self.session.commit()
             except Exception as e:
