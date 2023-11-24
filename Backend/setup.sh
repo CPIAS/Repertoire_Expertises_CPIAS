@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# Makes a pipe terminate on the first encountered error instead of passing that along to the next command in the chain.
+set -euo pipefail
+
+LOG_FILE="setup.log"
+
+log_error() {
+    local error_message="$1"
+    echo "$(date): $error_message" >> "$LOG_FILE"
+}
+
+check_root_privileges() {
+    if [[ $EUID -ne 0 ]]; then
+        log_error "Error: This script must be run as root."
+        exit 1
+    fi
+}
+
 check_os_arch() {
     # Get the OS name
     SYSTEM_NAME=$(uname -s)
@@ -9,84 +26,57 @@ check_os_arch() {
         # Get information about the Linux distribution
         DISTRO_INFO=$(lsb_release -d)
         if [[ $DISTRO_INFO != *"Ubuntu 22.04"* ]]; then
-            echo "Error: This script is intended for Ubuntu 22.04 only."
+            log_error "Error: This script is intended for Ubuntu 22.04 only."
             exit 1
         fi
 
         # Check if the architecture is x86_64
         ARCH=$(uname -m)
         if [[ $ARCH != "x86_64" ]]; then
-            echo "Error: This script is intended for x86_64 architecture only."
+            log_error "Error: This script is intended for x86_64 architecture only."
             exit 1
         fi
         ;;
     *)
-        echo "Error: This script is not supported on this operating system."
+        log_error "Error: This script is not supported on this operating system."
         exit 1
         ;;
     esac
 }
 
 update_package_list() {
-    if ! sudo apt-get -o DPkg::Lock::Timeout=60 update -y &>/dev/null; then
-        echo "Failed to update package list, please try again."
+    if ! sudo apt-get -o DPkg::Lock::Timeout=60 update -y 2>&1 | sudo tee -a "$LOG_FILE" > /dev/null; then
+        log_error "Failed to update package list, please try again."
         exit 1
     fi
 }
 
-install_dependencies() {
-    if ! command -v python3.10 &>/dev/null; then
-        echo "Installing python3.10..."
-        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install python3.10 -y &>/dev/null; then
-            echo "Failed to install python3.10, please try again."
+install_package() {
+    local package_name="$1"
+    if ! command -v "$package_name" &>/dev/null; then
+        echo "Installing $package_name..."
+        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install "$package_name" -y 2>&1 | sudo tee -a "$LOG_FILE" > /dev/null; then
+            log_error "Failed to install $package_name, please try again."
             exit 1
         fi
-        echo "Python 3.10 installed."
+        echo "$package_name installed."
     fi
+}
+
+install_dependencies() {
+    install_package "python3.10"
+    install_package "nginx"
+    install_package "openssl"
+    install_package "lshw"
+    install_package "curl"
 
     if ! dpkg -l | grep -q "python3.10-venv"; then
         echo "Installing python3.10-venv..."
-        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install python3.10-venv -y &>/dev/null; then
-            echo "Failed to install python3.10-venv, please try again."
+        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install python3.10-venv -y 2>&1 | sudo tee -a "$LOG_FILE" > /dev/null; then
+            log_error "Failed to install python3.10-venv, please try again."
             exit 1
         fi
         echo "Python 3.10-venv installed."
-    fi
-
-    if ! command -v nginx &>/dev/null; then
-        echo "Installing Nginx..."
-        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install nginx -y &>/dev/null; then
-            echo "Failed to install Nginx, please try again."
-            exit 1
-        fi
-        echo "Nginx installed."
-    fi
-
-    if ! command -v openssl &>/dev/null; then
-        echo "Installing openssl..."
-        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install openssl -y &>/dev/null; then
-            echo "Failed to install openssl, please try again."
-            exit 1
-        fi
-        echo "openssl installed."
-    fi
-
-    if ! command -v lshw &>/dev/null; then
-        echo "Installing GPU driver..."
-        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install lshw -y &>/dev/null; then
-            echo "Failed to install GPU driver, please try again."
-            exit 1
-        fi
-        echo "GPU driver installed."
-    fi
-
-    if ! command -v curl &>/dev/null; then
-        echo "Installing curl..."
-        if ! sudo apt-get -o DPkg::Lock::Timeout=60 install curl -y &>/dev/null; then
-            echo "Failed to install curl, please try again."
-            exit 1
-        fi
-        echo "curl installed."
     fi
 }
 
@@ -103,12 +93,16 @@ generate_self_signed_key_cert_pair() {
         SUBJECT="/C=CA/ST=Quebec/L=Montreal/O=CHUM/OU=EIAS-CPIAS/CN=$PUBLIC_HOSTNAME"
 
         # Generate a self-signed certificate and key
-        if ! sudo openssl req -x509 -newkey rsa:2048 -keyout "$KEY_FILE_PATH" -out "$CERT_FILE_PATH" -days 365 -nodes -subj "$SUBJECT" &>/dev/null; then
-            echo "Failed to generate self-signed key and certificate pair, please try again."
+        if ! sudo openssl req -x509 -newkey rsa:2048 -keyout "$KEY_FILE_PATH" -out "$CERT_FILE_PATH" -days 365 -nodes -subj "$SUBJECT" 2>&1 | sudo tee -a "$LOG_FILE" > /dev/null; then
+            log_error "Failed to generate self-signed key and certificate pair, please try again."
             exit 1
         fi
     fi
 }
+
+echo "Checking root privileges..."
+check_root_privileges
+echo "Done."
 
 echo "Checking OS and architecture..."
 check_os_arch
@@ -123,19 +117,18 @@ install_dependencies
 echo "Done."
 
 echo "Installing Ollama..."
-sudo curl https://ollama.ai/install.sh | sh
-ollama serve &
+sudo curl -sSL https://ollama.ai/install.sh | sudo sh 2>&1 | sudo tee -a "$LOG_FILE" > /dev/null
 sleep 5
 echo "Done."
 
-echo "Pulling llama2 LLM..."
-ollama pull mistral:instruct
+echo "Pulling Mistral LLM..."
+ollama pull mistral:instruct 2>&1 | sudo tee -a "$LOG_FILE" > /dev/null
 echo "Done."
 
 echo "Setting up the server..."
 python3.10 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt &>/dev/null
+pip install -r requirements.txt 2>&1 | sudo tee -a "$LOG_FILE" > /dev/null
 deactivate
 echo "Done."
 
@@ -150,7 +143,7 @@ generate_self_signed_key_cert_pair
 echo "Done."
 
 echo "Generating Diffie-Hellman key exchange parameters (this will take a while)..."
-sudo openssl dhparam -out /etc/nginx/dhparam.pem 4096 &>/dev/null
+sudo openssl dhparam -out /etc/nginx/dhparam.pem 4096 2>&1 | sudo tee -a "$LOG_FILE" > /dev/null
 echo "Done."
 
 echo "Setting up TLS/SSL..."
@@ -160,12 +153,13 @@ echo "Done."
 
 echo "Setting up nginx..."
 sudo cp src/server.conf /etc/nginx/sites-available
-sudo ln -s /etc/nginx/sites-available/server.conf /etc/nginx/sites-enabled &>/dev/null
+sudo ln -s /etc/nginx/sites-available/server.conf /etc/nginx/sites-enabled 2>&1 | sudo tee -a "$LOG_FILE" > /dev/null
 sudo rm /etc/nginx/sites-enabled/default
 sudo systemctl restart nginx
 echo "Done."
 
 echo "Setting up permissions..."
 sudo chmod 755 /home/ubuntu
-sudo chmod 755 /home/ubuntu/project_4/Backend/src/server.sock
 echo "Done."
+
+echo "Server installation is now complete. Your machine must be restarted."
