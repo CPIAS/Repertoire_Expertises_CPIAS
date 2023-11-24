@@ -16,6 +16,7 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
     const scores: number[] = results.flatMap(result =>
         result.recommendation.map(recommendation => recommendation.score || 0)
     );
+    const maxCategoryCharacters = 20;
 
     const formatName = (name: string) => {
         return name
@@ -75,14 +76,28 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
     results.forEach((result, categoryIndex) => {
         const categoryId = categoryIndex + 1;
       
-        GraphData.nodes.push({
-            id: categoryId,
-            label: result.category,
-            title: `Category id ${categoryId}`,
-            color: '#FFFFFF',
-            shape: 'box',
-            margin: 6
-        });
+        if (result.recommendation.length > 0) {
+            const formattedCategoryLabel =
+        result.category.length > maxCategoryCharacters
+            ? result.category.split(/\s+/).reduce((acc, word) => {
+                if (acc.length === 0 || acc[acc.length - 1].length + word.length > maxCategoryCharacters) {
+                    acc.push(word);
+                } else {
+                    acc[acc.length - 1] += ` ${word}`;
+                }
+                return acc;
+            }, [] as string[]).join('\n')
+            : result.category;
+
+            GraphData.nodes.push({
+                id: categoryId,
+                label: formattedCategoryLabel,
+                title: `Category id ${categoryId}`,
+                color: '#FFFFFF',
+                shape: 'box',
+                margin: 10,
+            });
+        }
         
         result.recommendation.forEach((recommendation) => {
             const userId = recommendation.expert.userId;
@@ -110,7 +125,7 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
             const edgeLabel = recommendation.score
                 ? `${Math.min(100, Math.round((1 - recommendation.score) * 100))}%`
                 : '';
-            const edgeColor = colorScale(recommendation.score || 0);
+            const edgeColor = legendColorScale(recommendation.score || 0);
             GraphData.edges.push({
                 label: edgeLabel,
                 from: categoryId,
@@ -137,14 +152,14 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
                 from: { enabled: false, scaleFactor: 1 },
             },
             color: 'black',
+            length: 250,
         },
         physics:{
             barnesHut:{
                 gravitationalConstant: -5000,
-                springConstant:0.1,
-                avoidOverlap: 0.01,
                 damping: 0.3,
-            }
+            },
+            minVelocity: 0.75,
         },
         smoothCurves: {dynamic:true},
         hideEdgesOnDrag: true,
