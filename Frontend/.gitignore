@@ -114,7 +114,7 @@ node_modules/
 
 # misc
 .DS_Store
-.env.local
+.env
 .env.development.local
 .env.test.local
 .env.production.local
@@ -122,8 +122,6 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-.env*
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,visualstudiocode,react
 
