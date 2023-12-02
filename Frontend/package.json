@@ -1,7 +1,6 @@
 {
   "name": "cpias",
   "version": "1.0.0",
-  "homepage": "https://polytechnique-montr-al.gitlab.io/log89xx/23-3/equipe-15/project_4/",
   "private": true,
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",

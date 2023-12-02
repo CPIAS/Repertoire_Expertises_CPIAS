@@ -3,6 +3,9 @@ import { Button, Checkbox, Flex, Icon, Menu, MenuButton, MenuItem, MenuList, Tex
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import colors from '../../utils/theme/colors';
 
+const NUMBER_OF_ITEMS = 25; 
+const LOAD_HEIGHT_THRESHOLD = 0.9;
+
 export type DropdownOptions = {
   value: string;
   label: string;
@@ -21,14 +24,18 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
     selectedOptions, 
     setSelectedOptions 
 }) => {
-    const [visibleOptions, setVisibleOptions] = useState<DropdownOptions[]>(options.slice(0, 25));
+    const [visibleOptions, setVisibleOptions] = useState<DropdownOptions[]>(options.slice(0, NUMBER_OF_ITEMS));
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
+    /**
+     * Handle scroll events for a dropdown component and loads additional items
+     * when the user has scrolled to a specified threshold.
+     */
     const handleScroll = () => {
         if (dropdownRef.current) {
             const { scrollTop, scrollHeight, clientHeight } = dropdownRef.current;
-            if (scrollTop + clientHeight >= 0.9 * scrollHeight) {
-                const numItemsToShow = Math.min(options.length - visibleOptions.length, 25);
+            if (scrollTop + clientHeight >= LOAD_HEIGHT_THRESHOLD * scrollHeight) {
+                const numItemsToShow = Math.min(options.length - visibleOptions.length, NUMBER_OF_ITEMS);
                 if (numItemsToShow > 0) {
                     setVisibleOptions(prevOptions => [
                         ...prevOptions,
@@ -39,6 +46,9 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
         }
     };
 
+    /**
+     * Set up an event listener for scrolling on the dropdown element.
+     */
     useEffect(() => {
         if (dropdownRef.current) {
             dropdownRef.current.addEventListener('scroll', handleScroll);
@@ -50,24 +60,16 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
         }
     }, [visibleOptions, options]);
 
+    /**
+     * Select the "All" option in the list (always the first one)
+     */
     const handleSelectAll = () => {
         setSelectedOptions([options[0]]);
     };
 
-    const getButtonLabel = () => {
-        if (selectedOptions.length === 1 && selectedOptions[0].value === 'Tous') {
-            return 'Tous';
-        } else if (selectedOptions.length === 1) {
-            return selectedOptions[0].label;
-        } else if (selectedOptions.length > 1) {
-            return `${selectedOptions.length} ${unit}`;
-        } 
-        else {
-            handleSelectAll();
-            return 'Tous';
-        }
-    };
-
+    /**
+     * Handle the selection of options in the list, including special handling for the "All" option.
+     */
     const handleSelectOption = useCallback((option: DropdownOptions) => {
         if (option.value === 'Tous') {
             handleSelectAll();
@@ -85,6 +87,32 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
         }
     }, [selectedOptions]);
 
+    /**
+     * Generate the label of the dropdown button based on the selected option(s).
+     *
+     * @returns {string} The label containing the selected options.
+     */
+    const getButtonLabel = () => {
+        if (selectedOptions.length === 1 && selectedOptions[0].value === 'Tous') {
+            return 'Tous';
+        } else if (selectedOptions.length === 1) {
+            return selectedOptions[0].label;
+        } else if (selectedOptions.length > 1) {
+            return `${selectedOptions.length} ${unit}`;
+        } 
+        else {
+            handleSelectAll();
+            return 'Tous';
+        }
+    };
+
+    /**
+     * Handles the click event for a dropdown menu item, preventing the default action
+     * and triggering the selection of the corresponding option.
+     *
+     * @param {DropdownOptions} option - The option associated with the clicked menu item.
+     * @param {React.MouseEvent} e - The React MouseEvent object.
+     */
     const handleMenuItemClick = (option: DropdownOptions) => (e: React.MouseEvent) => {
         e.preventDefault();
         handleSelectOption(option);

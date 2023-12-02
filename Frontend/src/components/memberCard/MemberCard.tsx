@@ -4,6 +4,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaLinkedin, FaRegEnvelope } from 'react-icons/fa';
 import { Member } from '../../models/member';
+import { formatName } from '../../utils/formatName';
 import colors from '../../utils/theme/colors';
 import ProfileCorrectionModal from '../modals/ProfileCorrectionModal';
 
@@ -21,7 +22,10 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
     const [isLoading, setIsLoading] = useState(true);
     const [profilePicture, setProfilePicture] = useState<string>('./images/avatar/generic-avatar.png');
 
-    // Fetch profile picture from the server
+    /**
+     * Fetch the profile picture from the server based on the member's userId,
+     * or display a generic image in case of an error or absence of a profile picture.
+     */
     useEffect(() => {
         const fetchProfilePicture = async () => {
             try {
@@ -50,15 +54,27 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
         }
     }, []);
 
+    /**
+     * Open the profile correction modal
+     */
     const openProfileCorrectionModal = () => {
         if (isReadOnly) return;
         setProfileCorrectionModalState(true);
     };
 
+    /**
+     * Close the profile correction modal
+     */
     const closeProfileCorrectionModal = () => {
         setProfileCorrectionModalState(false);
     };
 
+    /**
+     * Generate a formatted description for a member based on their affiliation organizations.
+     *
+     * @param {Member} member - The member object for which to generate the description.
+     * @returns {React.ReactNode} The formatted description as a React node.
+     */
     const getDescription = (member: Member) => {
         const filteredOrganization = member.affiliationOrganization.split(',').map((organization) => organization.trim());
         return (
@@ -75,22 +91,11 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
         );
     };
 
-    const formatName = (name: string) => {
-        return name
-            .split(/\s+/)
-            .map((word) => {
-                const hyphenIndex = word.indexOf('-');
-                if (hyphenIndex !== -1) {
-                    const firstPart = word.slice(0, hyphenIndex + 1);
-                    const restOfWord = word.slice(hyphenIndex + 1).charAt(0).toUpperCase() + word.slice(hyphenIndex + 2).toLowerCase();
-                    return `${firstPart}${restOfWord}`;
-                } else {
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                }
-            })
-            .join(' ');
-    };
-
+    /**
+     * Generate Tag components based on the tags of a member.
+     *
+     * @returns {React.ReactNode | null} The rendered Tag components or null if there are no tags.
+     */
     const getTags = () => {
         return member.tags.length > 0 
             && member.tags.split(/,| et /).slice(0, 5).map((tag, index) => (
@@ -220,6 +225,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                         >
                             {getTags()}
                         </Flex>
+                        {member.membershipCategory.length > 0 && 
                         <Flex
                             width={'100%'}
                             justifyContent={'flex-start'}
@@ -236,27 +242,32 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                             <Text width={'100%'}>
                                 {member.membershipCategory}
                             </Text>
+                            
                         </Flex>
-
-                        <Flex
-                            width={'100%'}
-                            justifyContent={'flex-start'}
-                            flexWrap={'wrap'}
-                        >
-                            <Text
-                                fontSize={'lg'}
-                                fontWeight={'bold'}
+                        }
+                        {member.affiliationOrganization.length > 0 && 
+                            <Flex
                                 width={'100%'}
-                                paddingBottom={'0.5rem'}
+                                justifyContent={'flex-start'}
+                                flexWrap={'wrap'}
                             >
-                                {'Organisation(s) d\'affiliation'}
-                            </Text>
-                            {member.affiliationOrganization.split(',').map((org: string, index: number) => (
-                                <Text key={index} width={'100%'}>
-                                    {org}
+                        
+                                <Text
+                                    fontSize={'lg'}
+                                    fontWeight={'bold'}
+                                    width={'100%'}
+                                    paddingBottom={'0.5rem'}
+                                >
+                                    {'Organisation(s) d\'affiliation'}
                                 </Text>
-                            ))}
-                        </Flex>
+                                {member.affiliationOrganization.split(',').map((org: string, index: number) => (
+                                    <Text key={index} width={'100%'}>
+                                        {org}
+                                    </Text>
+                                ))}
+                            </Flex>
+                        }
+                        {member.jobPosition.length > 0 && 
                         <Flex
                             width={'100%'}
                             justifyContent={'flex-start'}
@@ -273,8 +284,9 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isReadOnly = false }) =
                             <Text width={'100%'}>
                                 {member.jobPosition}
                             </Text>
-
+                          
                         </Flex>
+                        }
                         <Flex
                             width={'100%'}
                             justifyContent={'flex-start'}

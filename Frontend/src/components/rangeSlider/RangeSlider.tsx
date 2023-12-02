@@ -24,6 +24,10 @@ const RangeSliderWithLabels: React.FC<RangeSliderWithLabelsProps> = ({
     setSelectedValues,
 }) => {
 
+    /**
+     * Handle the change event for a range input.
+     * @param {Array<number>} values - An array containing the selected range values.
+     */
     const handleRangeChange = (values: [number, number]) => {
         setSelectedValues(values);
     };

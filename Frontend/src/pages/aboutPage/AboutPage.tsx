@@ -7,10 +7,16 @@ import colors from '../../utils/theme/colors';
 const AboutPage: React.FC = () => {
     const [contactModalState, setContactModalState] = useState(false);
 
+    /**
+     * Open the contact modal.
+     */
     const openContactModal = () => {
         setContactModalState(true);
     };
 
+    /**
+     * Close the contact modal.
+     */
     const closeContactModal = () => {
         setContactModalState(false);
     };

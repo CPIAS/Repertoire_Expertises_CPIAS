@@ -45,6 +45,9 @@ const ContactModal: React.FC<ModalProps> = ({
         return (message.trim().length > 0 && firstName.trim().length > 0 && lastName.trim().length > 0 && email.trim().length > 0);
     };
 
+    /**
+     * Send an email by making a POST request to the server's contact endpoint.
+     */
     const sendEmail = async () => {
         setIsWaitingForResponse(true);
         const formData = new FormData();

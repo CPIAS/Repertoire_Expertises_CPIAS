@@ -4,83 +4,39 @@ import * as d3 from 'd3';
 import React, { useState } from 'react';
 import Graph from 'react-graph-vis';
 import { Member, ResultsMembers } from '../../models/member';
+import { formatName } from '../../utils/formatName';
 import MemberDrawer from './components/MemberDrawer';
+import { Edge, Node } from './types';
+
+const MAX_CATEGORY_CHARACTERS = 20;
 
 const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
-  
     const [selectedNode, setSelectedNode] = useState<{ id: number; title: string; label: string } | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedExpert, setSelectedExpert] = useState<Member | undefined>(undefined);
 
     const userIdToNodeIdMap: Record<number, number> = {};
-    const scores: number[] = results.flatMap(result =>
-        result.recommendation.map(recommendation => recommendation.score || 0)
-    );
-    const maxCategoryCharacters = 20;
-
-    const formatName = (name: string) => {
-        return name
-            .split(/\s+/)
-            .map((word) => {
-                const hyphenIndex = word.indexOf('-');
-                if (hyphenIndex !== -1) {
-                    const firstPart = word.slice(0, hyphenIndex + 1);
-                    const restOfWord = word.slice(hyphenIndex + 1).charAt(0).toUpperCase() + word.slice(hyphenIndex + 2).toLowerCase();
-                    return `${firstPart}${restOfWord}`;
-                } else {
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                }
-            })
-            .join(' ');
-    };
-
-    const colorScale = d3
-        .scaleLinear<string>()
-        .domain(d3.extent(scores) as [number, number]  || [0, 1])
-        .range(['#13e30b', '#FFA500']);
-
-    const legendColorScale = d3
-        .scaleLinear<string>()
-        .domain([1, 0.75, 0.5, 0.25, 0])
-        .range(['#ff1100','#ff5900','#FFA500', '#FFD700', '#13e30b']);
-
+    
     const GraphData = {
         nodes: [] as Node[],
         edges: [] as Edge[],
     };
 
-    type Node = {
-        id: number;
-        label: string;
-        title: string;
-        color: string | { border: string; background: string };
-        shape: string;
-        borderRadius?: number;
-        width?: number;
-        margin?: number;
-    };
+    // Color scale for the legend
+    const legendColorScale = d3
+        .scaleLinear<string>()
+        .domain([1, 0.75, 0.5, 0.25, 0])
+        .range(['#ff1100','#ff5900','#FFA500', '#FFD700', '#13e30b']);
 
-    type Edge = { 
-        label: string;
-        from: number;
-        to: number; 
-        width: number;
-        color: string;
-        font?: {
-            align?: 'top' | 'middle' | 'bottom';
-            color?: string;
-            size?: number;
-        };
-    };
-
+    // Processing results data to populate graph nodes and edges
     results.forEach((result, categoryIndex) => {
         const categoryId = categoryIndex + 1;
       
         if (result.recommendation.length > 0) {
             const formattedCategoryLabel =
-        result.category.length > maxCategoryCharacters
+        result.category.length > MAX_CATEGORY_CHARACTERS
             ? result.category.split(/\s+/).reduce((acc, word) => {
-                if (acc.length === 0 || acc[acc.length - 1].length + word.length > maxCategoryCharacters) {
+                if (acc.length === 0 || acc[acc.length - 1].length + word.length > MAX_CATEGORY_CHARACTERS) {
                     acc.push(word);
                 } else {
                     acc[acc.length - 1] += ` ${word}`;
@@ -98,7 +54,8 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
                 margin: 10,
             });
         }
-        
+
+        // Add expert nodes and edges to the graph
         result.recommendation.forEach((recommendation) => {
             const userId = recommendation.expert.userId;
         
@@ -139,6 +96,7 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         });
     });
       
+    // Configuration options for the graph
     const options = {
         layout: {
             hierarchical: false,
@@ -175,6 +133,7 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         },
     };
         
+    // Event handlers for the graph interactions
     const events = {
         select: (event: any) => {
             if (event.nodes.length) {
@@ -223,6 +182,7 @@ const NetworkGraph: React.FC<{ results: ResultsMembers[]}> = ({results}) => {
         },
     };
     
+    // Legend data for the color scale
     const legendData = [
         { color: legendColorScale(1), label: '0%' },
         { color: legendColorScale(0.75), label: '25%' },

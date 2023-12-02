@@ -11,10 +11,16 @@ import HomePageTitle from './components/HomePageTitle';
 const HomePage: React.FC = () => {
     const [isUserGuideModalOpen, setIsUserGuideModalOpen] = useState(false);
 
+    /**
+     * Open the user guide modal.
+     */
     const openUserGuideModal = () => {
         setIsUserGuideModalOpen(true);
     };
 
+    /**
+     * Close the user guide modal.
+     */
     const closeUserGuideModal = () => {
         setIsUserGuideModalOpen(false);
     };

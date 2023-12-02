@@ -1,7 +1,7 @@
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { Button, Flex, Image, Text } from '@chakra-ui/react';
 import React from 'react';
-import mockMembers from '../../pages/membersPage/mockMembers.json';
+import mockMembers from '../../data/mockMembers.json';
 import colors from '../../utils/theme/colors';
 import MemberCard from '../memberCard/MemberCard';
 import SearchBar from '../searchBar/SearchBar';
@@ -14,6 +14,10 @@ const UserGuide: React.FC<UserGuideSteps> = ({
     activeStep
 }) => {
 
+    /**
+     * Returns the content for the active step page based on the current step.
+     * @returns {JSX.Element} - The JSX element representing the content for the active step.
+     */
     const getActiveStepPage = () => {
         switch (activeStep){
         case 1: {
@@ -30,11 +34,18 @@ const UserGuide: React.FC<UserGuideSteps> = ({
         }}
     };
 
+    /**
+     * Open the search examples document in a new browser window.
+     */
     const openSearchExamplesDocument = () => {
         const pdfUrl = './documents/search-examples.pdf';
         window.open(pdfUrl, '_blank');
     };
 
+    /**
+     * Returns the description page content.
+     * @returns {JSX.Element} - The JSX element representing the description page content.
+     */
     const getDescriptionPage = () => {
         return (
             <Flex
@@ -64,6 +75,10 @@ const UserGuide: React.FC<UserGuideSteps> = ({
         );
     };
 
+    /**
+     * Returns the search engine page content.
+     * @returns {JSX.Element} - The JSX element representing the search engine page content.
+     */
     const getSearchEnginePage = () => {
         return (
             <Flex
@@ -127,6 +142,10 @@ const UserGuide: React.FC<UserGuideSteps> = ({
         );
     };
 
+    /**
+     * Returns the members page content.
+     * @returns {JSX.Element} - The JSX element representing the members page content.
+     */
     const getMembersPage = () => {
         return (
             <Flex
@@ -163,6 +182,10 @@ const UserGuide: React.FC<UserGuideSteps> = ({
         );
     };
 
+    /**
+     * Returns the completed user guide page content.
+     * @returns {JSX.Element} - The JSX element representing the completed user guide page content.
+     */
     const getCompletedUserGuide = () => {
         return (
             <Flex

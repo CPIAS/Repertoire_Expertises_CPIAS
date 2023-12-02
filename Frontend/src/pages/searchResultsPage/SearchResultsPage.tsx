@@ -9,7 +9,6 @@ import SearchBar from '../../components/searchBar/SearchBar';
 import { Member, Recommendation, ResultsMembers } from '../../models/member';
 import colors from '../../utils/theme/colors';
 import ResultsTabs from './components/ResultsTabs';
-// import mockResults from './mockResults.json';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 const API_KEY = process.env.REACT_APP_API_KEY;
@@ -24,6 +23,9 @@ const SearchResultsPage: React.FC = () => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') as string;
 
+    /**
+     * useEffect to fetch members based on the search query when the component mounts or the location key changes.
+     */
     useEffect(() => {
         const fetchMembers = async () => {
             try {
