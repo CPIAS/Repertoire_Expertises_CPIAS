@@ -280,18 +280,24 @@ def filter_users():
             return jsonify({"message": "Database not available"}), 503
 
         criteria = request.json
-        query = User.query
+        matching_users = User.query.all()
 
-        for attr in dir(User):
-            if attr in criteria:
-                if attr in ['years_experience_ia', 'years_experience_healthcare']:
-                    query = query.filter(getattr(User, attr) >= criteria[attr])
-                elif attr in ['affiliation_organization', 'community_involvement', 'suggestions', 'skills']:
-                    query = query.filter(getattr(User, attr).like(f"%{criteria[attr]}%"))
-                else:
-                    query = query.filter(getattr(User, attr) == criteria[attr])
+        for attr in criteria.keys():
+            if attr in ['years_experience_ia', 'years_experience_healthcare']:
+                matching_users = list(filter(lambda user: getattr(user, attr) is not None and criteria[attr][0] <= getattr(user, attr) <= criteria[attr][1], matching_users))
+            elif attr in ['membership_category', 'affiliation_organization', 'tags']:
+                if len(criteria[attr]) == 0:
+                    continue
 
-        matching_users = query.all()
+                matching_users = [
+                    user for user in matching_users
+                    if getattr(user, attr) is not None and any(
+                        criteria_value.strip().lower() in [user_value.strip().lower() for user_value in getattr(user, attr).split(',')] for criteria_value in criteria[attr]
+                    )
+                ]
+            else:
+                return jsonify({"message": f"Unsupported criteria: {attr}"}), 400
+
         return matching_users, 200
 
     except Exception as e:
