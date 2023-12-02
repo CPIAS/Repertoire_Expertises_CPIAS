@@ -17,12 +17,21 @@ const Login: React.FC<LoginProps> = ({
     const [typedPassword, setTypedPassword] = useState<string>('');
     const toast = useToast();
 
+    /**
+     * Handles the key press event for the Enter key in the password input.
+     * Logs in when the Enter key is pressed and the password is not empty.
+     * @param {React.KeyboardEvent<HTMLInputElement>} event - The keyboard event.
+     */
     const handleEnterKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === ENTER_KEY && typedPassword.length !== 0) {
             login();
         }
     };
 
+    /**
+     * Logs in based on the typed password.
+     * Sets `isLoggedIn` to true if the password matches the admin password, otherwise shows an error toast.
+     */
     const login = () => {
         if (typedPassword === ADMIN_PASSWORD){
             setIsLoggedIn(true);

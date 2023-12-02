@@ -30,26 +30,44 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
     const [profilePicture, setProfilePicture] = useState<string>('./images/avatar/generic-avatar.png');
     const toast = useToast();
     
+    /**
+     * useEffect to update the edited member when selectedMember changes.
+     */
     useEffect(()=>{
         setEditedMember(selectedMember);
     }, [selectedMember]);
 
+    /**
+     * Handle changes in a field for the edited member.
+     * @param {string} fieldName - The name of the field to be changed.
+     * @param {string | number} value - The new value for the field.
+     */
     const handleFieldChange = (fieldName: string, value: string | number) => {
         if (editedMember) {
             setEditedMember({ ...editedMember, [fieldName]: value });
         }
     };
 
+    /**
+     * Handle button click event to trigger a click on the file input.
+     */
     const handleButtonClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
     };
 
+    /**
+     * useEffect to fetch the profile picture when the selected member changes.
+     */
     useEffect(() => {
         fetchProfilePicture();
     }, [selectedMember]);
   
+    /**
+     * Handle the change event when a file is selected for upload.
+     * @param {React.ChangeEvent<HTMLInputElement>} event - The change event containing the selected file.
+     */
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files !== null ? event.target.files[0] : null;
         if (selectedFile) {
@@ -66,6 +84,10 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
             }
         }
     };
+
+    /**
+     * Fetch the profile picture for the selected member.
+     */
     const fetchProfilePicture = async () => {
         try {
             const response = await axios.get(`${API_HOST}/download_user_photo/${selectedMember.userId}`, {
@@ -87,6 +109,9 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
         }
     };
     
+    /**
+     * Handle the deletion of a user.
+     */
     const handleDeleteUser = async () => {
         try {
             setIsWaitingForDeletion(true);
@@ -121,6 +146,9 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
         }
     };
 
+    /**
+     * Handle the saving of changes to the user's profile.
+     */
     const handleSaveChanges = async () => {
         try {
             if (editedMember && editedMember.userId) {
@@ -169,6 +197,10 @@ const EditMemberProfileModal: React.FC<ModalProps> = ({
         }
     };
 
+    /**
+     * Handle the upload of a user's profile picture.
+     * @param {File} image - The image file to be uploaded.
+     */
     const handleUploadPicture = async (image: File) => {
         try {
             if (image) {

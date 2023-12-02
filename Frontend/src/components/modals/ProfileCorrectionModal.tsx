@@ -45,16 +45,27 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
     const [isWaitingForResponse, setIsWaitingForResponse] = useState<boolean>(false);
     const toast = useToast();
 
+    /**
+     * Check if the form is valid by ensuring that required fields are not empty.
+     * @returns {boolean} - True if the form is valid, false otherwise.
+     */
     const checkFormIsValid = () => {
         return (message.trim().length > 0 && firstName.trim().length > 0 && lastName.trim().length > 0 && email.trim().length > 0);
     };
 
+    /**
+     * Handle button click event to trigger a click on the file input.
+     */
     const handleButtonClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
     };
   
+    /**
+     * Handle the change event when a file is selected for upload.
+     * @param {React.ChangeEvent<HTMLInputElement>} event - The change event containing the selected file.
+     */
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files !== null ? event.target.files[0] : null;
         if (selectedFile) {
@@ -74,6 +85,9 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
         }
     };
 
+    /**
+     * Send an email with the provided information, including optional profile picture.
+     */
     const sendEmail = async () => {
         setIsWaitingForResponse(true);
         const formData = new FormData();
@@ -117,6 +131,9 @@ const ProfileCorrectionModal: React.FC<ModalProps> = ({
             });
     };
 
+    /**
+     * Close the modal and resets the selected file state.
+     */
     const closeModal = () => {
         setSelectedFile(null);
         onClose();

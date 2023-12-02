@@ -1,9 +1,15 @@
-import { Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, useDisclosure } from '@chakra-ui/react';
+import { Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, useDisclosure, useToast } from '@chakra-ui/react';
+import axios from 'axios';
+import humps from 'humps';
 import React, { useEffect, useState } from 'react';
 import { IFilters } from '../../models/filters';
+import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
 import MultiSelectDropdown, { DropdownOptions } from '../dropdowns/MultiSelectDropdown';
 import RangeSliderWithLabels from '../rangeSlider/RangeSlider';
+
+const API_HOST = process.env.REACT_APP_SERVER_URL;
+const API_KEY = process.env.REACT_APP_API_KEY;
 
 type FiltersProps = {
     isOpen: boolean;
@@ -12,6 +18,7 @@ type FiltersProps = {
     tagsOptions: string[];
     setIsFilterSectionShown: (isShown: boolean) => void;
     setAppliedFilters: (filters: IFilters | undefined) => void;
+    setFilteredMembers: (filteredMembers: Member[]) => void;
 };
 
 const Filters: React.FC<FiltersProps> = ({
@@ -20,7 +27,8 @@ const Filters: React.FC<FiltersProps> = ({
     memberCategoryOptions,
     tagsOptions,
     setIsFilterSectionShown,
-    setAppliedFilters
+    setAppliedFilters,
+    setFilteredMembers
 }) => {
     const { onClose } = useDisclosure();
     const [selectedOrganization, setSelectedOrganization] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
@@ -31,7 +39,11 @@ const Filters: React.FC<FiltersProps> = ({
     const [selectedMemberType, setSelectedMemberType] = useState<DropdownOptions[]>([{value: 'Tous', label: 'Tous'}]);
     const [selectedAiExperience, setSelectedAiExperience] = useState<[number, number]>([0, 50]);
     const [selectedHealthExperience, setSelectedHealthExperience] = useState<[number, number]>([0, 50]);
+    const toast = useToast();
 
+    /**
+     * Resets all the filters
+     */
     const resetFilters = () => {
         setSelectedOrganization([{value: 'Tous', label: 'Tous'}]);
         setSelectedExpertise([{value: 'Tous', label: 'Tous'}]);
@@ -40,6 +52,9 @@ const Filters: React.FC<FiltersProps> = ({
         setSelectedHealthExperience([0, 50]);
     };
 
+    /**
+     * Populate the organizations dropdown menu
+     */
     useEffect(() => {
         const organisationDropdown: DropdownOptions[] = [];
         for (const organization of organizationsOptions) {
@@ -49,6 +64,9 @@ const Filters: React.FC<FiltersProps> = ({
         setOrganizationDropdownOptions(organisationDropdown);
     }, [organizationsOptions]);
 
+    /**
+     * Populate the member category dropdown menu
+     */
     useEffect(() => {
         const typeDropdown: DropdownOptions[] = [];
         for (const category of memberCategoryOptions) {
@@ -58,6 +76,9 @@ const Filters: React.FC<FiltersProps> = ({
         setMemberCategoryDropdownOptions(typeDropdown);
     }, [memberCategoryOptions]);
 
+    /**
+     * Populate the expertise dropdown menu
+     */
     useEffect(() => {
         const tagsDropdown: DropdownOptions[] = [];
         for (const tag of tagsOptions) {
@@ -71,7 +92,10 @@ const Filters: React.FC<FiltersProps> = ({
         setTagsDropdownOptions(tagsDropdown);
     }, [tagsOptions]);
 
-    const applyFilters = () => {
+    /**
+     * Apply the filters (useful to display the selected tags on the members page)
+     */
+    const applyFiltersTags = () => {
         let appliedFilters: IFilters | undefined = {organization:[], expertise: [], memberType: [], aiExperience: [], healthExperience: []};
         for (const organization of selectedOrganization) {
             if (organization.label !== 'Tous')
@@ -101,6 +125,46 @@ const Filters: React.FC<FiltersProps> = ({
         }
         setAppliedFilters(appliedFilters);
         setIsFilterSectionShown(false);
+    };
+
+    /**
+     * Fetch members that match the filters
+     */
+    const fetchFilteredMembers = async () => {
+        try {
+            // Prepare the data to be sent to the backend
+            const requestData = {
+                'affiliation_organization': selectedOrganization
+                    .filter(org => org.label !== 'Tous')
+                    .map(org => org.label),
+                'tags': selectedExpertise
+                    .filter(expertise => expertise.label !== 'Tous')
+                    .map(expertise => expertise.label),
+                'membership_category': selectedMemberType
+                    .filter(type => type.label !== 'Tous')
+                    .map(type => type.label),
+                'years_experience_ia': selectedAiExperience,
+                'years_experience_healthcare': selectedHealthExperience,
+            };
+            const response = await axios.post(`${API_HOST}/filter`, requestData, {
+                headers: {
+                    'Authorization': `${API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            setFilteredMembers(humps.camelizeKeys(response.data) as Member[]);
+            applyFiltersTags();
+        } catch (error) {
+            toast({
+                title: 'Une erreur est survenue.',
+                description: 'Veuillez réessayer plus tard.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+
+        }
     };
 
     return (
@@ -306,7 +370,7 @@ const Filters: React.FC<FiltersProps> = ({
                                     backgroundColor: colors.blue.light,
                                 }} 
                                 onClick={()=> {
-                                    applyFilters();
+                                    fetchFilteredMembers();
                                 }}
                             >
                                 {'Appliquer'}

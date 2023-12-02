@@ -4,11 +4,11 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaLinkedin, FaRegEnvelope } from 'react-icons/fa';
 import { Member } from '../../../models/member';
+import { formatName } from '../../../utils/formatName';
 import colors from '../../../utils/theme/colors';
 
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 const API_KEY = process.env.REACT_APP_API_KEY;
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 interface MemberDrawer {
     selectedMember: Member;
@@ -24,7 +24,10 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
     const [isLoading, setIsLoading] = useState(true);
     const [profilePicture, setProfilePicture] = useState<string>('./images/avatar/generic-avatar.png');
 
-    // Fetch profile picture from the server
+    /**
+     * Fetch the profile picture from the server based on the selected member's userId,
+     * or display a generic image in case of an error or absence of a profile picture.
+     */
     useEffect(() => {
         const fetchProfilePicture = async () => {
             setIsLoading(true);
@@ -51,22 +54,6 @@ const MemberDrawer: React.FC<MemberDrawer> = ({
 
         fetchProfilePicture();
     }, [selectedMember]);
-
-    const formatName = (name: string) => {
-        return name
-            .split(/\s+/)
-            .map((word) => {
-                const hyphenIndex = word.indexOf('-');
-                if (hyphenIndex !== -1) {
-                    const firstPart = word.slice(0, hyphenIndex + 1);
-                    const restOfWord = word.slice(hyphenIndex + 1).charAt(0).toUpperCase() + word.slice(hyphenIndex + 2).toLowerCase();
-                    return `${firstPart}${restOfWord}`;
-                } else {
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                }
-            })
-            .join(' ');
-    };
 
     return (
         <Drawer

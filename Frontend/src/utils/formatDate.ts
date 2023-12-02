@@ -1,3 +1,8 @@
+/**
+ * Format a date string to the 'YYYY-MM-DD' format.
+ * @param {string} dateString - The input date string.
+ * @returns {string} - The formatted date string.
+ */
 export const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const year = date.getFullYear();

@@ -15,7 +15,6 @@ const Router: React.FC = () => {
                 <Route path="/accueil" element={<HomePage />} />
                 <Route path="/recherche" element={<SearchResultsPage />} />
                 <Route path="/membres" element={<MembersPage />} />
-                {/* <Route path="/inscription" element={<RegisterPage />} /> */}
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/apropos" element={<AboutPage />} />
                 <Route path="*" element={<NotFoundPage />} />

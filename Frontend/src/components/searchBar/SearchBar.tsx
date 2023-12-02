@@ -24,6 +24,20 @@ const SearchBar: React.FC<SearchBarProps> = ({
     const [searchQuery, setSearchQuery] = useState<string>('');
     const navigate = useNavigate ();
 
+    /**
+     * useEffect to set the searchQuery when the component mounts in read-only mode with a default value.
+     */
+    useEffect(() => {
+        if (isReadOnly && defaultValue){
+            setSearchQuery(defaultValue); 
+        }
+    }, []);
+
+    /**
+     * Handle the key press event for the Enter key in a textarea.
+     * Submit the search query if the Enter key is pressed and the search query is not empty.
+     * @param {React.KeyboardEvent<HTMLTextAreaElement>} event - The keyboard event.
+     */
     const handleEnterKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (isDisabled) return;
         if (event.key === ENTER_KEY && searchQuery.trim().length !== 0) {
@@ -32,12 +46,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
         }
     };
 
-    useEffect(() => {
-        if (isReadOnly && defaultValue){
-            setSearchQuery(defaultValue); 
-        }
-    }, []);
-
+    /**
+     * Submit the search query and navigates to the search results page.
+     */
     const submitSearch = () => {
         if (searchQuery.trim().length !== 0)
             navigate(`/recherche?q=${searchQuery}`);

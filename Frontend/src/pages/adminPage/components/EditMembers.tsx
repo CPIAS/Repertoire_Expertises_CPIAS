@@ -28,12 +28,18 @@ const EditMembers: React.FC = () => {
     const [selectedMember, setSelectedMember] = useState<Member | null>(null);
     const toast = useToast();
 
+    /**
+     * Handle button click event to trigger a click on the file input.
+     */
     const handleButtonClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
     };
 
+    /**
+     * Fetch the members from the server and updates the state.
+     */
     const fetchMembers = async () => {
         try {
             const response = await axios.get(`${API_HOST}/users`, {
@@ -50,6 +56,10 @@ const EditMembers: React.FC = () => {
         }
     };
 
+    /**
+     * Handle the change event when a file is selected for upload.
+     * @param {React.ChangeEvent<HTMLInputElement>} event - The change event containing the selected file.
+     */
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files && files.length > 0) {
@@ -85,15 +95,18 @@ const EditMembers: React.FC = () => {
         }
     };
     
+    /**
+     * Open a modal with the details of the selected member.
+     * @param {Member} member - The selected member.
+     */
     const openModal = (member: Member) => {
         setSelectedMember(member);
         setIsModalOpen(true);
     };
 
-    useEffect(() => {
-        fetchMembers();
-    }, []);
-
+    /**
+     * Download the database file in CSV format.
+     */
     const downloadDatabaseFile = async () => {
         try {
             setIsWaitingForFile(true);
@@ -123,6 +136,10 @@ const EditMembers: React.FC = () => {
         }
     };
 
+    /**
+     * Generate rows for the members table.
+     * @returns {JSX.Element[]} - An array of JSX elements representing the table rows.
+     */
     const generateRows = () => {
         return members.map((member) => (
             <Tr key={member.userId} width={'100%'}>
@@ -141,6 +158,13 @@ const EditMembers: React.FC = () => {
             </Tr>
         ));
     };
+
+    /**
+     * useEffect to fetch members when the component mounts.
+     */
+    useEffect(() => {
+        fetchMembers();
+    }, []);
 
     return (
         <Flex

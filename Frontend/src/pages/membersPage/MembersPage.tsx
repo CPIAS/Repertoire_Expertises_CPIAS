@@ -11,9 +11,9 @@ import MemberCard from '../../components/memberCard/MemberCard';
 import { IFilters } from '../../models/filters';
 import { Member } from '../../models/member';
 import colors from '../../utils/theme/colors';
+
 const API_HOST = process.env.REACT_APP_SERVER_URL;
 const API_KEY = process.env.REACT_APP_API_KEY;
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const MembersPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -60,9 +60,10 @@ const MembersPage: React.FC = () => {
                 uniqueTags.add(tags.trim());
             }
             for (const category of member.membershipCategory.split(/,| et /)) {
-                uniqueMemberCategory.add(category);
+                uniqueMemberCategory.add(category.trim());
             }
         }
+
         setOrganizationsOptions(Array.from(uniqueOrganizations).sort().filter(org => org !== 'Autre'));
         setMembersCategoryOptions(Array.from(uniqueMemberCategory).sort().filter(cat => cat.trim().length > 1));
         setTagsOptions(Array.from(uniqueTags).sort());    
@@ -369,6 +370,7 @@ const MembersPage: React.FC = () => {
                 tagsOptions={tagsOptions}
                 setIsFilterSectionShown={setIsFilterSectionShown}
                 setAppliedFilters={setAppliedFilters}
+                setFilteredMembers={setFilteredMembers}
             />
         </Flex>
         
