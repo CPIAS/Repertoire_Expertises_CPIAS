@@ -46,6 +46,16 @@ wsgi_app = 'wsgi:start_server()'
 
 
 def on_exit(server: Arbiter):
+    """
+        Callback function called on the exit of the Gunicorn master process.
+
+        This function is responsible for releasing resources or performing cleanup tasks before the Gunicorn master process exits.
+        In this specific implementation, it attempts to release the port 5555 used by ZeroMQ by killing the process using that port.
+
+        Args:
+            server (Arbiter): The Gunicorn Arbiter instance.
+    """
+
     # Command to kill the process using port 5555 used by ZeroMQ
     command = "/usr/bin/fuser -k 5555/tcp"
     try:
