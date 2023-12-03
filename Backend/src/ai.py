@@ -54,10 +54,31 @@ class LLM:
 
     @staticmethod
     def __get_expert_recommendation_llm(expert_recommendation_llm_model: str, temperature: float = 0.0) -> Ollama:
+        """
+            Get an instance of the Ollama class for expert recommendation using the LLM model.
+
+            Parameters:
+                expert_recommendation_llm_model (str): The name or identifier of the LLM model for expert recommendation.
+                temperature (float): The temperature parameter for controlling randomness (default: 0.0).
+
+            Returns:
+                Ollama: An instance of the Ollama class configured for expert recommendation with the specified LLM model.
+        """
+
         return Ollama(base_url='http://localhost:11434', model=expert_recommendation_llm_model, temperature=temperature)
 
     @staticmethod
     def __get_expert_skills_from_csv(csv_file_path: str) -> tuple[list[str], list[str]]:
+        """
+            Extract expert skills and emails from a CSV file.
+
+            Parameters:
+                csv_file_path (str): The path to the CSV file containing expert information.
+
+            Returns:
+                tuple[list[str], list[str]]: A tuple containing lists of expert skills and corresponding emails.
+        """
+
         expert_skills = []
         expert_emails = []
 
@@ -73,6 +94,16 @@ class LLM:
 
     @staticmethod
     def __get_expert_skills_from_json(json_file_path: str) -> tuple[list[str], list[str]]:
+        """
+            Extract expert skills and emails from a JSON file.
+
+            Parameters:
+                json_file_path (str): The path to the JSON file containing expert information.
+
+            Returns:
+                tuple[list[str], list[str]]: A tuple containing lists of expert skills and corresponding emails.
+        """
+
         expert_skills = []
         expert_emails = []
 
@@ -92,6 +123,17 @@ class LLM:
         return expert_skills, expert_emails
 
     def __get_expert_skills(self, csv_file_path: str, json_file_path: str) -> tuple[list[str], list[str]]:
+        """
+            Combine expert skills from CSV and JSON files, matching them by email.
+
+            Parameters:
+                csv_file_path (str): The path to the CSV file containing expert information.
+                json_file_path (str): The path to the JSON file containing expert information.
+
+            Returns:
+                tuple[list[str], list[str]]: A tuple containing lists of combined expert skills and corresponding emails.
+        """
+
         expert_skills_csv, expert_emails_csv = self.__get_expert_skills_from_csv(csv_file_path)
         expert_skills_json, expert_emails_json = self.__get_expert_skills_from_json(json_file_path)
 
@@ -106,10 +148,30 @@ class LLM:
 
     @staticmethod
     def __get_expert_recommendation_embeddings(expert_recommendation_embeddings: str) -> SentenceTransformerEmbeddingFunction:
+        """
+            Get Sentence Transformer Embedding Function for expert recommendation.
+
+            Parameters:
+                expert_recommendation_embeddings (str): The model name for Sentence Transformer embeddings.
+
+            Returns:
+                SentenceTransformerEmbeddingFunction: An instance of Sentence Transformer Embedding Function.
+        """
+
         return SentenceTransformerEmbeddingFunction(model_name=expert_recommendation_embeddings)
 
     @staticmethod
     def __get_expert_recommendation_chroma_db_client(persist_directory: str = SERVER_SETTINGS["vector_directory"]):
+        """
+            Get a persistent client for ChromaDB.
+
+            Parameters:
+                persist_directory (str): The directory path for persisting ChromaDB.
+
+            Returns:
+                chromadb.PersistentClient: An instance of the persistent ChromaDB client.
+        """
+
         return chromadb.PersistentClient(path=persist_directory)
 
     def __get_expert_recommendation_vector_store(
@@ -121,6 +183,21 @@ class LLM:
             expert_skills: list[str],
             expert_emails: list[str]
     ) -> Collection:
+        """
+            Get or create a vector store for expert recommendation.
+
+            Parameters:
+                collection_name (str): The name of the collection.
+                expert_recommendation_chroma_db_client (ClientAPI): ChromaDB client for vector store.
+                expert_recommendation_embeddings (SentenceTransformerEmbeddingFunction): Embedding function for expert recommendation.
+                nlp_en (Language): spaCy Language object for English.
+                expert_skills (list[str]): List of expert skills.
+                expert_emails (list[str]): List of expert emails.
+
+            Returns:
+                Collection: The expert recommendation vector store collection.
+        """
+
         vector_store = expert_recommendation_chroma_db_client.get_or_create_collection(name=collection_name, embedding_function=expert_recommendation_embeddings, metadata={"hnsw:space": "cosine"})
 
         if not vector_store.count():
@@ -129,6 +206,16 @@ class LLM:
         return vector_store
 
     def __populate_or_update_expert_recommendation_vector_store(self, expert_recommendation_vector_store: Collection, nlp_en: Language, expert_skills: list[str], expert_emails: list[str]) -> None:
+        """
+            Populate or update the expert recommendation vector store.
+
+            Parameters:
+                expert_recommendation_vector_store (Collection): The vector store for expert recommendation.
+                nlp_en (Language): spaCy Language object for English.
+                expert_skills (list[str]): List of expert skills.
+                expert_emails (list[str]): List of expert emails.
+        """
+
         for i, expert_email in enumerate(expert_emails):
             translated_expert_skills = self.__translate_text(expert_skills[i], 'en')
             translated_expert_skills_tokenized = [sentence.text for sentence in nlp_en(translated_expert_skills).sents]  # tokenize text into sentences
@@ -138,10 +225,25 @@ class LLM:
                 for skill in translated_expert_skills_tokenized:
                     expert_recommendation_vector_store.add(documents=[skill], metadatas=[{"expert_email": expert_email}], ids=[str(time.time())])
 
-    def __delete_expert_from_vector_store(self, expert_email: str):
+    def __delete_expert_from_vector_store(self, expert_email: str) -> None:
+        """
+            Delete an expert from the expert recommendation vector store.
+
+            Parameters:
+                expert_email (str): Email of the expert to be deleted.
+        """
+
         self.expert_recommendation_vector_store.delete(where={"expert_email": expert_email})
 
-    def __add_expert_to_vector_store(self, expert_skills: str, expert_email: str):
+    def __add_expert_to_vector_store(self, expert_skills: str, expert_email: str) -> None:
+        """
+            Add an expert to the expert recommendation vector store.
+
+            Parameters:
+                expert_skills (str): Skills of the expert to be added.
+                expert_email (str): Email of the expert to be added.
+        """
+
         self.__populate_or_update_expert_recommendation_vector_store(
             self.expert_recommendation_vector_store,
             self.nlp_en,
@@ -150,6 +252,14 @@ class LLM:
         )
 
     def __update_expert_in_vector_store(self, expert_skills: str, expert_email: str):
+        """
+            Update the skills of an expert in the expert recommendation vector store.
+
+            Parameters:
+                expert_skills (str): Updated skills of the expert.
+                expert_email (str): Email of the expert to be updated.
+        """
+
         self.__delete_expert_from_vector_store(expert_email)
         self.__populate_or_update_expert_recommendation_vector_store(
             self.expert_recommendation_vector_store,
@@ -160,10 +270,27 @@ class LLM:
 
     @staticmethod
     def __get_expert_recommendation_parser() -> PydanticOutputParser:
+        """
+            Get an instance of the PydanticOutputParser for parsing expert recommendation results.
+
+            Returns:
+                PydanticOutputParser: Instance of the PydanticOutputParser.
+        """
+
         return PydanticOutputParser(pydantic_object=Experts)
 
     @staticmethod
     def __get_expert_recommendation_prompt(expert_recommendation_parser: PydanticOutputParser) -> FewShotPromptTemplate:
+        """
+            Get a FewShotPromptTemplate for generating prompts for expert recommendation.
+
+            Args:
+                expert_recommendation_parser (PydanticOutputParser): Parser for expert recommendation output.
+
+            Returns:
+                FewShotPromptTemplate: Instance of the FewShotPromptTemplate.
+        """
+
         example_prompt = PromptTemplate(input_variables=["question", "answer"], template="Question: {question}\n{answer}")
         examples = [
             {
@@ -347,18 +474,52 @@ class LLM:
 
     @staticmethod
     def __get_keywords_embeddings(keywords_llm: str) -> TransformerDocumentEmbeddings:
+        """
+            Get TransformerDocumentEmbeddings for keyword embeddings.
+
+            Args:
+                keywords_llm (str): Path or identifier for the LLM model for keywords.
+
+            Returns:
+                TransformerDocumentEmbeddings: Instance of TransformerDocumentEmbeddings.
+        """
+
         return TransformerDocumentEmbeddings(keywords_llm)
 
     @staticmethod
     def __get_keywords_model(keywords_embeddings: TransformerDocumentEmbeddings) -> KeyBERT:
+        """
+            Get KeyBERT model for extracting keywords from embeddings.
+
+            Args:
+                keywords_embeddings (TransformerDocumentEmbeddings): Embeddings for keywords.
+
+            Returns:
+                KeyBERT: Instance of KeyBERT.
+        """
+
         return KeyBERT(model=keywords_embeddings)
 
     @staticmethod
     def __get_keywords_parser() -> CommaSeparatedListOutputParser:
+        """
+            Get CommaSeparatedListOutputParser for parsing comma-separated keyword lists.
+
+            Returns:
+                CommaSeparatedListOutputParser: Instance of CommaSeparatedListOutputParser.
+        """
+
         return CommaSeparatedListOutputParser()
 
     @staticmethod
     def __get_keywords_prompt() -> PromptTemplate:
+        """
+            Get PromptTemplate for extracting keywords from a document.
+
+            Returns:
+                PromptTemplate: Instance of PromptTemplate with placeholders for document input.
+        """
+
         prompt_template = """
                 <s>
                 [INST]
@@ -393,19 +554,61 @@ class LLM:
 
     @staticmethod
     def __get_keywords_chain(qa_llm: Ollama, keywords_prompt: PromptTemplate, ) -> LLMChain:
+        """
+            Get an LLMChain for extracting keywords using a QA LLM and a keywords extraction prompt.
+
+            Args:
+                qa_llm (Ollama): Instance of the QA LLM.
+                keywords_prompt (PromptTemplate): Instance of PromptTemplate for extracting keywords.
+
+            Returns:
+                LLMChain: Instance of LLMChain configured for extracting keywords.
+        """
+
         return LLMChain(llm=qa_llm, prompt=keywords_prompt)
 
     @staticmethod
     def __get_nlp(model_name: str) -> Language:
+        """
+            Get a spaCy Language object for a given model name. Downloads the model if not already installed.
+
+            Args:
+                model_name (str): Name of the spaCy model.
+
+            Returns:
+                Language: spaCy Language object.
+        """
+
         if not spacy.util.is_package(model_name):
             spacy.cli.download(model_name)
         return spacy.load(model_name)
 
     @staticmethod
     def __get_stop_words(nlp: Language) -> list[str]:
+        """
+            Get a list of stop words from a given spaCy Language object.
+
+            Args:
+                nlp (Language): spaCy Language object.
+
+            Returns:
+                List[str]: List of stop words.
+        """
+
         return list(nlp.Defaults.stop_words) + [p for p in string.punctuation]
 
     def __remove_stop_words(self, documents: list[str], nlp: Language) -> list[str]:
+        """
+            Remove stop words from a list of documents using a spaCy Language object.
+
+            Args:
+                documents (List[str]): List of documents to process.
+                nlp (Language): spaCy Language object.
+
+            Returns:
+                List[str]: List of documents with stop words removed.
+        """
+
         filtered_documents = []
         for doc in documents:
             tokenized_doc = nlp(doc)
@@ -415,6 +618,16 @@ class LLM:
 
     @staticmethod
     def __get_user_emails_from_llm_response(source_documents: list[Document]) -> list[str]:
+        """
+            Extract user emails from a list of LLM response documents.
+
+            Args:
+                source_documents (List[Document]): List of LLM response documents.
+
+            Returns:
+                List[str]: List of user emails corresponding to the source documents.
+        """
+
         user_emails = []
 
         with open(SERVER_SETTINGS['users_csv_file'], 'r') as csv_file:
@@ -433,6 +646,17 @@ class LLM:
 
     @staticmethod
     def __translate_text(text: str, destination_language: Literal['en', 'fr']) -> str:
+        """
+            Translate text to the specified destination language.
+
+            Args:
+                text (str): Text to be translated.
+                destination_language (Literal['en', 'fr']): Destination language code ('en' for English, 'fr' for French).
+
+            Returns:
+                str: Translated text.
+        """
+
         if len(text) <= 5000:  # Maximum text length accepted by the Google Translator API
             return GoogleTranslator(source='auto', target=destination_language).translate(text)
         else:
@@ -455,6 +679,16 @@ class LLM:
             return translated_text
 
     def __init_expert_recommendation_chain(self) -> None:
+        """
+            Initialize the expert recommendation chain components, including language models, embeddings, and vector stores.
+
+            This method sets up the components needed for expert recommendation, including the language model (LLM),
+            embeddings, ChromaDB client, expert information from CSV, and the vector store for recommendations.
+
+            Returns:
+                None
+        """
+
         self.expert_recommendation_llm = self.__get_expert_recommendation_llm(SERVER_SETTINGS['expert_recommendation_llm_model'])
         self.expert_recommendation_embeddings = self.__get_expert_recommendation_embeddings(SERVER_SETTINGS['expert_recommendation_embeddings'])
         self.expert_recommendation_chroma_db_client = self.__get_expert_recommendation_chroma_db_client()
@@ -472,6 +706,16 @@ class LLM:
         self.expert_recommendation_prompt = self.__get_expert_recommendation_prompt(self.expert_recommendation_parser)
 
     def __init_keywords_chain(self) -> None:
+        """
+            Initialize the keywords chain components, including language models, embeddings, and parsers.
+
+            This method sets up the components needed for keyword extraction, including the language model (LLM),
+            embeddings, model for keyword extraction, parser, prompt, and the overall keywords chain.
+
+            Returns:
+            - None
+        """
+
         self.keywords_embeddings = self.__get_keywords_embeddings(SERVER_SETTINGS['keywords_llm_model'])
         self.keywords_model = self.__get_keywords_model(self.keywords_embeddings)
         self.keywords_parser = self.__get_keywords_parser()
@@ -481,11 +725,40 @@ class LLM:
         self.stop_words_fr = self.__get_stop_words(self.nlp_fr)
 
     def __init_zmq(self, addr: str) -> None:
+        """
+            Initialize ZeroMQ (ZMQ) communication components.
+
+            This method sets up a ZeroMQ context and creates a REP (Reply) socket, binding it to the specified address.
+
+            Args:
+                addr (str): The address to bind the ZeroMQ socket.
+
+            Returns:
+                None
+        """
+
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
         self.socket.bind(addr)
 
     def __try_get_llm_expert_recommendation(self, llm_input: str, max_attempts: int = 4, retry_delay: int = 1) -> List[str]:
+        """
+            Attempt to get expert recommendations from the language model (LLM).
+
+            This method sends an input query to the LLM, parses the output, and returns a list of generic profiles.
+
+            Args:
+                llm_input (str): The input query to be sent to the language model.
+                max_attempts (int): The maximum number of attempts to get recommendations (default: 4).
+                retry_delay (int): The delay (in seconds) between retry attempts (default: 1).
+
+            Returns:
+                List[str]: A list of generic profiles obtained from parsing the LLM output.
+
+            Raises:
+                Exception: If an error occurs during parsing LLM output after the maximum attempts.
+        """
+
         for attempt in range(1, max_attempts):
             try:
                 llm_output = self.expert_recommendation_llm(llm_input)
@@ -498,6 +771,24 @@ class LLM:
         raise Exception(f"Error occurred when parsing LLM output for generic profiles.")
 
     def __get_experts_recommendation(self, question: str):
+        """
+            Get expert recommendations based on a user's question.
+
+            This method translates the user's question, generates generic profiles using the LLM,
+            queries the expert recommendation vector store, and returns a dictionary of expert recommendations.
+
+            Args:
+                question (str): The user's question.
+
+            Returns:
+                dict: A dictionary containing translated generic profiles as keys and expert recommendations as values.
+                    Each value is a dictionary with 'expert_emails' and 'scores' lists.
+
+            Notes:
+                - Only considers experts with cosine similarity scores less than or equal to 0.5.
+                - Returns only the top 5 experts for each generic profile.
+        """
+
         query = GoogleTranslator(source='auto', target='en').translate(question)
         llm_input = self.expert_recommendation_prompt.format(input=query)
         generic_profiles = self.__try_get_llm_expert_recommendation(llm_input)  # max attempts = 4 , wait 1 second between each try.
@@ -523,6 +814,23 @@ class LLM:
         return response
 
     def __try_get_llm_keywords(self, llm_input: str, max_attempts: int = 4, retry_delay: int = 1) -> List[str]:
+        """
+            Try to get keywords from the LLM.
+
+            This method attempts to get keywords from the LLM chain by making multiple tries with a delay between attempts.
+
+            Args:
+                llm_input (str): Input document for LLM.
+                max_attempts (int): Maximum number of attempts.
+                retry_delay (int): Delay in seconds between attempts.
+
+            Returns:
+                List[str]: List of extracted keywords.
+
+            Raises:
+                Exception: Raised if an error occurs when parsing LLM output for keywords.
+        """
+
         for attempt in range(1, max_attempts):
             try:
                 llm_output = self.keywords_chain.predict(document=llm_input)
@@ -535,6 +843,24 @@ class LLM:
         raise Exception(f"Error occurred when parsing LLM output for keywords.")
 
     def __get_keywords(self, text: str) -> list[str]:
+        """
+            Get keywords from the given text.
+
+            This method extracts keywords from the text by performing the following steps:
+                1. Translate the text to French.
+                2. Tokenize the translated text into sentences.
+                3. Extract LLM keywords for each paragraph of five sentences.
+                4. Lowercase LLM keywords and remove stop words.
+                5. Use KeyBERT to obtain the most relevant keywords previously extracted by LLM.
+                6. Return a list of unique uppercase keywords.
+
+            Args:
+                text (str): Input text.
+
+            Returns:
+                list[str]: List of extracted keywords.
+        """
+
         if not text:
             return []
 
@@ -567,6 +893,22 @@ class LLM:
         return list(keywords)
 
     def __call_method(self, method_name: str, arguments: list) -> Any:
+        """
+            Dynamically call a private method within the class.
+
+            This method allows the dynamic invocation of private methods by specifying the method name and providing the necessary arguments.
+
+            Args:
+                method_name (str): The name of the private method to be called.
+                arguments (list): List of arguments to be passed to the method.
+
+            Returns:
+                dict: A dictionary containing the status of the call and the result or error message.
+                    - 'status': 'success' if the method call is successful, 'error' otherwise.
+                    - 'result': The result of the method call if successful.
+                    - 'error_message': Error message if the method is not found.
+        """
+
         # Look up the method dynamically
         method = getattr(self, f'_{type(self).__name__}__{method_name}', None)  # We need to add _ClassName__ before the method name, as all processing methods are super private.
 
@@ -582,6 +924,15 @@ class LLM:
     ###################################################################################################################
 
     def init(self) -> None:
+        """
+            Initialize the Language Model (LLM) and ZeroMQ communication.
+
+            This method initializes the expert recommendation and keywords chains, as well as sets up the ZeroMQ socket for communication.
+
+            Raises:
+                Exception: If there is an error during initialization.
+        """
+
         try:
             self.__init_expert_recommendation_chain()
             self.__init_keywords_chain()
@@ -593,6 +944,19 @@ class LLM:
             self.app_logger.info(msg="The LLM has been successfully initialized.")
 
     def start_llm_processing(self):
+        """
+            Continuously process queries received from the server.
+
+            This method runs in a loop, receiving queries from the server, extracting the method name and arguments,
+            dynamically calling the specified method, and sending the result or error back to the server.
+
+            The loop continues until the LLM context is terminated or an error occurs.
+
+            Raises:
+                zmq.error.ContextTerminated: If the ZeroMQ context is terminated.
+                Exception: For any other unexpected errors during processing.
+        """
+
         while self.is_available:
             try:
                 # Receive data from the server
@@ -618,6 +982,16 @@ class LLM:
                 self.app_logger.error(msg=str(e), exc_info=True)
 
     def stop_llm_processing(self):
+        """
+            Gracefully shuts down the LLM processor.
+
+            This method sets the `is_available` flag to False, closes the ZeroMQ socket, and terminates the ZeroMQ context.
+
+            The method is intended to be called when you want to stop the continuous processing of queries.
+
+            It logs an informational message indicating the shutdown process.
+        """
+
         self.app_logger.info("Shutting down the LLM processor gracefully...")
         self.is_available = False
         self.socket.close(0)
@@ -633,6 +1007,20 @@ class LLM:
                 'delete_expert_from_vector_store'
             ],
             arguments: list) -> Any:
+        """
+            Sends a query to the LLM processor for specified processing methods.
+
+            Args:
+                method (Literal): The LLM processing method to invoke.
+                arguments (list): The list of arguments required for the specified method.
+
+            Returns:
+                Any: The result of the LLM processing method.
+
+            Raises:
+                Exception: If there is an error in the LLM processing.
+        """
+
         socket = zmq.Context().socket(zmq.REQ)
         socket.connect(SERVER_SETTINGS["zeromq_request_address"])
         socket.send_json({'method': method, 'arguments': arguments})
