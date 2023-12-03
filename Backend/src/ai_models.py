@@ -3,4 +3,11 @@ from typing import List
 
 
 class Experts(BaseModel):
+    """
+        Pydantic model representing a list of expert profiles.
+
+        Attributes:
+            profiles (List[str]): The list of expert profiles.
+    """
+
     profiles: List[str] = Field(description="the list of experts profiles")

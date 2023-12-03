@@ -35,6 +35,32 @@ db = Database(app, llm, app_logger)
 ###################################################################################################################
 
 def init_server() -> None:
+    """
+    Initialize the server with necessary configurations and services.
+
+    This method performs the following tasks:
+        1. Initializes CORS (Cross-Origin Resource Sharing) to allow requests from any origin.
+           Note: CORS configuration should be modified in a production environment for security reasons.
+        2. Sets the logging level of the application logger to INFO.
+        3. Registers an exit handler to stop Language Model (LLM) processing gracefully.
+        4. Checks for the existence of a specified users CSV file in the server settings.
+           Raises an exception if the file does not exist.
+        5. Initializes the Language Model (LLM) by calling the 'llm.init()' method.
+           Raises an exception if the LLM is not available.
+        6. Initializes the database by calling the 'db.init()' method.
+           Raises an exception if the database is not available.
+        7. Starts the LLM processor in a separate thread using the 'llm.start_llm_processing()' method.
+
+    Exceptions:
+        - Any encountered exceptions during the initialization process are caught, and an error message is logged.
+
+    Logs:
+        - Informational log message is generated upon successful initialization.
+
+    Usage:
+        - This method is typically called at the start of the server application to set up essential components.
+    """
+
     try:
         CORS(app)  # Initialize CORS with default options, allowing requests from any origin. To be modified in a production environment.
         app_logger.setLevel(logging.INFO)
@@ -63,7 +89,18 @@ def init_server() -> None:
         app_logger.info(msg="The server has been successfully initialized.")
 
 
-def download_users_csv_file_from_google_drive() -> None:  # Only works if the file is public on Google Drive
+def download_users_csv_file_from_google_drive() -> None:
+    """
+        Download a CSV file from Google Drive and save it to the specified directory.
+
+        This method:
+            1. Checks if the target directory exists; creates it if not.
+            2. Downloads a CSV file from Google Drive using the provided file ID.
+
+        Note:
+            - This method assumes the file is public on Google Drive.
+    """
+
     if not os.path.exists(SERVER_SETTINGS["resources_directory"]):
         os.makedirs(SERVER_SETTINGS["resources_directory"])
 
@@ -72,6 +109,17 @@ def download_users_csv_file_from_google_drive() -> None:  # Only works if the fi
 
 @repeat(every().sunday.at("01:00", "Canada/Eastern"))
 def check_for_database_updates() -> None:
+    """
+        Periodically check for updates and synchronize the database.
+
+        This method:
+            1. Verifies the availability of the database and Language Model (LLM).
+            2. Downloads the latest users CSV file from Google Drive.
+            3. Updates the database with the new CSV data.
+
+        Warnings are logged if the database or LLM is unavailable. Any exceptions during the process are logged as errors.
+    """
+
     try:
         if not db.is_available:
             app_logger.warning("Unable to run database updates. Database is not available.")
@@ -88,13 +136,34 @@ def check_for_database_updates() -> None:
         app_logger.error(msg=str(e), exc_info=True)
 
 
-def check_scheduled_tasks():
+def check_scheduled_tasks() -> None:
+    """
+        Continuously check and run scheduled tasks.
+
+        This method:
+            1. Utilizes the 'run_pending' function to execute scheduled tasks.
+            2. Runs in an infinite loop, checking for tasks every hour.
+
+        Note: Ensure to use this method in a separate thread or asynchronous context to avoid blocking the main application.
+    """
+
     while True:
         run_pending()
         time.sleep(3600)  # Check every hour
 
 
-def start_scheduled_tasks_thread():
+def start_scheduled_tasks_thread() -> None:
+    """
+        Start a separate thread to execute scheduled tasks.
+
+        This method:
+            1. Creates a new thread targeting the 'check_scheduled_tasks' function.
+            2. Sets the thread as a daemon to avoid blocking program termination.
+            3. Starts the thread.
+
+        Note: Use this method to run scheduled tasks concurrently with the main program.
+    """
+
     t = Thread(target=check_scheduled_tasks)
     t.daemon = True  # Make the thread a daemon, so it doesn't block program termination
     t.start()
@@ -106,6 +175,15 @@ def start_scheduled_tasks_thread():
 
 @app.route('/', methods=['GET'], endpoint='index')
 def index():
+    """
+        Handle the 'GET' request for the '/' route, rendering the index page.
+
+        This method:
+            1. Retrieves the current datetime in the 'EDT' timezone.
+            2. Formats the datetime as a string.
+            3. Renders the 'index.html' template, passing the formatted datetime.
+    """
+
     formatted_datetime = datetime.now(timezone(-timedelta(hours=4), 'EDT')).strftime("%Y-%m-%d %H:%M:%S")
     return render_template('index.html', formatted_datetime=formatted_datetime)
 
@@ -113,6 +191,15 @@ def index():
 @app.route('/users', methods=['GET'], endpoint='get_users')
 @require_api_key
 def get_users():
+    """
+        Handle the 'GET' request for the '/users' route, returning a list of users.
+
+        This method:
+            1. Checks if the database is available; returns a 503 status if not.
+            2. Retrieves all users from the database.
+            3. Returns the list of users with a 200 status if available, or a 404 status for an empty database.
+    """
+
     if not db.is_available:
         return jsonify({"message": "Database not available"}), 503
 
@@ -127,6 +214,18 @@ def get_users():
 @app.route('/users/<int:user_id>', methods=['GET'], endpoint='get_user')
 @require_api_key
 def get_user(user_id):
+    """
+        Handle the 'GET' request for the '/users/<user_id>' route, returning details of a specific user.
+
+        This method:
+            1. Checks if the database is available; returns a 503 status if not.
+            2. Retrieves the user with the specified ID from the database.
+            3. Returns the user details with a 200 status if found, or a 404 status if the user is not found.
+
+        Parameters:
+            user_id (int): The ID of the user to retrieve.
+    """
+
     if not db.is_available:
         return jsonify({"message": "Database not available"}), 503
 
@@ -141,6 +240,19 @@ def get_user(user_id):
 @app.route('/search', methods=['POST'], endpoint='search_experts')
 @require_api_key
 def search_experts():
+    """
+        Handle the 'POST' request for the '/search' route, searching for experts based on a provided question.
+
+        This method:
+            1. Checks if Language Model (LLM) and the database are available; returns a 503 status if not.
+            2. Retrieves the question from the request.
+            3. Queries the LLM for expert recommendations based on the question.
+            4. Constructs and returns a response with expert recommendations categorized by generic profile.
+
+        Returns:
+            A JSON response containing expert recommendations or an appropriate error message.
+    """
+
     try:
         if not llm.is_available:
             return jsonify({"message": "LLM not available"}), 503
@@ -182,6 +294,18 @@ def search_experts():
 @app.route('/request_profile_correction', methods=['POST'], endpoint='request_profile_correction')
 @require_api_key
 def request_profile_correction():
+    """
+        Handle the 'POST' request for the '/request_profile_correction' route, sending an email to request profile correction.
+
+        This method:
+            1. Retrieves necessary data from the request form.
+            2. Constructs an email message with the request details.
+            3. Sends the email to the specified recipients using SMTP.
+
+        Returns:
+            A JSON response indicating the success or failure of the email sending process.
+    """
+
     try:
         member_id = request.form.get('id')
         member_last_name = request.form.get('memberLastName')
@@ -234,6 +358,18 @@ def request_profile_correction():
 @app.route('/request_contact', methods=['POST'], endpoint='request_contact')
 @require_api_key
 def request_contact():
+    """
+        Handle the 'POST' request for the '/request_contact' route, sending an email for contact request.
+
+        This method:
+            1. Retrieves necessary data from the request form.
+            2. Constructs an email message with the contact request details.
+            3. Sends the email to the specified recipients using SMTP.
+
+        Returns:
+            A JSON response indicating the success or failure of the email sending process.
+    """
+
     try:
         requester_first_name = request.form.get('requesterFirstName')
         requester_last_name = request.form.get('requesterLastName')
@@ -275,6 +411,18 @@ def request_contact():
 @app.route('/filter', methods=['POST'], endpoint='filter_users')
 @require_api_key
 def filter_users():
+    """
+        Handle the 'POST' request for the '/filter' route, filtering users based on specified criteria.
+
+        This method:
+            1. Checks if the database is available; returns a 503 status if not.
+            2. Retrieves filtering criteria from the request JSON.
+            3. Filters users based on the provided criteria.
+
+        Returns:
+            A list of users matching the criteria with a 200 status.
+    """
+
     try:
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
@@ -308,6 +456,18 @@ def filter_users():
 @app.route('/keywords', methods=['POST'], endpoint='get_keywords_from_user_expertise')
 @require_api_key
 def get_keywords_from_user_expertise():
+    """
+        Handle the 'POST' request for the '/keywords' route, extracting keywords from user expertise.
+
+        This method:
+            1. Checks if Language Model (LLM) is available; returns a 503 status if not.
+            2. Retrieves user expertise from the request.
+            3. Queries the LLM to extract keywords from the provided user expertise.
+
+        Returns:
+            A list of keywords extracted from the user expertise with a 200 status.
+    """
+
     try:
         if not llm.is_available:
             return jsonify({"message": "LLM not available"}), 503
@@ -328,6 +488,22 @@ def get_keywords_from_user_expertise():
 @app.route('/delete_user/<int:user_id>', methods=['DELETE'], endpoint='delete_user')
 @require_api_key
 def delete_user(user_id):
+    """
+        Handle the 'DELETE' request for the '/delete_user/<user_id>' route, deleting a user from the database.
+
+        This method:
+            1. Checks if Language Model (LLM) and the database are available; returns a 503 status if not.
+            2. Retrieves the user with the specified ID from the database.
+            3. Deletes the user from the database, CSV file, and LLM vector store.
+            4. Removes the user's profile photo if it exists.
+
+        Parameters:
+            user_id (int): The ID of the user to delete.
+
+        Returns:
+            A JSON response indicating the success or failure of the user deletion process.
+    """
+
     try:
         if not llm.is_available:
             return jsonify({"message": "LLM not available"}), 503
@@ -360,6 +536,23 @@ def delete_user(user_id):
 @app.route('/update_user/<int:user_id>', methods=['PUT'], endpoint='update_user')
 @require_api_key
 def update_user(user_id):
+    """
+        Handle the 'PUT' request for the '/update_user/<user_id>' route, updating user information in the database.
+
+        This method:
+            1. Checks if Language Model (LLM) and the database are available; returns a 503 status if not.
+            2. Retrieves the user with the specified ID from the database.
+            3. Updates user information in the CSV file and database.
+            4. Updates user tags based on the updated skills using LLM.
+            5. Updates user information in the LLM vector store.
+
+        Parameters:
+            user_id (int): The ID of the user to update.
+
+        Returns:
+            A JSON response indicating the success or failure of the user update process.
+    """
+
     try:
         if not llm.is_available:
             return jsonify({"message": "LLM not available"}), 503
@@ -395,6 +588,17 @@ def update_user(user_id):
 @app.route('/download_csv', methods=['GET'], endpoint='download_csv')
 @require_api_key
 def download_csv():
+    """
+        Handle the 'GET' request for the '/download_csv' route, allowing users to download the CSV file.
+
+        This method:
+            1. Checks if the CSV file exists on the server; returns a 404 status if not.
+            2. Sends the CSV file as an attachment for the user to download.
+
+        Returns:
+            The CSV file as an attachment with a 200 status.
+    """
+
     try:
         csv_file_path = SERVER_SETTINGS['users_csv_file']
 
@@ -418,6 +622,21 @@ def download_csv():
 @app.route('/upload_csv', methods=['POST'], endpoint='upload_csv')
 @require_api_key
 def upload_csv():
+    """
+        Handle the 'POST' request for the '/upload_csv' route, allowing users to upload and update the CSV file.
+
+        This method:
+            1. Checks if Language Model (LLM) and the database are available; returns a 503 status if not.
+            2. Retrieves the uploaded CSV file from the request.
+            3. Validates the format and content of the CSV file.
+            4. Temporarily saves the file for validation.
+            5. Updates the database and LLM vector store based on the validated CSV file.
+            6. Permanently replaces the existing CSV file with the validated one.
+
+        Returns:
+            A JSON response indicating the success or failure of the CSV file upload and database update process.
+    """
+
     try:
         if not llm.is_available:
             return jsonify({"message": "LLM not available"}), 503
@@ -473,6 +692,23 @@ def upload_csv():
 @app.route('/download_user_photo/<int:user_id>', methods=['GET'], endpoint='download_user_photo')
 @require_api_key
 def download_user_photo(user_id):
+    """
+        Handle the 'GET' request for the '/download_user_photo/<user_id>' route, allowing users to download a user's profile photo.
+
+        This method:
+            1. Checks if the database is available; returns a 503 status if not.
+            2. Retrieves the user with the specified ID from the database.
+            3. Checks if the user has a profile photo; returns a 204 status if not.
+            4. Retrieves the path to the user's profile photo on the server.
+            5. Sends the user's profile photo as an attachment for the user to download.
+
+        Parameters:
+            user_id (int): The ID of the user whose profile photo to download.
+
+        Returns:
+            The user's profile photo as an attachment with a 200 status.
+    """
+
     try:
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
@@ -505,6 +741,26 @@ def download_user_photo(user_id):
 @app.route('/upload_user_photo/<int:user_id>', methods=['POST'], endpoint='upload_user_photo')
 @require_api_key
 def upload_user_photo(user_id):
+    """
+        Handle the 'POST' request for the '/upload_user_photo/<user_id>' route, allowing users to upload a profile photo.
+
+        This method:
+            1. Checks if the database is available; returns a 503 status if not.
+            2. Retrieves the user with the specified ID from the database.
+            3. Checks if the user exists; returns a 404 status if not.
+            4. Retrieves the uploaded user photo from the request.
+            5. Validates the format and content of the user photo.
+            6. Deletes the user's old profile photo if it exists.
+            7. Saves the new user photo to the server.
+            8. Updates the database with the new user photo information.
+
+        Parameters:
+            user_id (int): The ID of the user for whom to upload a profile photo.
+
+        Returns:
+            A JSON response indicating the success or failure of the profile photo upload and database update process.
+    """
+
     try:
         if not db.is_available:
             return jsonify({"message": "Database not available"}), 503
