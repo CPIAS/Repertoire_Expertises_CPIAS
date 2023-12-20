@@ -71,16 +71,30 @@ instance EC2 d’Amazon Web Services.
     sudo systemctl restart build
     ```
 
-Pour plus d'information sur le déploiement en AWS sur EC2 voir ce tutoriel  [Deploy a NodeJS React app to AWS EC2](https://www.youtube.com/watch?v=rE8mJ1OYjmM)
+Pour plus d'information sur le déploiement sur une instance EC2 en AWS voir ce tutoriel  [Deploy a NodeJS React app to AWS EC2](https://www.youtube.com/watch?v=rE8mJ1OYjmM)
 
-La documentation complète ce trouve [ici]()
+La documentation complète est dans le [guide du développeur](https://github.com/CPIAS/Research_Engine_Healthcare_AI/blob/main/Guide_d%C3%A9veloppeur.pdf)
 
-Consultez le guide du développeur pour les instructions et la configuration du projet.
+## Installation Backend
 
-## Développeurs (Équipe Polytechnique)
+### Compilation et déploiement
+
+1. Cloner le répertoire Git de l’application dans l’instance EC2.
+`git clone https://adresse_du_répertoire_du_projet.git`
+2. Aller dans le répertoire Backend.
+3. Lancer l’installation du serveur avec la commande suivante :
+`sudo ./setup.sh`
+4. Redémarrer l’instance.
+5. Accéder à serveur en ouvrant le navigateur et en accédant à l’URL correspondant à l’adresse
+publique IPv4 de l’instance EC2 créée.
+
+La documentation complète pour le Backend est dans le [guide du développeur](https://github.com/CPIAS/Research_Engine_Healthcare_AI/blob/main/Guide_d%C3%A9veloppeur.pdf)
+
+## Équipe de Développement
 
 - [Antoine Déry](mailto:antoine-1.dery@polymtl.ca)
 - [Adam Halim](mailto:adam.halim@polymtl.ca)
 - [Ahmed Sabsabi](mailto:ahmed.sabsabi@polymtl.ca)
 - [Hichem Lamraoui](mailto:hichem.lamraoui@polymtl.ca)
 - [Augustin Lompo](mailto:diassibo-kani-fares.lompo@polymtl.ca)
+
