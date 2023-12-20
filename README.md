@@ -18,7 +18,7 @@ Avant de procéder au lancement de l'application, il est nécessaire de s'assure
 - Node Package Manager (npm), qui est généralement inclus avec l’installation de Node.js.
 - Fichier .env avec les variables présentées à la section 2.3.
 
-#### installation
+#### Installation
 
 1. Installer les dépendances du projet en exécutant la commande suivante dans un terminal
 ouvert dans le répertoire Frontend :
@@ -71,9 +71,9 @@ instance EC2 d’Amazon Web Services.
     sudo systemctl restart build
     ```
 
-Un tutoriel complet est présenté dans la vidéo  [Deploy a NodeJS React app to AWS EC2](https://www.youtube.com/watch?v=rE8mJ1OYjmM)
+Pour plus d'information sur le déploiement en AWS sur EC2 voir ce tutoriel  [Deploy a NodeJS React app to AWS EC2](https://www.youtube.com/watch?v=rE8mJ1OYjmM)
 
-## Instructions
+La documentation complète ce trouve [ici]()
 
 Consultez le guide du développeur pour les instructions et la configuration du projet.
 
