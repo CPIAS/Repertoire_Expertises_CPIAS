@@ -148,3 +148,5 @@ Il est de la responsabilité des entités qui reproduisent le code pour dévelop
 - Il est important de s’assurer d’obtenir le consentement éclairé des individus qui font partie du répertoire d’expertise, 
 - Il est important de rester transparent envers les individus sur les données collectées les usages qui ont sont faits, 
 - Avant de croiser les données avec d’autres sources de données publiques, il est important d’en informer les individus faisant partie de la plateforme.
+## Licence
+La plateforme de recommandation et de maillage des expertises en IA et Santé de la CPIAS est diffusé sous la licence publique générale GNU v3.0 ou une version ultérieure. Voir le fichier `LICENSE` pour plus de détails.
